@@ -53,6 +53,19 @@ app.get('/api/auth/check', async (req, res) => {
       const user = userResult.rows[0];
       
       // Ritorna le informazioni dell'utente (esclusa la password)
+
+// Endpoint per il logout
+app.post('/api/auth/logout', (req, res) => {
+  try {
+    // Cancella il cookie del token
+    res.clearCookie('token');
+    return res.status(200).json({ success: true, message: 'Logout completato con successo' });
+  } catch (error) {
+    console.error('Errore durante il logout:', error);
+    return res.status(500).json({ error: 'Errore durante il logout', details: error.message });
+  }
+});
+
       const { password, ...userInfo } = user;
       return res.status(200).json({ 
         authenticated: true, 

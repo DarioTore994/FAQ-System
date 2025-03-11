@@ -152,17 +152,35 @@ router.get('/faqs', async (req, res) => {
 
 // Endpoint per ottenere tutte le categorie
 router.get('/categories', async (req, res) => {
-  const client = await pool.connect();
+  let client;
   try {
+    client = await pool.connect();
     const query = 'SELECT * FROM categories ORDER BY name';
     const result = await client.query(query);
     
     return res.status(200).json(result.rows);
   } catch (err) {
     console.error('Errore API categorie:', err);
-    return res.status(500).json({ error: 'Errore durante il recupero delle categorie' });
+    // Gestione dettagliata dell'errore
+    if (err.code === '42P01') { // Tabella non esistente
+      return res.status(500).json({ 
+        error: 'Tabella categorie non trovata. Il database potrebbe non essere inizializzato',
+        errorCode: 'TABLE_NOT_FOUND'
+      });
+    } else if (err.code === '08003' || err.code === '08006' || err.code === '57P01') { // Connessione al DB fallita
+      return res.status(503).json({ 
+        error: 'Impossibile connettersi al database', 
+        errorCode: 'DB_CONNECTION_ERROR'
+      });
+    } else {
+      return res.status(500).json({
+        error: 'Errore durante il recupero delle categorie',
+        details: err.message,
+        errorCode: 'INTERNAL_ERROR'
+      });
+    }
   } finally {
-    client.release();
+    if (client) client.release();
   }
 });
 
