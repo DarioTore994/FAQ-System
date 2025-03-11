@@ -29,6 +29,7 @@
                 <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
                 <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
                 <a href="/admin" class="text-gray-300 hover:text-accent-yellow">Admin</a>
+                <a href="/create" class="text-gray-300 hover:text-accent-yellow">Crea FAQ</a>
                 <button id="logoutBtn" class="text-gray-300 hover:text-accent-yellow">Logout</button>
             </nav>
         </div>
@@ -38,20 +39,65 @@
         <h1 class="text-3xl font-bold mb-8 text-center text-accent-yellow">Gestione Utenti</h1>
         
         <div class="bg-dark-gray p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Lista Utenti</h2>
+            
             <div class="overflow-x-auto">
-                <table class="w-full table-auto">
+                <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr>
-                            <th class="px-4 py-2 text-left text-accent-yellow">ID</th>
-                            <th class="px-4 py-2 text-left text-accent-yellow">Email</th>
-                            <th class="px-4 py-2 text-left text-accent-yellow">Ruolo</th>
-                            <th class="px-4 py-2 text-left text-accent-yellow">Data registrazione</th>
+                        <tr class="text-accent-yellow">
+                            <th class="py-2 px-4">ID</th>
+                            <th class="py-2 px-4">Email</th>
+                            <th class="py-2 px-4">Ruolo</th>
+                            <th class="py-2 px-4">Data Creazione</th>
+                            <th class="py-2 px-4">Azioni</th>
                         </tr>
                     </thead>
                     <tbody id="usersTable">
-                        <!-- Tabella utenti sarà caricata dinamicamente -->
+                        <!-- Gli utenti verranno caricati dinamicamente -->
+                        <tr>
+                            <td colspan="5" class="py-4 text-center text-gray-400">Caricamento utenti...</td>
+                        </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+        
+        <!-- Modal per modifica ruolo -->
+        <div id="editRoleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-dark-gray p-6 rounded-lg shadow-lg w-full max-w-md">
+                <h3 class="text-xl font-semibold mb-4 text-accent-yellow">Modifica Ruolo Utente</h3>
+                <p id="modalUserEmail" class="mb-4 text-gray-300"></p>
+                
+                <form id="editRoleForm" class="space-y-4">
+                    <input type="hidden" id="editUserId" name="userId">
+                    <div>
+                        <label class="block mb-2 text-accent-yellow">Ruolo</label>
+                        <select
+                            id="editUserRole"
+                            name="role"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                        >
+                            <option value="user">Utente</option>
+                            <option value="admin">Amministratore</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-4 mt-6">
+                        <button
+                            type="button"
+                            id="cancelEditBtn"
+                            class="px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+                        >
+                            Annulla
+                        </button>
+                        <button
+                            type="submit"
+                            class="px-4 py-2 bg-accent-yellow text-primary-black rounded-lg hover:bg-yellow-300 transition-colors"
+                        >
+                            Salva
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </main>
@@ -111,24 +157,95 @@
             const table = document.getElementById('usersTable');
             table.innerHTML = '';
             
+            if (users.length === 0) {
+                table.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-gray-400">Nessun utente trovato</td></tr>';
+                return;
+            }
+            
             users.forEach(user => {
                 const row = document.createElement('tr');
                 row.className = 'border-t border-gray-700';
                 
                 row.innerHTML = `
-                    <td class="px-4 py-2">${user.id}</td>
-                    <td class="px-4 py-2">${user.email}</td>
-                    <td class="px-4 py-2">
-                        <span class="${user.role === 'admin' ? 'text-accent-yellow' : 'text-gray-300'} font-medium">
-                            ${user.role === 'admin' ? 'Amministratore' : 'Utente'}
+                    <td class="py-3 px-4">${user.id}</td>
+                    <td class="py-3 px-4">${user.email}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 rounded-full text-xs ${user.role === 'admin' ? 'bg-accent-yellow text-primary-black' : 'bg-gray-700 text-gray-300'}">
+                            ${user.role === 'admin' ? 'Admin' : 'Utente'}
                         </span>
                     </td>
-                    <td class="px-4 py-2">${new Date(user.created_at).toLocaleString()}</td>
+                    <td class="py-3 px-4">${new Date(user.created_at).toLocaleDateString()}</td>
+                    <td class="py-3 px-4">
+                        <button 
+                            class="edit-role-btn text-accent-yellow hover:underline"
+                            data-id="${user.id}"
+                            data-email="${user.email}"
+                            data-role="${user.role}"
+                        >
+                            Modifica ruolo
+                        </button>
+                    </td>
                 `;
                 
                 table.appendChild(row);
             });
+            
+            // Aggiungi eventi ai pulsanti di modifica
+            document.querySelectorAll('.edit-role-btn').forEach(btn => {
+                btn.addEventListener('click', openEditRoleModal);
+            });
         }
+        
+        // Gestione del modal di modifica ruolo
+        function openEditRoleModal() {
+            const userId = this.getAttribute('data-id');
+            const userEmail = this.getAttribute('data-email');
+            const userRole = this.getAttribute('data-role');
+            
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('modalUserEmail').textContent = `Utente: ${userEmail}`;
+            document.getElementById('editUserRole').value = userRole;
+            
+            document.getElementById('editRoleModal').classList.remove('hidden');
+        }
+        
+        // Chiudi il modal
+        document.getElementById('cancelEditBtn').addEventListener('click', () => {
+            document.getElementById('editRoleModal').classList.add('hidden');
+        });
+        
+        // Gestione del submit per la modifica del ruolo
+        document.getElementById('editRoleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userId = document.getElementById('editUserId').value;
+            const newRole = document.getElementById('editUserRole').value;
+            
+            try {
+                const response = await fetch(`/api/users/${userId}/role`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ role: newRole }),
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Errore durante l\'aggiornamento del ruolo');
+                }
+                
+                // Chiudi modal e ricarica utenti
+                document.getElementById('editRoleModal').classList.add('hidden');
+                showErrorAlert('Ruolo aggiornato con successo!');
+                loadUsers();
+            } catch (error) {
+                console.error('Errore aggiornamento ruolo:', error);
+                showErrorAlert('Errore: ' + error.message);
+            }
+        });
         
         // Gestione logout
         document.getElementById('logoutBtn').addEventListener('click', async () => {

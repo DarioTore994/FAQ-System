@@ -2,6 +2,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
   // Verifica ruolo utente
   let userRole = 'guest';
+  let userId = null;
   
   try {
     const authResponse = await fetch('/api/auth/check');
@@ -9,6 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     if (authData.authenticated) {
       userRole = authData.user.role;
+      userId = authData.user.id;
       
       // Se è un admin, mostra pulsante admin nella navbar
       const headerNav = document.getElementById('headerNav');

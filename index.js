@@ -354,6 +354,41 @@ app.get("/api/users", async (req, res) => {
   }
 });
 
+// API per modificare il ruolo di un utente (solo per admin)
+app.put("/api/users/:id/role", requireAdmin, async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    const { role } = req.body;
+    
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: 'ID utente non valido' });
+    }
+    
+    if (!role || !['admin', 'user'].includes(role)) {
+      return res.status(400).json({ error: 'Ruolo non valido. Deve essere "admin" o "user"' });
+    }
+    
+    const client = await pool.connect();
+    try {
+      // Controllo se l'utente esiste
+      const userCheck = await client.query('SELECT id FROM users WHERE id = $1', [userId]);
+      if (userCheck.rows.length === 0) {
+        return res.status(404).json({ error: 'Utente non trovato' });
+      }
+      
+      // Aggiorna il ruolo dell'utente
+      await client.query('UPDATE users SET role = $1 WHERE id = $2', [role, userId]);
+      
+      return res.json({ success: true, message: 'Ruolo aggiornato con successo' });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Errore aggiornamento ruolo:', error);
+    return res.status(500).json({ error: 'Errore interno del server' });
+  }
+});
+
 // Importa e usa le API per l'app mobile
 const apiEndpoints = require('./api-endpoints');
 app.use('/api/mobile', apiEndpoints);
