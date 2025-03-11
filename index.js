@@ -280,30 +280,93 @@ app.get("/api/faqs", async (req, res) => {
 });
 
 // Endpoint per verificare/creare la tabella faqs
-app.post("/api/init-db", requireAuth, async (req, res) => {
+app.post("/api/init-db", async (req, res) => {
   try {
-    // Creiamo la tabella utilizzando SQL
-    const { error: sqlError } = await supabase.sql(`
-      CREATE TABLE IF NOT EXISTS faqs (
-        id SERIAL PRIMARY KEY,
-        category TEXT NOT NULL,
-        title TEXT NOT NULL,
-        description TEXT NOT NULL,
-        resolution TEXT NOT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      );
-    `);
+    // Inizialmente verifichiamo la connessione al database
+    const { data: connectionTest, error: connectionError } = await supabase.from('_schema').select('*').limit(1).catch(err => {
+      return { data: null, error: err };
+    });
     
-    if (sqlError) {
-      console.error('Errore durante la creazione della tabella:', sqlError);
-      return res.status(500).json({ error: sqlError });
+    if (connectionError) {
+      console.error('Errore di connessione al database:', connectionError);
+    }
+    
+    // Verifichiamo se la tabella esiste già
+    const { data: tableTest, error: tableError } = await supabase.from('faqs').select('count').limit(1).catch(err => {
+      return { data: null, error: err };
+    });
+    
+    // Se la tabella non esiste, proviamo a crearla
+    if (tableError && tableError.code === '42P01') {
+      console.log('La tabella non esiste, tentiamo di crearla...');
+      
+      try {
+        // Creiamo la tabella utilizzando SQL
+        const { data: createResult, error: sqlError } = await supabase.sql(`
+          CREATE TABLE IF NOT EXISTS faqs (
+            id SERIAL PRIMARY KEY,
+            category TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            resolution TEXT NOT NULL,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+          );
+        `).catch(err => {
+          return { data: null, error: err };
+        });
+        
+        if (sqlError) {
+          console.error('Errore durante la creazione della tabella:', sqlError);
+          return res.status(500).json({ error: sqlError, message: 'Impossibile creare la tabella' });
+        } else {
+          console.log('Tabella faqs creata con successo!');
+          
+          // Proviamo ad inserire dati demo
+          const demoFaqs = [
+            {
+              category: 'Network',
+              title: 'Problema di connessione alla rete',
+              description: 'Il computer non riesce a connettersi alla rete Wi-Fi',
+              resolution: 'Verifica che il Wi-Fi sia attivo. Riavvia il router. Controlla le impostazioni di rete.'
+            }
+          ];
+          
+          const { error: insertError } = await supabase.from('faqs').insert(demoFaqs);
+          
+          if (insertError) {
+            console.log('Creazione tabella riuscita ma errore inserimento dati demo:', insertError);
+          }
+          
+          return res.json({ success: true, message: 'Tabella creata con successo' });
+        }
+      } catch (createError) {
+        console.error('Errore critico durante la creazione della tabella:', createError);
+        return res.status(500).json({ 
+          error: createError, 
+          message: 'Errore critico durante la creazione della tabella',
+          details: 'Potrebbe essere necessario controllare le credenziali del database o i permessi'
+        });
+      }
+    } else if (tableError) {
+      // C'è un errore ma non è relativo alla tabella mancante
+      console.error('Errore nella verifica della tabella:', tableError);
+      return res.status(500).json({ 
+        error: tableError, 
+        message: 'Errore nella verifica della tabella',
+        connectionTest: connectionTest ? 'OK' : 'Fallito'
+      });
     } else {
-      console.log('Tabella faqs verificata/creata con successo!');
-      return res.json({ success: true });
+      // La tabella esiste già
+      console.log('Tabella faqs verificata con successo!');
+      return res.json({ success: true, message: 'Tabella verificata con successo' });
     }
   } catch (error) {
-    console.error('Errore imprevisto durante la creazione della tabella:', error);
-    return res.status(500).json({ error });
+    console.error('Errore imprevisto durante la verifica/creazione del database:', error);
+    return res.status(500).json({ 
+      error: error, 
+      message: 'Errore imprevisto durante la verifica/creazione del database',
+      details: error.toString()
+    });
   }
 });
 

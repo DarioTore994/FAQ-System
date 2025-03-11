@@ -1,10 +1,9 @@
-
 // Client-side JavaScript
 document.addEventListener("DOMContentLoaded", async () => {
   // Initialize Supabase client
   const supabaseUrl = 'https://ejlyrwotgkrjeunosrzo.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqbHlyd290Z2tyamV1bm9zcnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE2ODQxOTYsImV4cCI6MjA1NzI2MDE5Nn0.xmfOVAMsH5QqzjKmkLriEshZalP0Xj8xf_N_wpWE_40';
-  
+
   // Check if supabase is available in the window object
   let supabase;
   if (window.supabase) {
@@ -27,14 +26,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         const errorData = await response.json();
         throw new Error(errorData.error?.message || "Network response was not ok");
       }
-      
+
       const data = await response.json();
       renderFAQs(data || [], selectedCategory);
       initAccordions();
     } catch (error) {
       console.error("Error loading FAQs:", error);
       showErrorAlert("Errore nel caricamento delle FAQ. La tabella 'faqs' potrebbe non esistere.");
-      
+
       // If the error is related to missing table, render empty state
       renderFAQs([], selectedCategory);
     }
@@ -44,7 +43,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const renderFAQs = (faqs, selectedCategory) => {
     const container = document.getElementById("faqContainer");
     if (!container) return;
-    
+
     container.innerHTML = "";
 
     if (faqs.length === 0) {
@@ -126,16 +125,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Load FAQs
   loadFAQs();
-  
+
   // Form handling for FAQ creation
   const faqForm = document.getElementById('faqForm');
   if (faqForm) {
     faqForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       // Visualizza messaggio di caricamento
       showErrorAlert('Salvataggio in corso...');
-      
+
       const formData = new FormData(faqForm);
       const faqData = {
         category: formData.get('category'),
@@ -143,14 +142,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         description: formData.get('description'),
         resolution: formData.get('resolution'),
       };
-      
+
       try {
         console.log('Sending FAQ data:', faqData);
-        
+
         // Verifica autenticazione prima di inviare
         const authCheck = await fetch('/api/auth/check');
         const authData = await authCheck.json();
-        
+
         if (!authData.authenticated) {
           showErrorAlert('Sessione scaduta. Effettua nuovamente il login.');
           setTimeout(() => {
@@ -158,7 +157,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           }, 1500);
           return;
         }
-        
+
         const response = await fetch('/api/faqs', {
           method: 'POST',
           headers: {
@@ -167,13 +166,13 @@ document.addEventListener("DOMContentLoaded", async () => {
           body: JSON.stringify(faqData),
           credentials: 'include'
         });
-        
+
         // Prima verifica se la tabella esiste
         const tableCheck = await fetch('/api/init-db', {
           method: 'POST',
           credentials: 'include'
         });
-        
+
         // Riprova a salvare dopo aver verificato la tabella
         const retryResponse = !response.ok ? await fetch('/api/faqs', {
           method: 'POST',
@@ -183,18 +182,18 @@ document.addEventListener("DOMContentLoaded", async () => {
           body: JSON.stringify(faqData),
           credentials: 'include'
         }) : response;
-        
+
         const responseData = await retryResponse.json().catch((err) => {
           console.error("Errore parsing JSON:", err);
           return { error: { message: "Errore nella risposta del server" } };
         });
-        
+
         if (!retryResponse.ok) {
           throw new Error(responseData.error?.message || 'Errore durante il salvataggio: ' + JSON.stringify(responseData));
         }
-        
+
         showErrorAlert('FAQ salvata con successo!');
-        
+
         // Redirect to home after successful creation (with a small delay to show success message)
         setTimeout(() => {
           window.location.href = '/dashboard';
@@ -205,4 +204,49 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
   }
+
+  // Verifica e inizializza il database all'avvio
+  window.addEventListener('DOMContentLoaded', async () => {
+    try {
+      showErrorAlert('Verifica del database in corso...');
+
+      const response = await fetch('/api/init-db', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const result = await response.json().catch(err => ({ 
+        error: err, 
+        message: 'Errore nel parsing della risposta' 
+      }));
+
+      if (!response.ok) {
+        console.warn('Verifica database fallita:', result);
+        showErrorAlert('Errore database: ' + (result.message || 'Verifica fallita'));
+
+        // Mostra dettagli tecnici nella console
+        if (result.error) {
+          console.error('Dettagli errore:', result.error);
+        }
+
+        // Se c'è un problema con il database, aggiungiamo un avviso visibile
+        const header = document.querySelector('header');
+        if (header) {
+          const alert = document.createElement('div');
+          alert.className = 'bg-red-500 text-white p-2 text-center';
+          alert.innerHTML = 'Attenzione: Problemi con il database. Alcune funzionalità potrebbero non essere disponibili.';
+          header.after(alert);
+        }
+      } else {
+        console.log('Database verificato correttamente:', result);
+        showErrorAlert('Database verificato con successo!');
+      }
+    } catch (error) {
+      console.error('Errore critico verifica database:', error);
+      showErrorAlert('Errore critico nella verifica del database');
+    }
+  });
 });
