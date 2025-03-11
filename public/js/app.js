@@ -334,25 +334,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (isMobile) {
       // Visualizzazione a card per mobile
       faqContainer.innerHTML = faqs.length === 0
-        ? `<tr><td colspan="3" class="text-center py-8 text-gray-400">Nessuna FAQ trovata</td></tr>`
+        ? `<tr><td colspan="3" class="text-center py-12 text-gray-400 text-lg">Nessuna FAQ trovata</td></tr>`
         : faqs
             .map(
               (faq) => `
-              <tr class="block mb-4 bg-gray-800/30 rounded-lg border border-gray-700">
-                <td class="block p-4 border-b border-gray-700">
+              <tr class="block mb-5 bg-gray-800/50 rounded-lg border border-gray-700 shadow-md overflow-hidden">
+                <td class="block p-5 border-b border-gray-700/50">
                   <div class="flex justify-between items-start">
-                    <h4 class="font-medium text-accent-yellow">${faq.title}</h4>
-                    <span class="px-3 py-1 bg-accent-yellow/10 text-accent-yellow rounded-full text-xs font-medium ml-2">
+                    <h4 class="font-medium text-accent-yellow text-base">${faq.title}</h4>
+                    <span class="px-3 py-1.5 bg-accent-yellow/20 text-accent-yellow rounded-full text-xs font-medium ml-2">
                       ${faq.category}
                     </span>
                   </div>
-                  <div class="text-xs text-gray-500 mt-1">${new Date(faq.created_at).toLocaleDateString()}</div>
+                  <div class="text-xs text-gray-500 mt-2">${new Date(faq.created_at).toLocaleDateString('it-IT', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}</div>
                 </td>
-                <td class="block p-4">
-                  <p class="text-sm text-gray-300 mb-3">${faq.description}</p>
-                  <div class="p-3 bg-gray-800/50 rounded-md">
-                    <h5 class="text-xs text-accent-yellow mb-1 font-medium">Soluzione:</h5>
-                    <p class="text-sm">${faq.resolution}</p>
+                <td class="block p-5">
+                  <p class="text-sm text-gray-300 mb-4">${faq.description}</p>
+                  <div class="p-4 bg-gray-800/70 rounded-md shadow-inner border border-gray-700/50">
+                    <h5 class="text-xs text-accent-yellow mb-2 font-medium uppercase tracking-wide">Soluzione:</h5>
+                    <p class="text-sm text-gray-200">${faq.resolution}</p>
                   </div>
                 </td>
               </tr>
@@ -362,25 +368,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else {
       // Visualizzazione a tabella per desktop
       faqContainer.innerHTML = faqs.length === 0
-        ? `<tr><td colspan="3" class="text-center py-8 text-gray-400">Nessuna FAQ trovata</td></tr>`
+        ? `<tr><td colspan="4" class="text-center py-12 text-gray-400 text-lg">Nessuna FAQ trovata</td></tr>`
         : faqs
             .map(
               (faq) => `
-              <tr class="border-b border-gray-700 hover:bg-gray-800/30">
-                <td class="p-4">
-                  <h4 class="font-medium text-accent-yellow">${faq.title}</h4>
+              <tr class="border-b border-gray-700 hover:bg-gray-800/50 transition-colors duration-150">
+                <td class="py-5 px-6">
+                  <h4 class="font-medium text-accent-yellow text-base">${faq.title}</h4>
                 </td>
-                <td class="p-4">
-                  <p class="text-sm text-gray-300">${faq.description}</p>
-                  <div class="mt-2 p-3 bg-gray-800/50 rounded-md">
-                    <p class="text-sm">${faq.resolution}</p>
+                <td class="py-5 px-6">
+                  <p class="text-sm text-gray-300 mb-3">${faq.description}</p>
+                  <div class="p-4 bg-gray-800/70 rounded-md shadow-inner border border-gray-700/50">
+                    <p class="text-sm text-gray-200">${faq.resolution}</p>
                   </div>
                 </td>
-                <td class="p-4">
-                  <span class="px-3 py-1 bg-accent-yellow/10 text-accent-yellow rounded-full text-xs font-medium">
+                <td class="py-5 px-6">
+                  <span class="px-3 py-1.5 bg-accent-yellow/20 text-accent-yellow rounded-full text-xs font-medium">
                     ${faq.category}
                   </span>
-                  <div class="text-xs text-gray-500 mt-2">${new Date(faq.created_at).toLocaleDateString()}</div>
+                </td>
+                <td class="py-5 px-6 text-xs text-gray-400">
+                  ${new Date(faq.created_at).toLocaleDateString('it-IT', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
                 </td>
               </tr>
             `,
