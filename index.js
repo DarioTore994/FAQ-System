@@ -37,6 +37,10 @@ app.get('/users', (req, res) => {
   res.sendFile(__dirname + '/views/users.html');
 });
 
+app.get('/categories', (req, res) => {
+  res.sendFile(__dirname + '/views/categories.html');
+});
+
 // Use API endpoints from api-endpoints.js
 const apiEndpoints = require('./api-endpoints');
 app.use('/api', apiEndpoints);
