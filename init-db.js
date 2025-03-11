@@ -3,6 +3,14 @@ const pool = require('./db');
 
 async function initDatabase() {
   try {
+    // Drop existing tables to reset everything
+    await pool.query(`
+      DROP TABLE IF EXISTS faqs;
+      DROP TABLE IF EXISTS categories;
+      DROP TABLE IF EXISTS users;
+    `);
+
+    // Create tables
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -20,8 +28,6 @@ async function initDatabase() {
         description TEXT,
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
-
-      DROP TABLE IF EXISTS faqs;
       
       CREATE TABLE IF NOT EXISTS faqs (
         id SERIAL PRIMARY KEY,
@@ -30,8 +36,7 @@ async function initDatabase() {
         description TEXT NOT NULL,
         resolution TEXT NOT NULL,
         status VARCHAR(50) DEFAULT 'Nuovo',
-        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMP
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
     `);
 
@@ -46,13 +51,21 @@ async function initDatabase() {
       ON CONFLICT (name) DO NOTHING;
     `);
 
-    console.log('Database inizializzato correttamente');
+    // Inserisci un utente admin di default
+    await pool.query(`
+      INSERT INTO users (email, password, role)
+      VALUES ('admin@example.com', '$2b$10$mLTY0eIwGQeudBA4jKkVk.S0T7JFttKVw0jECkqW5yBhY.LdH0tSi', 'admin')
+      ON CONFLICT (email) DO NOTHING;
+    `);
+
+    console.log('Database inizializzato con successo!');
   } catch (error) {
     console.error('Errore inizializzazione database:', error);
-  } finally {
-    // Chiudi il pool
-    pool.end();
+    throw error;
   }
 }
 
-initDatabase();
+// Esegui l'inizializzazione del database
+initDatabase().catch(console.error);
+
+module.exports = { initDatabase };

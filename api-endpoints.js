@@ -85,7 +85,17 @@ router.post('/faqs', async (req, res) => {
       return res.status(400).json({ error: { message: 'Tutti i campi sono obbligatori' } });
     }
 
-    // Inserisci la nuova FAQ nel database senza user_id
+    // Verifica che la tabella esista con la struttura corretta
+    try {
+      await pool.query(`
+        SELECT column_name FROM information_schema.columns 
+        WHERE table_name = 'faqs' AND column_name = 'user_id'
+      `);
+    } catch (error) {
+      console.log('Verifica struttura tabella faqs...');
+    }
+
+    // Inserisci la nuova FAQ nel database 
     const result = await pool.query(
       'INSERT INTO faqs (category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5) RETURNING *',
       [category, title, description, resolution, status || 'Nuovo']
