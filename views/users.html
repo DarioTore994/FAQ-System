@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -37,10 +36,10 @@
 
     <main class="container mx-auto px-6 py-8">
         <h1 class="text-3xl font-bold mb-8 text-center text-accent-yellow">Gestione Utenti</h1>
-        
+
         <div class="bg-dark-gray p-6 rounded-lg shadow-md mb-8">
             <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Lista Utenti</h2>
-            
+
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
@@ -61,13 +60,13 @@
                 </table>
             </div>
         </div>
-        
+
         <!-- Modal per modifica ruolo -->
         <div id="editRoleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
             <div class="bg-dark-gray p-6 rounded-lg shadow-lg w-full max-w-md">
                 <h3 class="text-xl font-semibold mb-4 text-accent-yellow">Modifica Ruolo Utente</h3>
                 <p id="modalUserEmail" class="mb-4 text-gray-300"></p>
-                
+
                 <form id="editRoleForm" class="space-y-4">
                     <input type="hidden" id="editUserId" name="userId">
                     <div>
@@ -81,7 +80,7 @@
                             <option value="admin">Amministratore</option>
                         </select>
                     </div>
-                    
+
                     <div class="flex justify-end space-x-4 mt-6">
                         <button
                             type="button"
@@ -115,17 +114,17 @@
             try {
                 const response = await fetch('/api/auth/check');
                 const data = await response.json();
-                
+
                 if (!data.authenticated) {
                     window.location.href = '/auth';
                     return;
                 }
-                
+
                 if (data.user.role !== 'admin') {
                     window.location.href = '/dashboard';
                     return;
                 }
-                
+
                 // Carica la lista utenti
                 loadUsers();
             } catch (error) {
@@ -133,17 +132,17 @@
                 showErrorAlert('Errore verifica autenticazione');
             }
         });
-        
+
         // Carica gli utenti
         async function loadUsers() {
             try {
                 const response = await fetch('/api/users');
-                
+
                 if (!response.ok) {
                     showErrorAlert('Errore nel caricamento degli utenti');
                     return;
                 }
-                
+
                 const users = await response.json();
                 renderUsers(users);
             } catch (error) {
@@ -151,21 +150,21 @@
                 showErrorAlert('Errore caricamento utenti: ' + error.message);
             }
         }
-        
+
         // Render della tabella utenti
         function renderUsers(users) {
             const table = document.getElementById('usersTable');
             table.innerHTML = '';
-            
+
             if (users.length === 0) {
                 table.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-gray-400">Nessun utente trovato</td></tr>';
                 return;
             }
-            
+
             users.forEach(user => {
                 const row = document.createElement('tr');
                 row.className = 'border-t border-gray-700';
-                
+
                 row.innerHTML = `
                     <td class="py-3 px-4">${user.id}</td>
                     <td class="py-3 px-4">${user.email}</td>
@@ -186,41 +185,41 @@
                         </button>
                     </td>
                 `;
-                
+
                 table.appendChild(row);
             });
-            
+
             // Aggiungi eventi ai pulsanti di modifica
             document.querySelectorAll('.edit-role-btn').forEach(btn => {
                 btn.addEventListener('click', openEditRoleModal);
             });
         }
-        
+
         // Gestione del modal di modifica ruolo
         function openEditRoleModal() {
             const userId = this.getAttribute('data-id');
             const userEmail = this.getAttribute('data-email');
             const userRole = this.getAttribute('data-role');
-            
+
             document.getElementById('editUserId').value = userId;
             document.getElementById('modalUserEmail').textContent = `Utente: ${userEmail}`;
             document.getElementById('editUserRole').value = userRole;
-            
+
             document.getElementById('editRoleModal').classList.remove('hidden');
         }
-        
+
         // Chiudi il modal
         document.getElementById('cancelEditBtn').addEventListener('click', () => {
             document.getElementById('editRoleModal').classList.add('hidden');
         });
-        
+
         // Gestione del submit per la modifica del ruolo
         document.getElementById('editRoleForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const userId = document.getElementById('editUserId').value;
             const newRole = document.getElementById('editUserRole').value;
-            
+
             try {
                 const response = await fetch(`/api/users/${userId}/role`, {
                     method: 'PUT',
@@ -230,13 +229,13 @@
                     body: JSON.stringify({ role: newRole }),
                     credentials: 'include'
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (!response.ok) {
                     throw new Error(data.error || 'Errore durante l\'aggiornamento del ruolo');
                 }
-                
+
                 // Chiudi modal e ricarica utenti
                 document.getElementById('editRoleModal').classList.add('hidden');
                 showErrorAlert('Ruolo aggiornato con successo!');
@@ -246,14 +245,14 @@
                 showErrorAlert('Errore: ' + error.message);
             }
         });
-        
+
         // Gestione logout
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             try {
                 const response = await fetch('/api/auth/logout', {
                     method: 'POST'
                 });
-                
+
                 if (response.ok) {
                     window.location.href = '/';
                 }
