@@ -242,6 +242,9 @@ app.get("/login", (req, res) =>
 app.get("/create", requireAdmin, (req, res) =>
   res.sendFile(path.join(__dirname, "views/faq-create.html")),
 );
+app.get("/modifica", requireAdmin, (req, res) =>
+  res.sendFile(path.join(__dirname, "views/modifica.html")),
+);
 app.get("/dashboard", requireAuth, (req, res) =>
   res.sendFile(path.join(__dirname, "views/dashboard.html")),
 );
@@ -983,6 +986,78 @@ app.get("/api/faqs", async (req, res) => {
     return res.json(result.rows);
   } catch (error) {
     console.error("Errore nel recupero delle FAQ:", error);
+    return res.status(500).json({ error: error.message, stack: error.stack });
+  } finally {
+    client.release();
+  }
+});
+
+// API per ottenere una FAQ specifica per ID
+app.get("/api/faqs/:id", requireAuth, async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'ID FAQ non valido' });
+  }
+
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT * FROM faqs WHERE id = $1', [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'FAQ non trovata' });
+    }
+    
+    return res.json(result.rows[0]);
+  } catch (error) {
+    console.error("Errore nel recupero della FAQ:", error);
+    return res.status(500).json({ error: error.message, stack: error.stack });
+  } finally {
+    client.release();
+  }
+});
+
+// API per aggiornare una FAQ
+app.put("/api/faqs/:id", requireAuth, async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'ID FAQ non valido' });
+  }
+
+  const { category, title, description, resolution, status } = req.body;
+  
+  if (!category || !title || !description || !resolution || !status) {
+    return res.status(400).json({ error: 'Tutti i campi sono obbligatori' });
+  }
+
+  const client = await pool.connect();
+  try {
+    // Verifica se la FAQ esiste
+    const checkResult = await client.query('SELECT * FROM faqs WHERE id = $1', [id]);
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ error: 'FAQ non trovata' });
+    }
+
+    // Verifica se l'utente ha i permessi (solo admin possono modificare)
+    const authToken = req.cookies.authToken;
+    if (!authToken) {
+      return res.status(401).json({ error: 'Accesso non autorizzato' });
+    }
+
+    const userId = parseInt(authToken, 10);
+    const userResult = await client.query('SELECT role FROM users WHERE id = $1', [userId]);
+    if (userResult.rows.length === 0 || userResult.rows[0].role !== 'admin') {
+      return res.status(403).json({ error: 'Solo gli admin possono modificare le FAQ' });
+    }
+    
+    // Aggiorna la FAQ
+    const result = await client.query(
+      'UPDATE faqs SET category = $1, title = $2, description = $3, resolution = $4, status = $5 WHERE id = $6 RETURNING *',
+      [category, title, description, resolution, status, id]
+    );
+    
+    return res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error("Errore nell'aggiornamento della FAQ:", error);
     return res.status(500).json({ error: error.message, stack: error.stack });
   } finally {
     client.release();
