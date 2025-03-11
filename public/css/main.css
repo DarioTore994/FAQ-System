@@ -952,6 +952,10 @@ video {
   border-bottom-width: 1px;
 }
 
+.border-b-2 {
+  border-bottom-width: 2px;
+}
+
 .border-l-2 {
   border-left-width: 2px;
 }
@@ -1142,6 +1146,10 @@ video {
 .py-8 {
   padding-top: 2rem;
   padding-bottom: 2rem;
+}
+
+.pb-1 {
+  padding-bottom: 0.25rem;
 }
 
 .pl-10 {
