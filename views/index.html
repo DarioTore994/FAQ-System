@@ -130,7 +130,7 @@
             <h1 class="text-3xl sm:text-4xl font-bold text-accent-yellow mb-4 sm:mb-6">Benvenuto nel FAQ Portal</h1>
             <p class="text-lg sm:text-xl text-gray-300 mb-8 sm:mb-10">La piattaforma per gestire le domande tecniche frequenti</p>
 
-            <div id="loginContainer" class="flex flex-col items-center">
+            <div id="loginContainer" class="hidden flex flex-col items-center">
                 <p class="text-gray-400 mb-6">Effettua il login per accedere e gestire le FAQ</p>
                 <a href="/auth" class="btn-accent">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -176,6 +176,7 @@
                 // Controlla se la risposta è valida
                 if (!response.ok) {
                     console.error('Errore nella risposta API:', response.status, response.statusText);
+                    // Utente non autenticato: mostra login, nascondi logout e contenuti autenticati
                     document.getElementById('loginContainer')?.classList.remove('hidden');
                     document.getElementById('loggedInContainer')?.classList.add('hidden');
                     document.getElementById('headerNav')?.classList.add('hidden');
@@ -188,6 +189,7 @@
                     data = await response.json();
                 } catch (jsonError) {
                     console.error('Errore parsing JSON:', jsonError);
+                    // Errore parsing: mostra login, nascondi logout e contenuti autenticati
                     document.getElementById('loginContainer')?.classList.remove('hidden');
                     document.getElementById('loggedInContainer')?.classList.add('hidden');
                     document.getElementById('headerNav')?.classList.add('hidden');
@@ -195,17 +197,19 @@
                 }
                 
                 if (data.authenticated) {
+                    // Utente autenticato: nascondi login, mostra logout e contenuti autenticati
                     document.getElementById('loginContainer')?.classList.add('hidden');
                     document.getElementById('loggedInContainer')?.classList.remove('hidden');
                     document.getElementById('headerNav')?.classList.remove('hidden');
                 } else {
+                    // Utente non autenticato: mostra login, nascondi logout e contenuti autenticati
                     document.getElementById('loginContainer')?.classList.remove('hidden');
                     document.getElementById('loggedInContainer')?.classList.add('hidden');
                     document.getElementById('headerNav')?.classList.add('hidden');
                 }
             } catch (error) {
                 console.error('Errore controllo autenticazione:', error);
-                // Fallback in caso di errore: mostra login
+                // Fallback in caso di errore: mostra login, nascondi logout e contenuti autenticati
                 document.getElementById('loginContainer')?.classList.remove('hidden');
                 document.getElementById('loggedInContainer')?.classList.add('hidden');
                 document.getElementById('headerNav')?.classList.add('hidden');
