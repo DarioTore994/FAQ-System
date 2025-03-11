@@ -78,8 +78,6 @@ router.post('/auth/login', async (req, res) => {
         return res.status(401).json({ error: 'Credenziali non valide' });
       }
 
-      const user = result.rows[0];
-
       // Usa l'ID utente come token (semplificato, in produzione usa JWT)
       const token = user.id.toString();
 
@@ -144,15 +142,8 @@ router.post('/faqs', verificaAutenticazione, async (req, res) => {
 
 
     // Inserisci la nuova FAQ nel database con user_id se disponibile
-    let query, params;
-
-    if (userId) {
-      query = 'INSERT INTO faqs (user_id, category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
-      params = [userId, category, title, description, resolution, status || 'Nuovo'];
-    } else {
-      query = 'INSERT INTO faqs (category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5) RETURNING *';
-      params = [category, title, description, resolution, status || 'Nuovo'];
-    }
+    const query = 'INSERT INTO faqs (user_id, category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
+    const params = [userId || null, category, title, description, resolution, status || 'Nuovo'];
 
     const result = await pool.query(query, params);
 

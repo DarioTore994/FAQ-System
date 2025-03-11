@@ -1,4 +1,3 @@
-
 const pool = require('./db');
 
 async function initDatabase() {
@@ -28,10 +27,10 @@ async function initDatabase() {
         description TEXT,
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
-      
+
       CREATE TABLE IF NOT EXISTS faqs (
         id SERIAL PRIMARY KEY,
-        user_id INTEGER, -- Campo nullable per supportare inserimenti senza utente
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NULL,
         category VARCHAR(100) NOT NULL,
         title VARCHAR(255) NOT NULL,
         description TEXT NOT NULL,
