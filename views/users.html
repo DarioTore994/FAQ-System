@@ -208,6 +208,66 @@
                 </form>
             </div>
         </div>
+        
+        <!-- Modal per modifica completa dati utente -->
+        <div id="editUserModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" style="display: none;">
+            <div class="bg-dark-gray p-6 rounded-lg shadow-lg w-full max-w-md admin-content">
+                <h3 class="text-xl font-semibold mb-4 text-accent-yellow">Modifica Dati Utente</h3>
+                
+                <form id="editUserForm" class="space-y-4">
+                    <input type="hidden" id="editCompleteUserId" name="userId">
+                    
+                    <div>
+                        <label class="block mb-2 text-accent-yellow">Email</label>
+                        <input
+                            type="email"
+                            id="editUserEmail"
+                            name="email"
+                            required
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                        />
+                    </div>
+                    
+                    <div>
+                        <label class="block mb-2 text-accent-yellow">Nuova Password (lasciare vuoto per non modificare)</label>
+                        <input
+                            type="password"
+                            id="editUserPassword"
+                            name="password"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                        />
+                    </div>
+                    
+                    <div>
+                        <label class="block mb-2 text-accent-yellow">Ruolo</label>
+                        <select
+                            id="editCompleteUserRole"
+                            name="role"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                        >
+                            <option value="user">Utente</option>
+                            <option value="admin">Amministratore</option>
+                        </select>
+                    </div>
+
+                    <div class="flex justify-end space-x-4 mt-6">
+                        <button
+                            type="button"
+                            id="cancelEditCompleteBtn"
+                            class="px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+                        >
+                            Annulla
+                        </button>
+                        <button
+                            type="submit"
+                            class="px-4 py-2 bg-accent-yellow text-primary-black rounded-lg hover:bg-yellow-300 transition-colors"
+                        >
+                            Salva Modifiche
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </main>
 
     <footer class="bg-dark-gray py-6 px-4 mt-12 border-t border-gray-800">
@@ -304,14 +364,24 @@
                     </td>
                     <td class="py-3 px-4">${new Date(user.created_at).toLocaleDateString()}</td>
                     <td class="py-3 px-4">
-                        <button 
-                            class="edit-role-btn text-accent-yellow hover:underline"
-                            data-id="${user.id}"
-                            data-email="${user.email}"
-                            data-role="${user.role}"
-                        >
-                            Modifica ruolo
-                        </button>
+                        <div class="flex space-x-3">
+                            <button 
+                                class="edit-role-btn text-accent-yellow hover:underline"
+                                data-id="${user.id}"
+                                data-email="${user.email}"
+                                data-role="${user.role}"
+                            >
+                                Modifica ruolo
+                            </button>
+                            <button 
+                                class="edit-user-btn text-accent-yellow hover:underline"
+                                data-id="${user.id}"
+                                data-email="${user.email}"
+                                data-role="${user.role}"
+                            >
+                                Modifica completa
+                            </button>
+                        </div>
                     </td>
                 `;
 
@@ -321,6 +391,10 @@
             // Aggiungi eventi ai pulsanti di modifica
             document.querySelectorAll('.edit-role-btn').forEach(btn => {
                 btn.addEventListener('click', openEditRoleModal);
+            });
+            
+            document.querySelectorAll('.edit-user-btn').forEach(btn => {
+                btn.addEventListener('click', openEditUserModal);
             });
         }
 
@@ -338,10 +412,32 @@
             modal.classList.remove('hidden');
             modal.style.display = 'flex';
         }
+        
+        // Gestione del modal di modifica completa utente
+        function openEditUserModal() {
+            const userId = this.getAttribute('data-id');
+            const userEmail = this.getAttribute('data-email');
+            const userRole = this.getAttribute('data-role');
 
-        // Chiudi il modal
+            document.getElementById('editCompleteUserId').value = userId;
+            document.getElementById('editUserEmail').value = userEmail;
+            document.getElementById('editUserPassword').value = ''; // Reset password field
+            document.getElementById('editCompleteUserRole').value = userRole;
+
+            const modal = document.getElementById('editUserModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+
+        // Chiudi i modal
         document.getElementById('cancelEditBtn').addEventListener('click', () => {
             const modal = document.getElementById('editRoleModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        });
+        
+        document.getElementById('cancelEditCompleteBtn').addEventListener('click', () => {
+            const modal = document.getElementById('editUserModal');
             modal.classList.add('hidden');
             modal.style.display = 'none';
         });
@@ -396,6 +492,77 @@
                 loadUsers();
             } catch (error) {
                 console.error('Errore aggiornamento ruolo:', error);
+
+                if (error.message.includes('Sessione scaduta')) {
+                    // Se è un errore di sessione, reindirizza alla pagina di login
+                    showErrorAlert('Sessione scaduta. Reindirizzamento alla pagina di login...');
+                    setTimeout(() => {
+                        window.location.href = '/auth';
+                    }, 2000);
+                } else {
+                    showErrorAlert('Errore: ' + error.message);
+                }
+            }
+        });
+        
+        // Gestione del submit per la modifica completa dell'utente
+        document.getElementById('editUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const userId = document.getElementById('editCompleteUserId').value;
+            const email = document.getElementById('editUserEmail').value;
+            const password = document.getElementById('editUserPassword').value;
+            const role = document.getElementById('editCompleteUserRole').value;
+            
+            // Preparazione dati da inviare (escludi password se vuota)
+            const userData = { email, role };
+            if (password.trim() !== '') {
+                userData.password = password;
+            }
+
+            try {
+                const response = await fetch(`/api/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData),
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    // Verifica se la risposta è in formato JSON
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        try {
+                            const data = await response.json();
+                            throw new Error(data.error || 'Errore durante l\'aggiornamento dell\'utente');
+                        } catch (jsonError) {
+                            console.error('Errore parsing JSON:', jsonError);
+                            throw new Error(`Errore server (${response.status}): Impossibile elaborare la risposta`);
+                        }
+                    } else {
+                        // Se non è JSON, gestisci diversamente
+                        if (response.status === 401 || response.status === 403) {
+                            throw new Error('Sessione scaduta o non autorizzato. Rieffettua il login.');
+                        } else {
+                            throw new Error(`Errore server (${response.status}): ${response.statusText}`);
+                        }
+                    }
+                }
+
+                const data = await response.json();
+
+                // Chiudi modal e ricarica utenti
+                const modal = document.getElementById('editUserModal');
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+
+                // Conferma l'azione all'utente
+                showErrorAlert('Dati utente aggiornati con successo!');
+                loadUsers();
+            } catch (error) {
+                console.error('Errore aggiornamento utente:', error);
 
                 if (error.message.includes('Sessione scaduta')) {
                     // Se è un errore di sessione, reindirizza alla pagina di login
