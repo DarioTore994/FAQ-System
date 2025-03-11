@@ -125,20 +125,31 @@
     <header class="py-4 px-6 border-b sticky top-0 z-10">
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-yellow mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
-            </div>
-            <nav class="flex items-center space-x-4" id="headerNav">
-                <a href="/dashboard" class="flex items-center text-gray-300 hover:text-accent-yellow">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7m-7-7v14" />
+                <a href="/" class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-yellow mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Dashboard
+                    <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
                 </a>
-                <!-- adminBtn rimosso per evitare duplicati -->
-                        <!-- Sezione Admin rimossa per evitare duplicati -->
+            </div>
+            <nav class="flex items-center gap-4">
+                <!-- Menu principale -->
+                <div class="flex items-center gap-4">
+                    <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
+                    <a href="/dashboard" class="flex items-center text-gray-300 hover:text-accent-yellow">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7m-7-7v14" />
+                        </svg>
+                        Dashboard
+                    </a>
+                </div>
+                
+                <!-- Menu solo per admin (nascosto di default) -->
+                <div id="adminMenu" class="hidden flex items-center gap-4">
+                    <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow">Admin</a>
+                    <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow">Utenti</a>
+                    <a href="/categories" id="categoriesLink" class="text-gray-300 hover:text-accent-yellow">Categorie</a>
+                </div>
 
                 <button id="logoutBtn" class="btn btn-secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -286,6 +297,53 @@
                         
                         // Verifica che la tabella esista
                         console.log('Verifica tabella in corso...');
+
+<script>
+// Verifica ruolo utente e mostra/nascondi pulsanti appropriati
+window.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const response = await fetch('/api/auth/check');
+        
+        // Controlla se la risposta è valida
+        if (!response.ok) {
+            console.error('Errore nella risposta API:', response.status, response.statusText);
+            window.location.href = '/auth';
+            return;
+        }
+        
+        // Gestione sicura del parsing JSON
+        let data;
+        try {
+            data = await response.json();
+        } catch (jsonError) {
+            console.error('Errore parsing JSON:', jsonError);
+            window.location.href = '/auth';
+            return;
+        }
+        
+        // Riferimento al menu admin
+        const adminMenu = document.getElementById('adminMenu');
+
+        // Nascondi di default il menu admin
+        if (adminMenu) adminMenu.classList.add('hidden');
+        
+        if (data.authenticated) {
+            // Controllo ruolo admin
+            if (data.user.role === 'admin') {
+                // Menu admin visibile solo per amministratori
+                if (adminMenu) adminMenu.classList.remove('hidden');
+            }
+        } else {
+            // Non autenticato: reindirizza a login
+            window.location.href = '/auth';
+        }
+    } catch (error) {
+        console.error('Errore controllo autenticazione:', error);
+        window.location.href = '/auth';
+    }
+});
+</script>
+
                         await fetch('/api/init-db', { method: 'POST' });
                         console.log('Tabella verificata');
                         

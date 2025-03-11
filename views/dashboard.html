@@ -71,25 +71,40 @@
     <header class="py-4 px-6 border-b sticky top-0 z-10">
         <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
             <div class="flex items-center mb-3 md:mb-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-yellow mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
-            </div>
-            <nav class="flex items-center flex-wrap justify-center gap-2 md:gap-4" id="headerNav">
-                <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
-                <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
-                <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow hidden">Admin</a>
-                <a href="/create" id="createFaqBtn" class="btn btn-primary shadow-md flex items-center hidden">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                <a href="/" class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-yellow mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span class="hidden sm:inline">Crea FAQ</span>
-                    <span class="sm:hidden">Crea</span>
+                    <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
                 </a>
-                <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow hidden">Utenti</a>
-                <a href="/categories" id="categoriesLink" class="text-gray-300 hover:text-accent-yellow hidden">Categorie</a>
-                <button id="logoutBtn" class="btn btn-secondary">
+            </div>
+            <nav class="flex items-center flex-wrap justify-center gap-2 md:gap-4">
+                <!-- Menu principale -->
+                <div class="flex items-center gap-2 md:gap-4">
+                    <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
+                    <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow border-b-2 border-accent-yellow pb-1">Dashboard</a>
+                </div>
+                
+                <!-- Menu per utenti autenticati (nascosto di default) -->
+                <div id="authUserMenu" class="hidden flex items-center gap-2 md:gap-4">
+                    <a href="/create" id="createFaqBtn" class="btn btn-primary shadow-md flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span class="hidden sm:inline">Crea FAQ</span>
+                        <span class="sm:hidden">Crea</span>
+                    </a>
+                </div>
+                
+                <!-- Menu solo per admin (nascosto di default) -->
+                <div id="adminMenu" class="hidden flex items-center gap-2 md:gap-4">
+                    <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow">Admin</a>
+                    <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow">Utenti</a>
+                    <a href="/categories" id="categoriesLink" class="text-gray-300 hover:text-accent-yellow">Categorie</a>
+                </div>
+                
+                <!-- Logout (sempre visibile per utenti autenticati) -->
+                <button id="logoutBtn" class="btn btn-secondary ml-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
@@ -184,35 +199,25 @@
                     return;
                 }
 
-                // Di default, nascondi elementi admin
-                const createFaqBtn = document.getElementById('createFaqBtn');
+                // Riferimenti ai menu
+                const authUserMenu = document.getElementById('authUserMenu');
+                const adminMenu = document.getElementById('adminMenu');
                 const adminCategorySection = document.getElementById('adminCategorySection');
-                const adminLink = document.getElementById('adminLink');
-                const usersLink = document.getElementById('usersLink');
-                const categoriesLink = document.getElementById('categoriesLink');
 
-                if (createFaqBtn) createFaqBtn.classList.add('hidden');
+                // Nascondi di default i menu per utenti autenticati e admin
+                if (authUserMenu) authUserMenu.classList.add('hidden');
+                if (adminMenu) adminMenu.classList.add('hidden');
                 if (adminCategorySection) adminCategorySection.classList.add('hidden');
-                if (adminLink) adminLink.classList.add('hidden');
-                if (usersLink) usersLink.classList.add('hidden');
-                if (categoriesLink) categoriesLink.classList.add('hidden');
-
 
                 if (data.authenticated) {
-                    // Gestione elementi basati sul ruolo utente
+                    // Utente autenticato
+                    if (authUserMenu) authUserMenu.classList.remove('hidden');
+                    
+                    // Controllo ruolo admin
                     if (data.user.role === 'admin') {
-                        // Mostra pulsante Crea FAQ e la sezione di gestione categorie solo agli admin
-                        if (createFaqBtn) createFaqBtn.classList.remove('hidden');
+                        // Menu admin visibile solo per amministratori
+                        if (adminMenu) adminMenu.classList.remove('hidden');
                         if (adminCategorySection) adminCategorySection.classList.remove('hidden');
-                        if (adminLink) adminLink.classList.remove('hidden');
-                        if (usersLink) usersLink.classList.remove('hidden');
-                        if (categoriesLink) categoriesLink.classList.remove('hidden');
-                    } else {
-                        // Utente normale
-                        if (createFaqBtn) createFaqBtn.classList.remove('hidden');
-                        if (adminLink) adminLink.classList.add('hidden');
-                        if (usersLink) usersLink.classList.add('hidden');
-                        if (categoriesLink) categoriesLink.classList.add('hidden');
                     }
                 } else {
                     // Non autenticato: reindirizza a login
