@@ -4,8 +4,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initialize Supabase client
   const supabaseUrl = 'https://ejlyrwotgkrjeunosrzo.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqbHlyd290Z2tyamV1bm9zcnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE2ODQxOTYsImV4cCI6MjA1NzI2MDE5Nn0.xmfOVAMsH5QqzjKmkLriEshZalP0Xj8xf_N_wpWE_40';
-  // Accediamo alla variabile globale resa disponibile dalla libreria Supabase
-  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+  
+  // Check if supabase is available in the window object
+  let supabase;
+  if (window.supabase) {
+    supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+  } else {
+    console.error("Supabase library not loaded properly");
+    showErrorAlert("Errore di connessione al database");
+  }
 
   // Initialize with appropriate API endpoints
   const loadFAQs = async (selectedCategory = "all") => {
@@ -16,14 +23,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       const response = await fetch(url);
-      if (!response.ok) throw new Error("Network response was not ok");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || "Network response was not ok");
+      }
       
       const data = await response.json();
-      renderFAQs(data, selectedCategory);
+      renderFAQs(data || [], selectedCategory);
       initAccordions();
     } catch (error) {
       console.error("Error loading FAQs:", error);
-      showErrorAlert("Errore nel caricamento delle FAQ");
+      showErrorAlert("Errore nel caricamento delle FAQ. La tabella 'faqs' potrebbe non esistere.");
+      
+      // If the error is related to missing table, render empty state
+      renderFAQs([], selectedCategory);
     }
   };
 

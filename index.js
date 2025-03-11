@@ -25,16 +25,44 @@ async function initDatabase() {
 
     // Se c'è un errore specifico sulla non esistenza della tabella
     if (error && error.code === '42P01') {
-      console.log('Inizializzazione della tabella faqs...');
-      // In realtà non possiamo creare tabelle direttamente con la client API di Supabase
-      // Questo va fatto nell'interfaccia di Supabase o tramite la RDBMS API
-      console.log('Favor visitare l\'interfaccia di Supabase per creare la tabella faqs con i seguenti campi:');
+      console.log('Tabella faqs non esiste. Creazione di dati demo...');
+      
+      try {
+        // Possiamo comunque tentare di inserire alcuni dati - se la tabella è stata creata manualmente 
+        // nell'interfaccia di Supabase ma non c'è ancora nessun dato
+        const demoFaqs = [
+          {
+            category: 'Network',
+            title: 'Problema di connessione alla rete',
+            description: 'Il computer non riesce a connettersi alla rete Wi-Fi',
+            resolution: 'Verifica che il Wi-Fi sia attivo. Riavvia il router. Controlla le impostazioni di rete.'
+          },
+          {
+            category: 'Software',
+            title: 'Applicazione non risponde',
+            description: 'Un\'applicazione si blocca e non risponde ai comandi',
+            resolution: 'Prova a forzare la chiusura dell\'applicazione. Riavvia il computer se necessario.'
+          }
+        ];
+        
+        const { error: insertError } = await supabase.from('faqs').insert(demoFaqs);
+        if (!insertError) {
+          console.log('Dati demo inseriti con successo!');
+        } else {
+          console.log('Non è stato possibile inserire dati demo.');
+        }
+      } catch (insertErr) {
+        console.error('Errore inserimento dati demo:', insertErr);
+      }
+      
+      console.log('È necessario creare manualmente la tabella faqs con i seguenti campi:');
       console.log('- id (integer, primary key)');
       console.log('- category (string)');
       console.log('- title (string)');
       console.log('- description (string)');
       console.log('- resolution (string)');
       console.log('- created_at (timestamp with timezone, default: now())');
+      console.log('Accedi all\'interfaccia Supabase e crea questa tabella per far funzionare correttamente l\'applicazione.');
     }
   } catch (err) {
     console.error('Errore inizializzazione database:', err);
