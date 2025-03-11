@@ -50,7 +50,10 @@ async function initDatabase() {
     `);
     console.log('Tabella categories verificata/creata con successo');
 
-    // Verifica se la tabella esiste e se necessario la crea
+    // Prova a eliminare la tabella faqs se esiste per ricrearla con la struttura corretta
+    await client.query(`DROP TABLE IF EXISTS faqs;`);
+    
+    // Ricrea la tabella con la struttura corretta
     await client.query(`
       CREATE TABLE IF NOT EXISTS faqs (
         id SERIAL PRIMARY KEY,
@@ -661,6 +664,7 @@ app.post("/api/init-db", async (req, res) => {
       await client.query(`
         CREATE TABLE faqs (
           id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id),
           category TEXT NOT NULL,
           title TEXT NOT NULL,
           description TEXT NOT NULL,
@@ -670,21 +674,28 @@ app.post("/api/init-db", async (req, res) => {
       `);
       console.log('Tabella faqs creata con successo!');
 
-      // Inserimento dati demo
-      const demoFaqs = [
-        {
-          category: 'Network',
-          title: 'Problema di connessione alla rete',
-          description: 'Il computer non riesce a connettersi alla rete Wi-Fi',
-          resolution: 'Verifica che il Wi-Fi sia attivo. Riavvia il router. Controlla le impostazioni di rete.'
-        }
-      ];
+      // Ottieni l'utente admin per l'inserimento dei dati demo
+      const adminResult = await client.query('SELECT id FROM users WHERE role = $1 LIMIT 1', ['admin']);
+      
+      if (adminResult.rows.length > 0) {
+        const adminId = adminResult.rows[0].id;
+        
+        // Inserimento dati demo
+        const demoFaqs = [
+          {
+            category: 'Network',
+            title: 'Problema di connessione alla rete',
+            description: 'Il computer non riesce a connettersi alla rete Wi-Fi',
+            resolution: 'Verifica che il Wi-Fi sia attivo. Riavvia il router. Controlla le impostazioni di rete.'
+          }
+        ];
 
-      for (const faq of demoFaqs) {
-        await client.query(
-          'INSERT INTO faqs (category, title, description, resolution) VALUES ($1, $2, $3, $4)',
-          [faq.category, faq.title, faq.description, faq.resolution]
-        );
+        for (const faq of demoFaqs) {
+          await client.query(
+            'INSERT INTO faqs (user_id, category, title, description, resolution) VALUES ($1, $2, $3, $4, $5)',
+            [adminId, faq.category, faq.title, faq.description, faq.resolution]
+          );
+        }
       }
 
       return res.json({ success: true, message: 'Tabella creata con successo' });
