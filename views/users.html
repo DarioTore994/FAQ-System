@@ -316,11 +316,19 @@
                     credentials: 'include'
                 });
 
-                const data = await response.json();
-
                 if (!response.ok) {
-                    throw new Error(data.error || 'Errore durante l\'aggiornamento del ruolo');
+                    // Verifica se la risposta è in formato JSON
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await response.json();
+                        throw new Error(data.error || 'Errore durante l\'aggiornamento del ruolo');
+                    } else {
+                        // Se non è JSON (probabilmente HTML di un errore), gestisci diversamente
+                        throw new Error(`Errore server (${response.status}): Sessione scaduta o non autorizzato`);
+                    }
                 }
+
+                const data = await response.json();
 
                 // Chiudi modal e ricarica utenti
                 document.getElementById('editRoleModal').classList.add('hidden');
@@ -328,7 +336,16 @@
                 loadUsers();
             } catch (error) {
                 console.error('Errore aggiornamento ruolo:', error);
-                showErrorAlert('Errore: ' + error.message);
+                
+                if (error.message.includes('Sessione scaduta')) {
+                    // Se è un errore di sessione, reindirizza alla pagina di login
+                    showErrorAlert('Sessione scaduta. Reindirizzamento alla pagina di login...');
+                    setTimeout(() => {
+                        window.location.href = '/auth';
+                    }, 2000);
+                } else {
+                    showErrorAlert('Errore: ' + error.message);
+                }
             }
         });
 
