@@ -207,7 +207,16 @@
                         if (adminLink) adminLink.classList.remove('hidden');
                         if (usersLink) usersLink.classList.remove('hidden');
                         if (categoriesLink) categoriesLink.classList.remove('hidden');
+                    } else {
+                        // Utente normale
+                        if (createFaqBtn) createFaqBtn.classList.remove('hidden');
+                        if (adminLink) adminLink.classList.add('hidden');
+                        if (usersLink) usersLink.classList.add('hidden');
+                        if (categoriesLink) categoriesLink.classList.add('hidden');
                     }
+                } else {
+                    // Non autenticato: reindirizza a login
+                    window.location.href = '/auth';
                 }
             } catch (error) {
                 console.error('Errore controllo autenticazione:', error);
