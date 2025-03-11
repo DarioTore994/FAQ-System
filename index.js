@@ -309,4 +309,4 @@ app.post('/api/faq/create', async (req, res) => {
 // ... (rest of the app.js file) ...
 
 const port = process.env.PORT || 3001;
-app.listen(port, () => console.log(`Server started on port ${port}`));
+app.listen(port, '0.0.0.0', () => console.log(`Server started on port ${port} at 0.0.0.0`));
