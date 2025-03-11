@@ -170,49 +170,37 @@
             </div>
         </div>
 
-        <!-- Modal per modifica ruolo -->
-        <div id="editRoleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" style="display: none;">
+        <!-- Modal di conferma eliminazione utente -->
+        <div id="deleteUserModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" style="display: none;">
             <div class="bg-dark-gray p-6 rounded-lg shadow-lg w-full max-w-md admin-content">
-                <h3 class="text-xl font-semibold mb-4 text-accent-yellow">Modifica Ruolo Utente</h3>
-                <p id="modalUserEmail" class="mb-4 text-gray-300"></p>
+                <h3 class="text-xl font-semibold mb-4 text-accent-yellow">Conferma Eliminazione</h3>
+                <p class="mb-4 text-gray-300">Sei sicuro di voler eliminare questo utente? Questa operazione non può essere annullata.</p>
+                <p id="deleteUserEmail" class="mb-6 font-semibold text-gray-300"></p>
 
-                <form id="editRoleForm" class="space-y-4">
-                    <input type="hidden" id="editUserId" name="userId">
-                    <div>
-                        <label class="block mb-2 text-accent-yellow">Ruolo</label>
-                        <select
-                            id="editUserRole"
-                            name="role"
-                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
-                        >
-                            <option value="user">Utente</option>
-                            <option value="admin">Amministratore</option>
-                        </select>
-                    </div>
-
-                    <div class="flex justify-end space-x-4 mt-6">
-                        <button
-                            type="button"
-                            id="cancelEditBtn"
-                            class="px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
-                        >
-                            Annulla
-                        </button>
-                        <button
-                            type="submit"
-                            class="px-4 py-2 bg-accent-yellow text-primary-black rounded-lg hover:bg-yellow-300 transition-colors"
-                        >
-                            Salva
-                        </button>
-                    </div>
-                </form>
+                <div class="flex justify-end space-x-4">
+                    <button
+                        type="button"
+                        id="cancelDeleteBtn"
+                        class="px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+                    >
+                        Annulla
+                    </button>
+                    <button
+                        type="button"
+                        id="confirmDeleteBtn"
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        data-id=""
+                    >
+                        Elimina
+                    </button>
+                </div>
             </div>
         </div>
         
         <!-- Modal per modifica completa dati utente -->
         <div id="editUserModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" style="display: none;">
             <div class="bg-dark-gray p-6 rounded-lg shadow-lg w-full max-w-md admin-content">
-                <h3 class="text-xl font-semibold mb-4 text-accent-yellow">Modifica Dati Utente</h3>
+                <h3 class="text-xl font-semibold mb-4 text-accent-yellow">Modifica Utente</h3>
                 
                 <form id="editUserForm" class="space-y-4">
                     <input type="hidden" id="editCompleteUserId" name="userId">
@@ -366,20 +354,19 @@
                     <td class="py-3 px-4">
                         <div class="flex space-x-3">
                             <button 
-                                class="edit-role-btn text-accent-yellow hover:underline"
-                                data-id="${user.id}"
-                                data-email="${user.email}"
-                                data-role="${user.role}"
-                            >
-                                Modifica ruolo
-                            </button>
-                            <button 
                                 class="edit-user-btn text-accent-yellow hover:underline"
                                 data-id="${user.id}"
                                 data-email="${user.email}"
                                 data-role="${user.role}"
                             >
-                                Modifica completa
+                                Modifica
+                            </button>
+                            <button 
+                                class="delete-user-btn text-red-500 hover:underline"
+                                data-id="${user.id}"
+                                data-email="${user.email}"
+                            >
+                                Elimina
                             </button>
                         </div>
                     </td>
@@ -388,27 +375,25 @@
                 table.appendChild(row);
             });
 
-            // Aggiungi eventi ai pulsanti di modifica
-            document.querySelectorAll('.edit-role-btn').forEach(btn => {
-                btn.addEventListener('click', openEditRoleModal);
-            });
-            
+            // Aggiungi eventi ai pulsanti
             document.querySelectorAll('.edit-user-btn').forEach(btn => {
                 btn.addEventListener('click', openEditUserModal);
             });
+            
+            document.querySelectorAll('.delete-user-btn').forEach(btn => {
+                btn.addEventListener('click', openDeleteUserModal);
+            });
         }
 
-        // Gestione del modal di modifica ruolo
-        function openEditRoleModal() {
+        // Gestione del modal di eliminazione utente
+        function openDeleteUserModal() {
             const userId = this.getAttribute('data-id');
             const userEmail = this.getAttribute('data-email');
-            const userRole = this.getAttribute('data-role');
-
-            document.getElementById('editUserId').value = userId;
-            document.getElementById('modalUserEmail').textContent = `Utente: ${userEmail}`;
-            document.getElementById('editUserRole').value = userRole;
-
-            const modal = document.getElementById('editRoleModal');
+            
+            document.getElementById('deleteUserEmail').textContent = `${userEmail}`;
+            document.getElementById('confirmDeleteBtn').setAttribute('data-id', userId);
+            
+            const modal = document.getElementById('deleteUserModal');
             modal.classList.remove('hidden');
             modal.style.display = 'flex';
         }
@@ -430,48 +415,41 @@
         }
 
         // Chiudi i modal
-        document.getElementById('cancelEditBtn').addEventListener('click', () => {
-            const modal = document.getElementById('editRoleModal');
-            modal.classList.add('hidden');
-            modal.style.display = 'none';
-        });
-        
         document.getElementById('cancelEditCompleteBtn').addEventListener('click', () => {
             const modal = document.getElementById('editUserModal');
             modal.classList.add('hidden');
             modal.style.display = 'none';
         });
+        
+        document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+            const modal = document.getElementById('deleteUserModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        });
 
-        // Gestione del submit per la modifica del ruolo
-        document.getElementById('editRoleForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const userId = document.getElementById('editUserId').value;
-            const newRole = document.getElementById('editUserRole').value;
-
+        // Gestione dell'eliminazione utente
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+            const userId = this.getAttribute('data-id');
+            
             try {
-                const response = await fetch(`/api/users/${userId}/role`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ role: newRole }),
+                const response = await fetch(`/api/users/${userId}`, {
+                    method: 'DELETE',
                     credentials: 'include'
                 });
-
+                
                 if (!response.ok) {
                     // Verifica se la risposta è in formato JSON
                     const contentType = response.headers.get('content-type');
                     if (contentType && contentType.includes('application/json')) {
                         try {
                             const data = await response.json();
-                            throw new Error(data.error || 'Errore durante l\'aggiornamento del ruolo');
+                            throw new Error(data.error || 'Errore durante l\'eliminazione dell\'utente');
                         } catch (jsonError) {
                             console.error('Errore parsing JSON:', jsonError);
                             throw new Error(`Errore server (${response.status}): Impossibile elaborare la risposta`);
                         }
                     } else {
-                        // Se non è JSON (probabilmente HTML di un errore), gestisci diversamentente
+                        // Se non è JSON, gestisci diversamente
                         if (response.status === 401 || response.status === 403) {
                             throw new Error('Sessione scaduta o non autorizzato. Rieffettua il login.');
                         } else {
@@ -479,20 +457,18 @@
                         }
                     }
                 }
-
-                const data = await response.json();
-
+                
                 // Chiudi modal e ricarica utenti
-                const modal = document.getElementById('editRoleModal');
+                const modal = document.getElementById('deleteUserModal');
                 modal.classList.add('hidden');
                 modal.style.display = 'none';
-
+                
                 // Conferma l'azione all'utente
-                showErrorAlert('Ruolo aggiornato con successo!');
+                showErrorAlert('Utente eliminato con successo!');
                 loadUsers();
             } catch (error) {
-                console.error('Errore aggiornamento ruolo:', error);
-
+                console.error('Errore eliminazione utente:', error);
+                
                 if (error.message.includes('Sessione scaduta')) {
                     // Se è un errore di sessione, reindirizza alla pagina di login
                     showErrorAlert('Sessione scaduta. Reindirizzamento alla pagina di login...');
