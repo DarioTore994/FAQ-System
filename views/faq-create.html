@@ -216,6 +216,15 @@
                             placeholder="Spiega passo passo come risolvere il problema"
                         ></textarea>
                     </div>
+                    
+                    <div class="form-control">
+                        <label class="form-label">Stato</label>
+                        <select name="status" class="form-select">
+                            <option value="Nuovo">Nuovo</option>
+                            <option value="In corso">In corso</option>
+                            <option value="Risolto">Risolto</option>
+                        </select>
+                    </div>
 
                     <button type="submit" class="submit-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -314,7 +323,8 @@
                             category: formData.get('category'),
                             title: formData.get('title'),
                             description: formData.get('description'),
-                            resolution: formData.get('resolution')
+                            resolution: formData.get('resolution'),
+                            status: formData.get('status')
                         };
 
                         console.log('Sending FAQ data:', faqData);

@@ -70,6 +70,7 @@ async function initDatabase() {
           title TEXT NOT NULL,
           description TEXT NOT NULL,
           resolution TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'Nuovo',
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
       `);
@@ -119,21 +120,23 @@ async function initDatabase() {
             category: 'Network',
             title: 'Problema di connessione alla rete',
             description: 'Il computer non riesce a connettersi alla rete Wi-Fi',
-            resolution: 'Verifica che il Wi-Fi sia attivo. Riavvia il router. Controlla le impostazioni di rete.'
+            resolution: 'Verifica che il Wi-Fi sia attivo. Riavvia il router. Controlla le impostazioni di rete.',
+            status: 'Risolto'
           },
           {
             category: 'Software',
             title: 'Applicazione non risponde',
             description: 'Un\'applicazione si blocca e non risponde ai comandi',
-            resolution: 'Prova a forzare la chiusura dell\'applicazione. Riavvia il computer se necessario.'
+            resolution: 'Prova a forzare la chiusura dell\'applicazione. Riavvia il computer se necessario.',
+            status: 'Nuovo'
           }
         ];
 
         // Inserimento dati demo
         for (const faq of demoFaqs) {
           await client.query(
-            'INSERT INTO faqs (user_id, category, title, description, resolution) VALUES ($1, $2, $3, $4, $5)',
-            [adminId, faq.category, faq.title, faq.description, faq.resolution]
+            'INSERT INTO faqs (user_id, category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5, $6)',
+            [adminId, faq.category, faq.title, faq.description, faq.resolution, faq.status]
           );
         }
         console.log('Dati demo inseriti con successo!');
@@ -579,7 +582,7 @@ app.put("/api/users/:id/role", requireAdmin, async (req, res) => {
 app.delete("/api/users/:id", requireAdmin, async (req, res) => {
   try {
     const userId = parseInt(req.params.id, 10);
-    
+
     if (isNaN(userId)) {
       return res.status(400).json({ error: 'ID utente non valido' });
     }
@@ -587,7 +590,7 @@ app.delete("/api/users/:id", requireAdmin, async (req, res) => {
     // Controllo se l'utente sta cercando di eliminare se stesso
     const authToken = req.cookies.authToken;
     const currentUserId = parseInt(authToken, 10);
-    
+
     if (userId === currentUserId) {
       return res.status(400).json({ error: 'Non puoi eliminare il tuo account mentre sei loggato' });
     }
@@ -602,11 +605,11 @@ app.delete("/api/users/:id", requireAdmin, async (req, res) => {
 
       // Prima di eliminare l'utente, verifichiamo se ha delle FAQ associate
       const faqsCheck = await client.query('SELECT COUNT(*) FROM faqs WHERE user_id = $1', [userId]);
-      
+
       if (parseInt(faqsCheck.rows[0].count) > 0) {
         // Opzione 1: impedire l'eliminazione
         // return res.status(400).json({ error: 'Non è possibile eliminare questo utente perché ha delle FAQ associate' });
-        
+
         // Opzione 2: eliminare anche le FAQ associate (più pulito)
         await client.query('DELETE FROM faqs WHERE user_id = $1', [userId]);
       }
@@ -755,7 +758,7 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
   let client;
   try {
     // Validate that all required fields are present
-    const { category, title, description, resolution } = req.body;
+    const { category, title, description, resolution, status = 'Nuovo' } = req.body;
     const authToken = req.cookies.authToken;
     let userId;
 
@@ -825,6 +828,7 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
           title TEXT NOT NULL,
           description TEXT NOT NULL,
           resolution TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'Nuovo',
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
       `);
@@ -835,8 +839,8 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
 
     // Inserimento della FAQ
     const result = await client.query(
-      'INSERT INTO faqs (user_id, category, title, description, resolution) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [userId, category, title, description, resolution]
+      'INSERT INTO faqs (user_id, category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [userId, category, title, description, resolution, status]
     );
 
     console.log('FAQ inserita con successo:', result.rows[0]);
@@ -867,7 +871,67 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
   }
 });
 
-// API per ottenere le FAQ
+// Endpoint per aggiornare lo stato di una FAQ
+app.put('/api/faqs/:id/status', requireAuth, async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const { status } = req.body;
+  const authToken = req.cookies.authToken;
+  let userId;
+
+  if (!authToken) {
+    return res.status(401).json({ error: 'Accesso non autorizzato. Effettua il login.' });
+  }
+  try {
+    userId = parseInt(authToken, 10);
+    if (isNaN(userId)) {
+        return res.status(401).json({ error: { message: 'Token non valido' } });
+    }
+  } catch (error) {
+    return res.status(401).json({ error: { message: 'Token non valido' } });
+  }
+
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'ID FAQ non valido' });
+  }
+
+  if (!status || !['Nuovo', 'In corso', 'Risolto'].includes(status)) {
+    return res.status(400).json({ error: 'Stato non valido. Valori ammessi: Nuovo, In corso, Risolto' });
+  }
+
+  const client = await pool.connect();
+  try {
+    // Verifica se l'utente è autorizzato a modificare lo stato
+    const userResult = await client.query('SELECT role FROM users WHERE id = $1', [userId]);
+    if (userResult.rows.length === 0 || userResult.rows[0].role !== 'admin') {
+      return res.status(403).json({ error: 'Non autorizzato a modificare lo stato' });
+    }
+
+    // Aggiorna lo stato nella tabella faqs
+    const result = await client.query(
+      'UPDATE faqs SET status = $1 WHERE id = $2 RETURNING *',
+      [status, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'FAQ non trovata' });
+    }
+
+    return res.status(200).json(result.rows[0]);
+  } catch (err) {
+    console.error('Errore nell\'aggiornamento dello stato:', err);
+    return res.status(500).json({ 
+      error: { 
+        message: 'Errore interno del server',
+        details: err.message,
+        stack: err.stack
+      }
+    });
+  } finally {
+    client.release();
+  }
+});
+
+// API per ottenere tutte le FAQ
 app.get("/api/faqs", async (req, res) => {
   const client = await pool.connect();
   try {
@@ -880,7 +944,7 @@ app.get("/api/faqs", async (req, res) => {
           AND table_name = 'faqs'
         );
       `);
-      
+
       if (!tableCheck.rows[0].exists) {
         // Crea la tabella se non esiste
         await client.query(`
@@ -891,18 +955,19 @@ app.get("/api/faqs", async (req, res) => {
             title TEXT NOT NULL,
             description TEXT NOT NULL,
             resolution TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'Nuovo',
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
           );
         `);
         console.log('Tabella faqs creata automaticamente');
-        
+
         // Inserisci almeno una FAQ di esempio
         const adminResult = await client.query('SELECT id FROM users WHERE role = $1 LIMIT 1', ['admin']);
         if (adminResult.rows.length > 0) {
           const adminId = adminResult.rows[0].id;
           await client.query(
-            'INSERT INTO faqs (user_id, category, title, description, resolution) VALUES ($1, $2, $3, $4, $5)',
-            [adminId, 'Generale', 'Benvenuto nel FAQ Portal', 'Questa è una FAQ di esempio', 'Puoi creare nuove FAQ dal pannello di amministrazione.']
+            'INSERT INTO faqs (user_id, category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5, $6)',
+            [adminId, 'Generale', 'Benvenuto nel FAQ Portal', 'Questa è una FAQ di esempio', 'Puoi creare nuove FAQ dal pannello di amministrazione.', 'Nuovo']
           );
         }
       }
@@ -955,6 +1020,7 @@ app.post("/api/init-db", async (req, res) => {
           title TEXT NOT NULL,
           description TEXT NOT NULL,
           resolution TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'Nuovo',
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
       `);
@@ -1011,14 +1077,15 @@ app.post("/api/init-db", async (req, res) => {
           category: 'Network',
           title: 'Problema di connessione alla rete',
           description: 'Il computer non riesce a connettersi alla rete Wi-Fi',
-          resolution: 'Verifica che il Wi-Fi sia attivo. Riavvia il router. Controlla le impostazioni di rete.'
+          resolution: 'Verifica che il Wi-Fi sia attivo. Riavvia il router. Controlla le impostazioni di rete.',
+          status: 'Risolto'
         }
       ];
 
       for (const faq of demoFaqs) {
         await client.query(
-          'INSERT INTO faqs (user_id, category, title, description, resolution) VALUES ($1, $2, $3, $4, $5)',
-          [adminId, faq.category, faq.title, faq.description, faq.resolution]
+          'INSERT INTO faqs (user_id, category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5, $6)',
+          [adminId, faq.category, faq.title, faq.description, faq.resolution, faq.status]
         );
       }
     }

@@ -119,12 +119,24 @@
         <div class="card bg-gray-800/20 border border-gray-700 rounded-xl shadow-lg overflow-hidden">
             <!-- Filtro categorie -->
             <div class="p-4 border-b border-gray-700 bg-gray-800/30">
-                <div class="flex flex-wrap items-center gap-2">
-                    <label for="categoryFilter" class="text-sm font-medium text-gray-300">Filtra per categoria:</label>
-                    <select id="categoryFilter" class="bg-gray-700 text-white border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-accent-yellow">
-                        <option value="all">Tutte le categorie</option>
-                        <!-- Opzioni categorie verranno popolate via JavaScript -->
-                    </select>
+                <div class="flex flex-wrap items-center gap-4">
+                    <div>
+                        <label for="categoryFilter" class="text-sm font-medium text-gray-300">Filtra per categoria:</label>
+                        <select id="categoryFilter" class="bg-gray-700 text-white border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-accent-yellow">
+                            <option value="all">Tutte le categorie</option>
+                            <!-- Opzioni categorie verranno popolate via JavaScript -->
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="statusFilter" class="text-sm font-medium text-gray-300">Filtra per stato:</label>
+                        <select id="statusFilter" class="bg-gray-700 text-white border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-accent-yellow">
+                            <option value="all">Tutti gli stati</option>
+                            <option value="Nuovo">Nuovo</option>
+                            <option value="In corso">In corso</option>
+                            <option value="Risolto">Risolto</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -233,11 +245,18 @@
                         categoryFilter.appendChild(option);
                     });
                     
-                    // Aggiungi event listener per il filtro
+                    // Aggiungi event listener per il filtro di categoria
                     categoryFilter.addEventListener('change', () => {
-                        const selectedCategory = categoryFilter.value;
-                        filterFAQsByCategory(selectedCategory);
+                        applyFilters();
                     });
+                    
+                    // Aggiungi event listener per il filtro di stato
+                    const statusFilter = document.getElementById('statusFilter');
+                    if (statusFilter) {
+                        statusFilter.addEventListener('change', () => {
+                            applyFilters();
+                        });
+                    }
                 }
             } catch (error) {
                 console.error('Errore nel caricamento delle categorie:', error);
@@ -245,15 +264,82 @@
             }
         }
         
-        // Funzione per filtrare le FAQ per categoria
-        function filterFAQsByCategory(category) {
+        // Funzione per applicare i filtri (sia categoria che stato)
+        function applyFilters() {
             if (!window.allFaqs) return;
             
-            const filteredFaqs = category === 'all' 
-                ? window.allFaqs 
-                : window.allFaqs.filter(faq => faq.category === category);
+            const categoryFilter = document.getElementById('categoryFilter');
+            const statusFilter = document.getElementById('statusFilter');
+            
+            const selectedCategory = categoryFilter ? categoryFilter.value : 'all';
+            const selectedStatus = statusFilter ? statusFilter.value : 'all';
+            
+            let filteredFaqs = window.allFaqs;
+            
+            // Applica filtro per categoria
+            if (selectedCategory !== 'all') {
+                filteredFaqs = filteredFaqs.filter(faq => faq.category === selectedCategory);
+            }
+            
+            // Applica filtro per stato
+            if (selectedStatus !== 'all') {
+                filteredFaqs = filteredFaqs.filter(faq => faq.status === selectedStatus);
+            }
             
             renderFAQsList(filteredFaqs);
+        }
+        
+        // Funzione per ottenere la classe CSS in base allo stato
+        function getStatusClass(status) {
+            switch(status) {
+                case 'Nuovo':
+                    return 'bg-blue-500/20 text-blue-400';
+                case 'In corso':
+                    return 'bg-yellow-500/20 text-yellow-400';
+                case 'Risolto':
+                    return 'bg-green-500/20 text-green-400';
+                default:
+                    return 'bg-gray-500/20 text-gray-400';
+            }
+        }
+        
+        // Funzione per aggiornare lo stato della FAQ
+        async function updateFaqStatus(faqId, newStatus, event) {
+            event.stopPropagation(); // Evita che il click propaghi all'elemento padre
+            
+            try {
+                showErrorAlert(`Aggiornamento stato a "${newStatus}" in corso...`, 'info');
+                
+                const response = await fetch(`/api/faqs/${faqId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || 'Errore durante l\'aggiornamento dello stato');
+                }
+                
+                showErrorAlert(`Stato aggiornato a "${newStatus}" con successo!`, 'success');
+                
+                // Aggiorna la UI senza ricaricare la pagina
+                const updatedFaq = await response.json();
+                
+                // Aggiorna l'elemento nella lista delle FAQ
+                window.allFaqs = window.allFaqs.map(faq => 
+                    faq.id === faqId ? { ...faq, status: newStatus } : faq
+                );
+                
+                // Ricarica la lista
+                const currentCategory = document.getElementById('categoryFilter').value;
+                filterFAQsByCategory(currentCategory);
+            } catch (error) {
+                console.error('Errore nell\'aggiornamento dello stato:', error);
+                showErrorAlert('Errore: ' + error.message, 'error');
+            }
         }
 
         // Funzione per caricare le FAQ
@@ -392,10 +478,12 @@
                 const header = document.createElement('div');
                 header.className = 'bg-gray-800/30 py-3 px-6 grid grid-cols-12 gap-4 items-center text-xs uppercase font-semibold text-gray-400 tracking-wider';
                 header.innerHTML = `
-                    <div class="col-span-3">Titolo</div>
-                    <div class="col-span-3">Descrizione</div>
-                    <div class="col-span-3">Soluzione</div>
+                    <div class="col-span-2">Titolo</div>
+                    <div class="col-span-2">Descrizione</div>
+                    <div class="col-span-2">Soluzione</div>
                     <div class="col-span-2">Categoria</div>
+                    <div class="col-span-2">Stato</div>
+                    <div class="col-span-1">Azioni</div>
                     <div class="col-span-1 text-right">Data</div>
                 `;
                 listContainer.appendChild(header);
@@ -438,13 +526,13 @@
                     // Layout per desktop
                     faqItem.innerHTML = `
                         <div class="py-4 px-6 grid grid-cols-12 gap-4 items-center hover:bg-gray-800/30 group">
-                            <div class="col-span-3">
+                            <div class="col-span-2">
                                 <h3 class="font-medium text-accent-yellow">${truncateText(title, 50)}</h3>
                             </div>
-                            <div class="col-span-3">
+                            <div class="col-span-2">
                                 <p class="text-sm text-gray-300">${truncateText(description, 60)}</p>
                             </div>
-                            <div class="col-span-3">
+                            <div class="col-span-2">
                                 <div class="p-2 bg-gray-800/70 rounded border border-gray-700/50">
                                     <p class="text-sm text-gray-200">${truncateText(resolution, 60)}</p>
                                 </div>
@@ -453,6 +541,30 @@
                                 <span class="px-2 py-1 bg-accent-yellow/20 text-accent-yellow rounded-full text-xs">
                                     ${category}
                                 </span>
+                            </div>
+                            <div class="col-span-2">
+                                <span class="px-2 py-1 ${getStatusClass(faq.status || 'Nuovo')} rounded-full text-xs">
+                                    ${faq.status || 'Nuovo'}
+                                </span>
+                            </div>
+                            <div class="col-span-1">
+                                <div class="flex space-x-1 faq-actions">
+                                    <button class="p-1 bg-gray-700 rounded hover:bg-gray-600 transition-colors" 
+                                            onclick="updateFaqStatus(${faq.id}, 'Nuovo', event)">
+                                        <span class="sr-only">Imposta come Nuovo</span>
+                                        <span class="w-4 h-4 block bg-blue-400 rounded-full"></span>
+                                    </button>
+                                    <button class="p-1 bg-gray-700 rounded hover:bg-gray-600 transition-colors" 
+                                            onclick="updateFaqStatus(${faq.id}, 'In corso', event)">
+                                        <span class="sr-only">Imposta In corso</span>
+                                        <span class="w-4 h-4 block bg-yellow-400 rounded-full"></span>
+                                    </button>
+                                    <button class="p-1 bg-gray-700 rounded hover:bg-gray-600 transition-colors" 
+                                            onclick="updateFaqStatus(${faq.id}, 'Risolto', event)">
+                                        <span class="sr-only">Imposta come Risolto</span>
+                                        <span class="w-4 h-4 block bg-green-400 rounded-full"></span>
+                                    </button>
+                                </div>
                             </div>
                             <div class="col-span-1 text-right text-xs text-gray-400">
                                 ${formattedDate}
