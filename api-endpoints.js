@@ -150,6 +150,107 @@ router.get('/faqs', async (req, res) => {
   }
 });
 
+// Endpoint per ottenere tutte le categorie
+router.get('/categories', async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const query = 'SELECT * FROM categories ORDER BY name';
+    const result = await client.query(query);
+    
+    return res.status(200).json(result.rows);
+  } catch (err) {
+    console.error('Errore API categorie:', err);
+    return res.status(500).json({ error: 'Errore durante il recupero delle categorie' });
+  } finally {
+    client.release();
+  }
+});
+
+// Endpoint per aggiungere una nuova categoria
+router.post('/categories', verificaAutenticazione, async (req, res) => {
+  try {
+    const { name, description } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: 'Il nome della categoria è obbligatorio' });
+    }
+
+    const client = await pool.connect();
+    try {
+      const query = 'INSERT INTO categories (name, description) VALUES ($1, $2) RETURNING *';
+      const result = await client.query(query, [name, description || null]);
+      
+      return res.status(201).json(result.rows[0]);
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error('Errore aggiunta categoria:', err);
+    // Gestione dell'errore di categoria duplicata
+    if (err.code === '23505') { // Unique violation
+      return res.status(400).json({ error: 'Esiste già una categoria con questo nome' });
+    }
+    return res.status(500).json({ error: 'Errore durante l\'aggiunta della categoria' });
+  }
+});
+
+// Endpoint per aggiornare una categoria
+router.put('/categories/:id', verificaAutenticazione, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: 'Il nome della categoria è obbligatorio' });
+    }
+
+    const client = await pool.connect();
+    try {
+      const query = 'UPDATE categories SET name = $1, description = $2 WHERE id = $3 RETURNING *';
+      const result = await client.query(query, [name, description || null, id]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Categoria non trovata' });
+      }
+      
+      return res.status(200).json(result.rows[0]);
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error('Errore aggiornamento categoria:', err);
+    // Gestione dell'errore di categoria duplicata
+    if (err.code === '23505') { // Unique violation
+      return res.status(400).json({ error: 'Esiste già una categoria con questo nome' });
+    }
+    return res.status(500).json({ error: 'Errore durante l\'aggiornamento della categoria' });
+  }
+});
+
+// Endpoint per eliminare una categoria
+router.delete('/categories/:id', verificaAutenticazione, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const client = await pool.connect();
+    try {
+      const query = 'DELETE FROM categories WHERE id = $1 RETURNING *';
+      const result = await client.query(query, [id]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Categoria non trovata' });
+      }
+      
+      return res.status(200).json({ success: true, message: 'Categoria eliminata con successo' });
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error('Errore eliminazione categoria:', err);
+    return res.status(500).json({ error: 'Errore durante l\'eliminazione della categoria' });
+  }
+});
+
 // Endpoint per salvare una nuova FAQ
 router.post('/faqs', verificaAutenticazione, async (req, res) => {
   try {
