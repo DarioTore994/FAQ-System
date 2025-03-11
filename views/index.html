@@ -24,6 +24,9 @@
     <header class="bg-dark-gray py-4 px-6 border-b border-gray-800">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
+            <div id="headerNav">
+                <button id="logoutBtn" class="text-gray-300 hover:text-accent-yellow">Logout</button>
+            </div>
         </div>
     </header>
 
@@ -68,6 +71,46 @@
             <p>© 2024 FAQ Portal - Tutti i diritti riservati</p>
         </div>
     </footer>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="/js/error-alert.js"></script>
+    <script>
+        // Mostra/nascondi pulsanti login/logout in base allo stato di autenticazione
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/auth/check');
+                const data = await response.json();
+                
+                if (data.authenticated) {
+                    document.getElementById('loginContainer').classList.add('hidden');
+                    document.getElementById('loggedInContainer').classList.remove('hidden');
+                    document.getElementById('headerNav').classList.remove('hidden');
+                } else {
+                    document.getElementById('loginContainer').classList.remove('hidden');
+                    document.getElementById('loggedInContainer').classList.add('hidden');
+                    document.getElementById('headerNav').classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Errore controllo autenticazione:', error);
+            }
+        });
+
+        // Gestione logout
+        document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Errore durante il logout:', error);
+                showErrorAlert('Errore durante il logout');
+            }
+        });
+    </script>
 
     <!-- Load Supabase client first -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
