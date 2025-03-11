@@ -574,15 +574,16 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
 app.get("/api/faqs", async (req, res) => {
   const client = await pool.connect();
   try {
-    const { category } = req.query;
+    const { category, limit = 50 } = req.query;
+    const limitNum = parseInt(limit, 10) || 50;
 
     let query, result;
     if (category && category !== 'all') {
-      query = 'SELECT * FROM faqs WHERE category = $1 ORDER BY created_at DESC';
-      result = await client.query(query, [category]);
+      query = 'SELECT * FROM faqs WHERE category = $1 ORDER BY created_at DESC LIMIT $2';
+      result = await client.query(query, [category, limitNum]);
     } else {
-      query = 'SELECT * FROM faqs ORDER BY created_at DESC';
-      result = await client.query(query);
+      query = 'SELECT * FROM faqs ORDER BY created_at DESC LIMIT $1';
+      result = await client.query(query, [limitNum]);
     }
 
     return res.json(result.rows);
