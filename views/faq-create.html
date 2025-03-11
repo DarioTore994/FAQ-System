@@ -405,47 +405,45 @@
         });
 
         // Listener di errore per debugging
+        
+        // Verifica autenticazione all'avvio della pagina
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/auth/check');
 
-<script>
-    // Verifica autenticazione all'avvio della pagina
-    window.addEventListener('DOMContentLoaded', async () => {
-        try {
-            const response = await fetch('/api/auth/check');
-
-            if (!response.ok) {
-                // Reindirizza alla pagina di login se non autenticato
-                window.location.href = '/auth';
-                return;
-            }
-
-            const data = await response.json();
-
-            // Elementi UI
-            const authUserMenu = document.getElementById('authUserMenu');
-            const adminMenu = document.getElementById('adminMenu');
-            const loginNavBtn = document.getElementById('loginNavBtn');
-            const logoutBtn = document.getElementById('logoutBtn');
-
-            if (data.authenticated) {
-                // Utente autenticato
-                if (loginNavBtn) loginNavBtn.classList.add('hidden');
-                if (logoutBtn) logoutBtn.classList.remove('hidden');
-                if (authUserMenu) authUserMenu.classList.remove('hidden');
-
-                // Se è admin, mostra il menu admin
-                if (data.user && data.user.role === 'admin') {
-                    if (adminMenu) adminMenu.classList.remove('hidden');
+                if (!response.ok) {
+                    // Reindirizza alla pagina di login se non autenticato
+                    window.location.href = '/auth';
+                    return;
                 }
-            } else {
-                // Non autenticato: reindirizza alla pagina di login
+
+                const data = await response.json();
+
+                // Elementi UI
+                const authUserMenu = document.getElementById('authUserMenu');
+                const adminMenu = document.getElementById('adminMenu');
+                const loginNavBtn = document.getElementById('loginNavBtn');
+                const logoutBtn = document.getElementById('logoutBtn');
+
+                if (data.authenticated) {
+                    // Utente autenticato
+                    if (loginNavBtn) loginNavBtn.classList.add('hidden');
+                    if (logoutBtn) logoutBtn.classList.remove('hidden');
+                    if (authUserMenu) authUserMenu.classList.remove('hidden');
+
+                    // Se è admin, mostra il menu admin
+                    if (data.user && data.user.role === 'admin') {
+                        if (adminMenu) adminMenu.classList.remove('hidden');
+                    }
+                } else {
+                    // Non autenticato: reindirizza alla pagina di login
+                    window.location.href = '/auth';
+                }
+            } catch (error) {
+                console.error('Errore controllo autenticazione:', error);
                 window.location.href = '/auth';
             }
-        } catch (error) {
-            console.error('Errore controllo autenticazione:', error);
-            window.location.href = '/auth';
-        }
-    });
-</script>
+        });
 
         window.addEventListener('error', function(event) {
             console.error('Errore JavaScript:', event.error);
