@@ -361,9 +361,19 @@
                     credentials: 'include'
                 });
 
+                let errorMessage = 'Errore durante l\'aggiornamento della categoria';
+                
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Errore durante l\'aggiornamento della categoria');
+                    try {
+                        const errorData = await response.json();
+                        if (errorData && errorData.error) {
+                            errorMessage = errorData.error;
+                        }
+                    } catch (parseError) {
+                        console.error('Errore parsing risposta:', parseError);
+                        errorMessage = `Errore del server (${response.status}): ${response.statusText}`;
+                    }
+                    throw new Error(errorMessage);
                 }
 
                 document.getElementById('editCategoryModal').classList.add('hidden');
@@ -371,7 +381,7 @@
                 loadCategories();
             } catch (error) {
                 console.error('Errore aggiornamento categoria:', error);
-                showErrorAlert('Errore: ' + error.message);
+                showErrorAlert('Errore: ' + (error.message || 'Errore sconosciuto'));
             }
         });
 
