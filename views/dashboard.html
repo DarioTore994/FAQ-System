@@ -84,22 +84,22 @@
                     <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
                     <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow border-b-2 border-accent-yellow pb-1">Dashboard</a>
                 </div>
-                
+
                 <!-- Menu per utenti autenticati -->
                 <div id="authUserMenu" class="hidden flex items-center gap-4">
                     <a href="/create" id="createFaqBtn" class="text-gray-300 hover:text-accent-yellow">
                         <span>Crea FAQ</span>
                     </a>
                 </div>
-                
+
                 <!-- Menu solo per admin -->
                 <div id="adminMenu" class="hidden flex items-center gap-4">
                     <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow">Admin</a>
                     <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow">Utenti</a>
                     <a href="/categories" id="categoriesLink" class="text-gray-300 hover:text-accent-yellow">Categorie</a>
                 </div>
-                
-                <button id="logoutBtn" class="btn btn-secondary">
+
+                <button id="logoutBtn" class="btn btn-secondary" onclick="performLogout()">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
@@ -213,7 +213,7 @@
                 if (data.authenticated) {
                     // Utente autenticato
                     if (authUserMenu) authUserMenu.classList.remove('hidden');
-                    
+
                     // Controllo ruolo admin
                     if (data.user.role === 'admin') {
                         // Menu admin visibile solo per amministratori
@@ -231,7 +231,7 @@
         });
 
         // Gestione logout
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
+        async function performLogout() {
             try {
                 const response = await fetch('/api/auth/logout', {
                     method: 'POST'
@@ -239,12 +239,14 @@
 
                 if (response.ok) {
                     window.location.href = '/';
+                } else {
+                    showErrorAlert('Errore durante il logout');
                 }
             } catch (error) {
                 console.error('Errore durante il logout:', error);
                 showErrorAlert('Errore durante il logout');
             }
-        });
+        }
 
     </script>
 </body>
