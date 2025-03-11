@@ -1416,10 +1416,6 @@ video {
 }
 
 @media (min-width: 640px) {
-  .sm\:mb-0 {
-    margin-bottom: 0px;
-  }
-
   .sm\:mb-10 {
     margin-bottom: 2.5rem;
   }
@@ -1446,10 +1442,6 @@ video {
 
   .sm\:w-auto {
     width: auto;
-  }
-
-  .sm\:flex-row {
-    flex-direction: row;
   }
 
   .sm\:gap-4 {
