@@ -6,144 +6,242 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAQ Portal - Autenticazione</title>
     <link href="/css/main.css" rel="stylesheet">
-    <!-- Use local Tailwind CSS build -->
+    <link href="/css/theme.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Tema scuro (default) */
-        :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #1a1a1a;
-            --text-primary: #f3f4f6;
-            --text-secondary: #9ca3af;
-            --accent-color: #FFD700;
-            --border-color: #374151;
+        .auth-card {
+            max-width: 400px;
+            width: 100%;
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         
-        /* Tema chiaro */
-        [data-theme="light"] {
-            --bg-primary: #f5f5f5;
-            --bg-secondary: #ffffff;
-            --text-primary: #111827;
-            --text-secondary: #4b5563;
-            --accent-color: #FFD700;
-            --border-color: #e5e7eb;
+        .auth-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
         }
         
-        body {
-            background-color: var(--bg-primary);
+        .tab-btn {
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            background-color: var(--accent-color);
+            color: var(--bg-primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab-btn:not(.active) {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+        }
+        
+        .tab-btn:not(.active):hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--accent-color);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
             color: var(--text-primary);
-            transition: background-color 0.3s, color 0.3s;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         
-        header, footer {
-            background-color: var(--bg-secondary);
-            border-color: var(--border-color);
+        .form-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.25);
+            outline: none;
         }
         
-        .bg-dark-gray, .bg-primary-black {
-            background-color: var(--bg-secondary);
+        .submit-btn {
+            width: 100%;
+            padding: 0.875rem;
+            border-radius: 0.5rem;
+            background-color: var(--accent-color);
+            color: var(--bg-primary);
+            font-weight: 600;
+            transition: all 0.2s ease;
         }
         
-        .text-gray-300, .text-gray-400, .text-gray-500 {
-            color: var(--text-secondary);
+        .submit-btn:hover {
+            background-color: var(--btn-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
-        input, textarea, select {
-            background-color: var(--bg-primary) !important;
-            border-color: var(--border-color) !important;
-            color: var(--text-primary) !important;
+        .auth-form {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: formFadeIn 0.5s forwards;
+        }
+        
+        @keyframes formFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
-    <header class="py-4 px-6 border-b">
+    <header class="py-4 px-6 border-b sticky top-0 z-10">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
+            <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-yellow mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
+            </div>
             <div class="flex items-center space-x-4">
-                <button class="theme-toggle-btn p-2 rounded-full border border-gray-700 hover:border-accent-yellow" title="Cambia tema">
+                <button class="theme-toggle-btn shadow-md" title="Cambia tema">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 theme-toggle-icon" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                     </svg>
                 </button>
-                <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
+                <a href="/" class="text-gray-300 hover:text-accent-yellow flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7m-7-7v14" />
+                    </svg>
+                    Home
+                </a>
             </div>
         </div>
     </header>
 
     <main class="container mx-auto py-12 px-4 flex-grow flex flex-col items-center justify-center">
-        <div class="bg-dark-gray border border-gray-700 rounded-lg p-8 w-full max-w-md">
-            <div class="text-center mb-8">
-                <h2 class="text-2xl font-bold text-accent-yellow">Accedi al portale</h2>
-                <p class="text-gray-400 mt-2">Gestisci la tua knowledge base</p>
+        <div class="auth-card">
+            <div class="bg-gradient-to-r from-accent-yellow/20 to-accent-yellow/10 p-4 border-b border-accent-yellow/20">
+                <div class="text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 text-accent-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    </svg>
+                    <h2 class="text-2xl font-bold text-accent-yellow">Accedi al portale</h2>
+                    <p class="text-gray-400 mt-2">Gestisci la tua knowledge base</p>
+                </div>
             </div>
 
-            <div class="tabs flex gap-4 justify-center mb-8">
-                <button
-                    data-tab="signin"
-                    class="tab-btn active px-4 py-2 rounded-full bg-accent-yellow text-primary-black"
-                >
-                    Accedi
-                </button>
-                <button
-                    data-tab="signup"
-                    class="tab-btn px-4 py-2 rounded-full border border-gray-700 hover:border-accent-yellow"
-                >
-                    Registrati
-                </button>
+            <div class="p-8">
+                <div class="tabs flex gap-4 justify-center mb-8">
+                    <button
+                        data-tab="signin"
+                        class="tab-btn active"
+                    >
+                        Accedi
+                    </button>
+                    <button
+                        data-tab="signup"
+                        class="tab-btn"
+                    >
+                        Registrati
+                    </button>
+                </div>
+
+                <form id="signin-form" class="auth-form">
+                    <div class="form-group">
+                        <label class="form-label" for="signin-email">Email</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                                </svg>
+                            </span>
+                            <input
+                                id="signin-email"
+                                type="email"
+                                name="email"
+                                required
+                                class="form-input pl-10"
+                                placeholder="email@esempio.com"
+                            />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="signin-password">Password</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </span>
+                            <input
+                                id="signin-password"
+                                type="password"
+                                name="password"
+                                required
+                                class="form-input pl-10"
+                                placeholder="••••••••"
+                            />
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        Accedi
+                    </button>
+                </form>
+
+                <form id="signup-form" class="auth-form hidden">
+                    <div class="form-group">
+                        <label class="form-label" for="signup-email">Email</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                                </svg>
+                            </span>
+                            <input
+                                id="signup-email"
+                                type="email"
+                                name="email"
+                                required
+                                class="form-input pl-10"
+                                placeholder="email@esempio.com"
+                            />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="signup-password">Password</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </span>
+                            <input
+                                id="signup-password"
+                                type="password"
+                                name="password"
+                                required
+                                class="form-input pl-10"
+                                placeholder="••••••••"
+                            />
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        Registrati
+                    </button>
+                </form>
             </div>
-
-            <form id="signin-form" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1 text-accent-yellow">Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        required
-                        class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
-                    />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1 text-accent-yellow">Password</label>
-                    <input
-                        type="password"
-                        name="password"
-                        required
-                        class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
-                    />
-                </div>
-                <button
-                    type="submit"
-                    class="w-full bg-accent-yellow text-primary-black py-3 rounded-lg font-bold hover:bg-yellow-300 transition-colors"
-                >
-                    Accedi
-                </button>
-            </form>
-
-            <form id="signup-form" class="space-y-4 hidden">
-                <div>
-                    <label class="block text-sm font-medium mb-1 text-accent-yellow">Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        required
-                        class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
-                    />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1 text-accent-yellow">Password</label>
-                    <input
-                        type="password"
-                        name="password"
-                        required
-                        class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
-                    />
-                </div>
-                <button
-                    type="submit"
-                    class="w-full bg-accent-yellow text-primary-black py-3 rounded-lg font-bold hover:bg-yellow-300 transition-colors"
-                >
-                    Registrati
-                </button>
-            </form>
         </div>
     </main>
 

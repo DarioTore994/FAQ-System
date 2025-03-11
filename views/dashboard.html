@@ -5,58 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAQ Portal - Dashboard</title>
     <link href="/css/main.css" rel="stylesheet">
-    <!-- Use local Tailwind CSS build -->
+    <link href="/css/theme.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Tema scuro (default) */
-        :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #1a1a1a;
-            --text-primary: #f3f4f6;
-            --text-secondary: #9ca3af;
-            --accent-color: #FFD700;
-            --border-color: #374151;
-            --table-border: #374151;
-            --table-header: #1f2937;
-        }
-        
-        /* Tema chiaro */
-        [data-theme="light"] {
-            --bg-primary: #f5f5f5;
-            --bg-secondary: #ffffff;
-            --text-primary: #111827;
-            --text-secondary: #4b5563;
-            --accent-color: #FFD700;
-            --border-color: #e5e7eb;
-            --table-border: #e5e7eb;
-            --table-header: #f3f4f6;
-        }
-        
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            transition: background-color 0.3s, color 0.3s;
-        }
-        
-        header, footer {
-            background-color: var(--bg-secondary);
-            border-color: var(--border-color);
-        }
-        
-        th, td {
-            border-color: var(--table-border) !important;
-        }
-        
-        th {
-            background-color: var(--table-header) !important;
-            color: var(--text-primary) !important;
-        }
-        
-        select, input {
-            background-color: var(--bg-secondary) !important;
-            color: var(--text-primary) !important;
-            border-color: var(--border-color) !important;
-        }
-        
         .category-accordion {
             @apply bg-gray-800 rounded-xl border border-gray-700 mb-4 overflow-hidden transition-all duration-300;
         }
@@ -72,41 +23,74 @@
         .faq-detail {
             @apply hidden p-4 pt-0 border-t border-gray-700/30;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        
+        /* Badge per categoria */
+        .category-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background-color: var(--accent-color);
+            color: var(--bg-primary);
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
+        
+        /* Animazione per dettagli FAQ */
+        .faq-detail.show {
+            animation: slideDown 0.3s ease-out forwards;
         }
-        th {
-            background-color: #f2f2f2;
+        
+        @keyframes slideDown {
+            from { max-height: 0; opacity: 0; }
+            to { max-height: 500px; opacity: 1; }
         }
     </style>
 </head>
-<body class="bg-primary-black text-gray-100" id="body">
-    <header class="py-4 px-6 border-b">
+<body class="bg-primary-black text-gray-100 min-h-screen flex flex-col" id="body">
+    <header class="py-4 px-6 border-b sticky top-0 z-10">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
+            <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-yellow mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
+            </div>
             <nav class="flex items-center space-x-4" id="headerNav">
-                <a href="/create" id="createFaqBtn" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Crea FAQ</a>
-                <button class="theme-toggle-btn p-2 rounded-full border border-gray-700 hover:border-accent-yellow" title="Cambia tema">
+                <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow hidden">Admin</a>
+                <a href="/create" id="createFaqBtn" class="btn btn-primary shadow-md flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Crea FAQ
+                </a>
+                <button class="theme-toggle-btn shadow-md" title="Cambia tema">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 theme-toggle-icon" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                     </svg>
                 </button>
-                <button id="logoutBtn" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Logout</button>
+                <button id="logoutBtn" class="btn btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Logout
+                </button>
             </nav>
         </div>
     </header>
 
-    <main class="container mx-auto py-8 px-4">
+    <main class="container mx-auto py-8 px-4 flex-grow">
         <div class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-bold">Domande Frequenti</h2>
-            <div class="relative">
-                <select id="categoryFilter" class="bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-yellow">
+            <div>
+                <h2 class="text-2xl font-bold text-accent-yellow">Domande Frequenti</h2>
+                <p class="text-gray-400 mt-1">Consulta la knowledge base disponibile</p>
+            </div>
+            <div class="relative flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent-yellow mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                <select id="categoryFilter" class="bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-yellow shadow-md">
                     <option value="all">Tutte le categorie</option>
                     <option value="Network">Network</option>
                     <option value="Software">Software</option>
@@ -116,13 +100,13 @@
             </div>
         </div>
 
-        <div id="faqContainer">
+        <div id="faqContainer" class="card p-0 overflow-hidden animate-fade-in">
             <table>
                 <thead>
                     <tr>
-                        <th>Domanda</th>
-                        <th>Risposta</th>
-                        <th>Categoria</th>
+                        <th width="30%">Domanda</th>
+                        <th width="50%">Risposta</th>
+                        <th width="20%">Categoria</th>
                     </tr>
                 </thead>
                 <tbody id="faqTableBody">
@@ -130,12 +114,18 @@
                 </tbody>
             </table>
 
-
             <!-- Admin Section (hidden by default) -->
-            <div id="adminCategorySection" class="hidden mt-4">
-                <h3>Aggiungi Categoria</h3>
-                <input type="text" id="newCategoryName" placeholder="Nome categoria">
-                <button id="addCategoryBtn">Aggiungi</button>
+            <div id="adminCategorySection" class="hidden p-6 border-t border-gray-700 mt-4">
+                <h3 class="text-xl font-bold text-accent-yellow mb-4">Gestione Categorie</h3>
+                <div class="flex items-center">
+                    <input type="text" id="newCategoryName" placeholder="Nome categoria" class="mr-2 px-4 py-2 rounded-lg border border-gray-700 focus:ring-2 focus:ring-accent-yellow">
+                    <button id="addCategoryBtn" class="btn btn-primary flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Aggiungi
+                    </button>
+                </div>
             </div>
         </div>
     </main>

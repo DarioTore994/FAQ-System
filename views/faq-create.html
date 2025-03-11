@@ -5,124 +5,194 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAQ Portal - Crea FAQ</title>
     <link href="/css/main.css" rel="stylesheet">
-    <!-- Use local Tailwind CSS build -->
+    <link href="/css/theme.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Tema scuro (default) */
-        :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #1a1a1a;
-            --text-primary: #f3f4f6;
-            --text-secondary: #9ca3af;
-            --accent-color: #FFD700;
-            --border-color: #374151;
+        .form-control {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1.5rem;
         }
         
-        /* Tema chiaro */
-        [data-theme="light"] {
-            --bg-primary: #f5f5f5;
-            --bg-secondary: #ffffff;
-            --text-primary: #111827;
-            --text-secondary: #4b5563;
-            --accent-color: #FFD700;
-            --border-color: #e5e7eb;
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--accent-color);
         }
         
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            transition: background-color 0.3s, color 0.3s;
-        }
-        
-        header, footer {
-            background-color: var(--bg-secondary);
-            border-color: var(--border-color);
-        }
-        
-        input, textarea, select {
-            background-color: var(--bg-primary) !important;
-            border-color: var(--border-color) !important;
-            color: var(--text-primary) !important;
-        }
-        
-        .theme-toggle {
-            @apply flex items-center justify-center w-10 h-10 rounded-full;
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
+        .form-input, 
+        .form-select, 
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
             border: 1px solid var(--border-color);
+            background-color: var(--input-bg) !important;
+            color: var(--text-primary) !important;
+            transition: all 0.2s ease;
+        }
+        
+        .form-input:focus, 
+        .form-select:focus, 
+        .form-textarea:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.25);
+            outline: none;
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 0.875rem;
+            border-radius: 0.5rem;
+            background-color: var(--accent-color);
+            color: var(--bg-primary);
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .submit-btn:hover {
+            background-color: var(--btn-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-card {
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .form-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-secondary);
+        }
+        
+        .form-body {
+            padding: 1.5rem;
         }
     </style>
 </head>
-<body class="bg-primary-black text-gray-100">
-    <header class="py-4 px-6 border-b">
+<body class="bg-primary-black text-gray-100 min-h-screen flex flex-col">
+    <header class="py-4 px-6 border-b sticky top-0 z-10">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
+            <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-yellow mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
+            </div>
             <nav class="flex items-center space-x-4" id="headerNav">
-                <a href="/admin" id="adminBtn" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Admin</a>
-                <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
-                <button class="theme-toggle-btn p-2 rounded-full border border-gray-700 hover:border-accent-yellow" title="Cambia tema">
+                <a href="/dashboard" class="flex items-center text-gray-300 hover:text-accent-yellow">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7m-7-7v14" />
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="/admin" id="adminBtn" class="flex items-center bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Admin
+                </a>
+                <button class="theme-toggle-btn shadow-md" title="Cambia tema">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 theme-toggle-icon" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                     </svg>
                 </button>
-                <button id="logoutBtn" class="text-gray-300 hover:text-accent-yellow">Logout</button>
+                <button id="logoutBtn" class="btn btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Logout
+                </button>
             </nav>
         </div>
     </header>
 
-    <main class="container mx-auto px-6 py-8 max-w-2xl">
-        <h1 class="text-2xl font-bold mb-8">Crea nuova FAQ</h1>
-
-        <form id="faqForm" class="space-y-6">
-            <div>
-                <label class="block mb-2 text-accent-yellow">Categoria</label>
-                <select
-                    name="category"
-                    class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
-                >
-                    <option value="Hardware">Hardware</option>
-                    <option value="Software">Software</option>
-                    <option value="Network">Network</option>
-                    <option value="Security">Security</option>
-                </select>
+    <main class="container mx-auto px-6 py-8 max-w-2xl flex-grow">
+        <div class="form-card animate-fade-in">
+            <div class="form-header flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-yellow mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <h1 class="text-2xl font-bold text-accent-yellow">Crea nuova FAQ</h1>
             </div>
+            <div class="form-body">
+                <form id="faqForm">
+                    <div class="form-control">
+                        <label class="form-label">Categoria</label>
+                        <select name="category" class="form-select">
+                            <option value="Hardware">Hardware</option>
+                            <option value="Software">Software</option>
+                            <option value="Network">Network</option>
+                            <option value="Security">Security</option>
+                        </select>
+                    </div>
 
-            <div>
-                <label class="block mb-2 text-accent-yellow">Titolo</label>
-                <input
-                    type="text"
-                    name="title"
-                    required
-                    class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
-                />
+                    <div class="form-control">
+                        <label class="form-label">Titolo</label>
+                        <input
+                            type="text"
+                            name="title"
+                            required
+                            class="form-input"
+                            placeholder="Inserisci un titolo chiaro e conciso"
+                        />
+                    </div>
+
+                    <div class="form-control">
+                        <label class="form-label">Descrizione del problema</label>
+                        <textarea
+                            name="description"
+                            rows="3"
+                            required
+                            class="form-textarea"
+                            placeholder="Descrivi in dettaglio il problema riscontrato"
+                        ></textarea>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="form-label">Procedura di risoluzione</label>
+                        <textarea
+                            name="resolution"
+                            rows="5"
+                            required
+                            class="form-textarea"
+                            placeholder="Spiega passo passo come risolvere il problema"
+                        ></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                        </svg>
+                        Salva FAQ
+                    </button>
+                </form>
             </div>
-
-            <div>
-                <label class="block mb-2 text-accent-yellow">Descrizione del problema</label>
-                <textarea
-                    name="description"
-                    rows="3"
-                    required
-                    class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
-                ></textarea>
-            </div>
-
-            <div>
-                <label class="block mb-2 text-accent-yellow">Procedura di risoluzione</label>
-                <textarea
-                    name="resolution"
-                    rows="5"
-                    required
-                    class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
-                ></textarea>
-            </div>
-
-            <button
-                type="submit"
-                class="w-full bg-accent-yellow text-primary-black py-3 rounded-lg font-bold hover:bg-yellow-300 transition-colors"
-            >
-                Salva FAQ
-            </button>
-        </form>
+        </div>
     </main>
 
     <footer class="bg-dark-gray py-6 px-4 mt-12 border-t border-gray-800">

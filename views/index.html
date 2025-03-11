@@ -5,76 +5,107 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAQ Portal</title>
     <link href="/css/main.css" rel="stylesheet">
-    <!-- Use local Tailwind CSS build -->
+    <link href="/css/theme.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Tema scuro (default) */
-        :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #1a1a1a;
-            --text-primary: #f3f4f6;
-            --text-secondary: #9ca3af;
-            --accent-color: #FFD700;
-            --border-color: #374151;
+        .hero-bg {
+            background-image: radial-gradient(circle at center, var(--accent-color) 0%, transparent 70%);
+            background-size: 100% 100%;
+            background-position: center;
+            opacity: 0.05;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
         }
         
-        /* Tema chiaro */
-        [data-theme="light"] {
-            --bg-primary: #f5f5f5;
-            --bg-secondary: #ffffff;
-            --text-primary: #111827;
-            --text-secondary: #4b5563;
-            --accent-color: #FFD700;
-            --border-color: #e5e7eb;
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
         }
         
-        body {
-            background-color: var(--bg-primary);
+        .float-animation {
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        .btn-accent {
+            background-color: var(--accent-color);
+            color: var(--bg-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-accent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-outline {
+            border: 2px solid var(--border-color);
             color: var(--text-primary);
-            transition: background-color 0.3s, color 0.3s;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
         }
         
-        header, footer {
-            background-color: var(--bg-secondary);
-            border-color: var(--border-color);
-        }
-
-        .bg-primary-black {
-            background-color: var(--bg-primary);
-        }
-        
-        .bg-dark-gray {
-            background-color: var(--bg-secondary);
-        }
-        
-        .text-gray-300, .text-gray-400, .text-gray-500 {
-            color: var(--text-secondary);
+        .btn-outline:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
-    <header class="bg-dark-gray py-4 px-6 border-b border-gray-800">
+    <header class="py-4 px-6 border-b sticky top-0 z-10">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
-            <div id="headerNav" class="flex items-center space-x-2">
-                <button class="theme-toggle-btn p-2 rounded-full bg-dark-gray border border-gray-700 hover:border-accent-yellow" title="Cambia tema">
+            <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-yellow mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
+            </div>
+            <div id="headerNav" class="flex items-center space-x-4">
+                <button class="theme-toggle-btn shadow-md" title="Cambia tema">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 theme-toggle-icon" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                     </svg>
                 </button>
-                <button id="logoutBtn" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Logout</button>
+                <button id="logoutBtn" class="btn btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Logout
+                </button>
             </div>
         </div>
     </header>
 
-    <main class="container mx-auto py-12 px-4 flex-grow flex flex-col items-center justify-center">
-        <div class="text-center animate-fade-in max-w-lg mx-auto">
+    <main class="container mx-auto py-12 px-4 flex-grow flex flex-col items-center justify-center relative">
+        <div class="hero-bg"></div>
+        <div class="text-center animate-fade-in max-w-lg mx-auto relative z-10">
+            <div class="float-animation mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 mx-auto text-accent-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
             <h1 class="text-4xl font-bold text-accent-yellow mb-6">Benvenuto nel FAQ Portal</h1>
             <p class="text-xl text-gray-300 mb-10">La piattaforma per gestire le domande tecniche frequenti</p>
 
             <div id="loginContainer" class="flex flex-col items-center">
                 <p class="text-gray-400 mb-6">Effettua il login per accedere e gestire le FAQ</p>
-                <a href="/auth" class="bg-accent-yellow text-primary-black px-8 py-3 rounded-lg font-bold text-lg hover:bg-yellow-300 transition-colors flex items-center gap-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href="/auth" class="btn-accent">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
                     Accedi
@@ -84,14 +115,14 @@
             <div id="loggedInContainer" class="hidden flex flex-col items-center">
                 <p class="text-gray-400 mb-6">Sei autenticato. Ora puoi:</p>
                 <div class="flex gap-4 flex-wrap justify-center">
-                    <a href="/dashboard" class="bg-dark-gray border border-accent-yellow text-accent-yellow px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <a href="/dashboard" class="btn-outline">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                         Visualizza FAQ
                     </a>
-                    <a href="/create" class="bg-accent-yellow text-primary-black px-6 py-3 rounded-lg font-medium hover:bg-yellow-300 transition-colors flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <a href="/create" class="btn-accent">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
                         Crea FAQ

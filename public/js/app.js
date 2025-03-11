@@ -3,15 +3,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Verifica ruolo utente
   let userRole = 'guest';
   let userId = null;
-  
+
   try {
     const authResponse = await fetch('/api/auth/check');
     const authData = await authResponse.json();
-    
+
     if (authData.authenticated) {
       userRole = authData.user.role;
       userId = authData.user.id;
-      
+
       // Se è un admin, mostra pulsante admin nella navbar
       const headerNav = document.getElementById('headerNav');
       if (headerNav && userRole === 'admin') {
@@ -146,17 +146,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         icon.classList.toggle("rotate-180");
       });
     });
-    
+
     // FAQ row accordions
     document.querySelectorAll(".faq-row").forEach((row) => {
       row.addEventListener("click", () => {
         const faqId = row.getAttribute('data-faq-id');
         const detailRows = document.querySelectorAll(`.faq-detail-row[data-faq-id="${faqId}"]`);
-        
+
         detailRows.forEach(detailRow => {
           const detail = detailRow.querySelector('.faq-detail');
           detail.classList.toggle("hidden");
-          
+
           // Highlight active row
           row.classList.toggle("bg-accent-yellow/10");
         });
@@ -194,13 +194,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       try {
         console.log('Sending FAQ data:', faqData);
-        
+
         // Validazione lato client
         const missingFields = [];
         Object.entries(faqData).forEach(([key, value]) => {
           if (!value) missingFields.push(key);
         });
-        
+
         if (missingFields.length > 0) {
           throw new Error(`Campi mancanti: ${missingFields.join(', ')}`);
         }
@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           console.error('Errore verifica autenticazione:', await authCheck.text());
           throw new Error('Errore verifica autenticazione');
         }
-        
+
         const authData = await authCheck.json();
 
         if (!authData.authenticated) {
@@ -224,7 +224,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Prima verifica se la tabella esiste
         showErrorAlert('Verifica tabella in corso...');
-        
+
         const tableCheck = await fetch('/api/init-db', {
           method: 'POST',
           headers: {
@@ -232,7 +232,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           },
           credentials: 'include'
         });
-        
+
         if (!tableCheck.ok) {
           console.warn('Errore verifica tabella:', await tableCheck.text());
         } else {
@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         showErrorAlert('Salvataggio FAQ in corso...');
-        
+
         const response = await fetch('/api/faqs', {
           method: 'POST',
           headers: {
@@ -258,7 +258,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           console.error('Errore lettura risposta:', textErr);
           responseText = 'Errore lettura risposta';
         }
-        
+
         let responseData;
         try {
           responseData = JSON.parse(responseText);
@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (!response.ok) {
           console.error('Dettagli errore server:', responseData);
-          
+
           // Messaggi di errore più specifici
           if (responseData.error?.details && responseData.error.details.includes("user_id")) {
             throw new Error("Errore di autenticazione: sessione scaduta o utente non valido. Rieffettua il login.");
