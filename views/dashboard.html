@@ -28,7 +28,13 @@
             @apply bg-gray-700/50 p-4 flex justify-between items-center cursor-pointer hover:bg-gray-700/70;
         }
         .faq-item {
-            @apply bg-gray-800/30 p-4 border-l-4 border-yellow-500/20 hover:border-yellow-500/50 transition-colors;
+            @apply bg-gray-800/30 border-l-4 border-yellow-500/20 hover:border-yellow-500/50 transition-colors rounded-md mb-3;
+        }
+        .faq-preview {
+            @apply p-4 cursor-pointer flex justify-between items-start;
+        }
+        .faq-detail {
+            @apply hidden p-4 pt-0 border-t border-gray-700/30;
         }
     </style>
 </head>
@@ -69,8 +75,6 @@
         </div>
     </footer>
 
-    <!-- Load Supabase client first -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="/js/error-alert.js"></script>
     <script src="/js/app.js"></script>
     <script>

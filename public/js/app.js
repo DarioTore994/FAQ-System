@@ -97,15 +97,25 @@ document.addEventListener("DOMContentLoaded", async () => {
           ${faqs
             .map(
               (faq) => `
-            <div class="faq-item">
-              <div class="flex justify-between items-start mb-2">
-                <h4 class="font-medium">${faq.title}</h4>
-                <span class="text-xs text-yellow-500/80">${new Date(faq.created_at).toLocaleDateString()}</span>
+            <div class="faq-item" data-faq-id="${faq.id}">
+              <div class="faq-preview">
+                <div class="flex-1">
+                  <h4 class="font-medium">${faq.title}</h4>
+                  <p class="text-gray-400 text-sm line-clamp-1">${faq.description}</p>
+                </div>
+                <div class="flex flex-col items-end">
+                  <span class="text-xs text-yellow-500/80">${new Date(faq.created_at).toLocaleDateString()}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transform transition-transform mt-2 faq-expand-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </div>
-              <p class="text-gray-400 text-sm mb-3">${faq.description}</p>
-              <div class="resolution-box bg-gray-900/50 p-3 rounded-md">
-                <h5 class="text-yellow-500/80 text-sm font-medium mb-2">Procedura risolutiva:</h5>
-                <p class="text-gray-300 text-sm">${faq.resolution}</p>
+              <div class="faq-detail">
+                <p class="text-gray-300 text-sm mb-3">${faq.description}</p>
+                <div class="resolution-box bg-gray-900/50 p-3 rounded-md mt-3">
+                  <h5 class="text-yellow-500/80 text-sm font-medium mb-2">Procedura risolutiva:</h5>
+                  <p class="text-gray-300 text-sm">${faq.resolution}</p>
+                </div>
               </div>
             </div>
           `,
@@ -118,11 +128,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Initialize accordions
   const initAccordions = () => {
+    // Category accordions
     document.querySelectorAll(".category-header").forEach((header) => {
       header.addEventListener("click", () => {
         const content = header.nextElementSibling;
         const icon = header.querySelector("div");
         content.classList.toggle("hidden");
+        icon.classList.toggle("rotate-180");
+      });
+    });
+    
+    // FAQ item accordions
+    document.querySelectorAll(".faq-preview").forEach((preview) => {
+      preview.addEventListener("click", () => {
+        const faqItem = preview.closest('.faq-item');
+        const detail = faqItem.querySelector('.faq-detail');
+        const icon = preview.querySelector('.faq-expand-icon');
+        
+        detail.classList.toggle("hidden");
         icon.classList.toggle("rotate-180");
       });
     });
