@@ -481,6 +481,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (createFaqBtn) {
           createFaqBtn.classList.remove('hidden');
         }
+        
+        // Mostra link admin solo se l'utente è admin
+        const adminLink = document.getElementById('adminLink');
+        if (adminLink) {
+          adminLink.classList.remove('hidden');
+        }
+        }
 
         // Mostra pulsante admin (solo se non esiste già)
         if (!document.getElementById('adminLink')) {
