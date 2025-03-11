@@ -133,44 +133,23 @@
 
         <div id="faqContainer" class="card p-0 overflow-hidden animate-fade-in border border-gray-700 rounded-xl shadow-lg">
             <div class="overflow-x-auto">
-                <div id="faqCardContainer" class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- FAQ cards verranno inserite qui -->
+                <div id="faqListView" class="overflow-hidden">
+                <div class="bg-gray-800/20 border-b border-gray-700">
+                    <div class="grid grid-cols-12 text-left py-4 px-6">
+                        <div class="col-span-3 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Domanda</div>
+                        <div class="col-span-4 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Descrizione/Soluzione</div>
+                        <div class="col-span-2 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Categoria</div>
+                        <div class="col-span-2 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Data</div>
+                        <div class="col-span-1 font-semibold text-accent-yellow text-sm uppercase tracking-wider text-right">Azioni</div>
+                    </div>
                 </div>
-                <div id="faqTableView" class="hidden">
-                    <table class="w-full border-collapse">
-                        <thead class="bg-gray-800 border-b border-gray-700">
-                            <tr>
-                                <th class="py-5 px-6 text-left text-accent-yellow font-semibold text-sm uppercase tracking-wider" width="25%">Domanda</th>
-                                <th class="py-5 px-6 text-left text-accent-yellow font-semibold text-sm uppercase tracking-wider" width="40%">Risposta</th>
-                                <th class="py-5 px-6 text-left text-accent-yellow font-semibold text-sm uppercase tracking-wider" width="15%">Categoria</th>
-                                <th class="py-5 px-6 text-left text-accent-yellow font-semibold text-sm uppercase tracking-wider" width="20%">Data</th>
-                            </tr>
-                        </thead>
-                        <tbody id="faqTableBody" class="divide-y divide-gray-700 bg-gray-900/30">
-                            <!-- FAQ data will be inserted here -->
-                        </tbody>
-                    </table>
+                <div id="faqListContainer" class="divide-y divide-gray-700/50">
+                    <!-- FAQ items verranno inseriti qui -->
+                    <div class="py-6 text-center text-gray-400">
+                        Caricamento FAQ in corso...
+                    </div>
                 </div>
             </div>
-
-            <div class="flex justify-center p-4 border-t border-gray-700 bg-gray-800/30">
-                <div class="flex items-center space-x-4">
-                    <button id="viewModeCard" class="px-4 py-2 bg-accent-yellow/90 text-primary-black rounded-lg font-medium text-sm active">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                        </svg>
-                        Card
-                    </button>
-                    <button id="viewModeTable" class="px-4 py-2 bg-gray-700/50 text-gray-300 hover:bg-gray-700 rounded-lg font-medium text-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        Tabella
-                    </button>
-                </div>
             </div>
 
             <!-- Admin Section (hidden by default) -->
@@ -263,9 +242,6 @@
                     
                     // Carica le FAQ
                     loadFAQs();
-                    
-                    // Inizializza i pulsanti di visualizzazione
-                    initViewModeButtons();
                 } else {
                     // Non autenticato: reindirizza a login
                     window.location.href = '/auth';
@@ -275,40 +251,6 @@
                 showErrorAlert('Errore di autenticazione. Accedi per visualizzare questa pagina.');
             }
         });
-        
-        // Inizializza i pulsanti per cambiare modalità di visualizzazione
-        function initViewModeButtons() {
-            const cardButton = document.getElementById('viewModeCard');
-            const tableButton = document.getElementById('viewModeTable');
-            const faqCardContainer = document.getElementById('faqCardContainer');
-            const faqTableView = document.getElementById('faqTableView');
-            
-            if (cardButton && tableButton && faqCardContainer && faqTableView) {
-                // Imposta la visualizzazione card come predefinita
-                faqCardContainer.classList.remove('hidden');
-                faqTableView.classList.add('hidden');
-                
-                // Gestione clic sul pulsante card
-                cardButton.addEventListener('click', () => {
-                    faqCardContainer.classList.remove('hidden');
-                    faqTableView.classList.add('hidden');
-                    cardButton.classList.add('bg-accent-yellow/90', 'text-primary-black');
-                    cardButton.classList.remove('bg-gray-700/50', 'text-gray-300', 'hover:bg-gray-700');
-                    tableButton.classList.add('bg-gray-700/50', 'text-gray-300', 'hover:bg-gray-700');
-                    tableButton.classList.remove('bg-accent-yellow/90', 'text-primary-black');
-                });
-                
-                // Gestione clic sul pulsante tabella
-                tableButton.addEventListener('click', () => {
-                    faqCardContainer.classList.add('hidden');
-                    faqTableView.classList.remove('hidden');
-                    tableButton.classList.add('bg-accent-yellow/90', 'text-primary-black');
-                    tableButton.classList.remove('bg-gray-700/50', 'text-gray-300', 'hover:bg-gray-700');
-                    cardButton.classList.add('bg-gray-700/50', 'text-gray-300', 'hover:bg-gray-700');
-                    cardButton.classList.remove('bg-accent-yellow/90', 'text-primary-black');
-                });
-            }
-        }
 
         // Funzione per caricare le FAQ
         async function loadFAQs() {
@@ -330,12 +272,11 @@
                 const faqs = await response.json();
                 console.log('FAQ recuperate:', faqs);
                 
-                // Memorizza le FAQ per l'uso con la ricerca e i resize
+                // Memorizza le FAQ per l'uso con la ricerca
                 window.currentFaqs = faqs;
                 
-                // Renderizza entrambe le visualizzazioni
-                renderFAQsTable(faqs);
-                renderFAQsCards(faqs);
+                // Renderizza la visualizzazione a lista
+                renderFAQsList(faqs);
                 
                 // Aggiunta listener per ricerca
                 const searchInput = document.getElementById('searchInput');
@@ -348,36 +289,23 @@
                             (faq.resolution && faq.resolution.toLowerCase().includes(searchTerm)) ||
                             (faq.category && faq.category.toLowerCase().includes(searchTerm))
                         );
-                        renderFAQsTable(filteredFaqs);
-                        renderFAQsCards(filteredFaqs);
+                        renderFAQsList(filteredFaqs);
                     });
                 }
             } catch (error) {
                 console.error('Errore nel caricamento delle FAQ:', error);
-                // Gestione errori per la tabella
-                document.getElementById('faqTableBody').innerHTML = `
-                    <tr>
-                        <td colspan="4" class="py-4 text-center text-gray-400">
-                            Errore nel caricamento delle FAQ. <br>
-                            <button id="initDbBtn" class="mt-2 px-4 py-2 bg-accent-yellow text-primary-black rounded-md">
-                                Inizializza il database
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                
-                // Gestione errori per le card
-                document.getElementById('faqCardContainer').innerHTML = `
-                    <div class="col-span-full py-8 text-center text-gray-400">
+                // Gestione errori
+                document.getElementById('faqListContainer').innerHTML = `
+                    <div class="py-8 text-center text-gray-400">
                         Errore nel caricamento delle FAQ. <br>
-                        <button id="initDbBtnCard" class="mt-2 px-4 py-2 bg-accent-yellow text-primary-black rounded-md">
+                        <button id="initDbBtn" class="mt-2 px-4 py-2 bg-accent-yellow text-primary-black rounded-md">
                             Inizializza il database
                         </button>
                     </div>
                 `;
                 
                 // Aggiungi listener per i pulsanti di inizializzazione
-                document.querySelectorAll('#initDbBtn, #initDbBtnCard').forEach(btn => {
+                document.querySelectorAll('#initDbBtn').forEach(btn => {
                     btn.addEventListener('click', async () => {
                         try {
                             const response = await fetch('/api/init-db', { method: 'POST' });
@@ -414,25 +342,34 @@
             }
         }
 
-        // Funzione per renderizzare la visualizzazione a card delle FAQ
-        function renderFAQsCards(faqs) {
-            const cardContainer = document.getElementById('faqCardContainer');
-            if (!cardContainer) return;
+        // Funzione per troncare il testo a una lunghezza specifica
+        function truncateText(text, maxLength) {
+            if (!text) return '';
+            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+        }
+
+        // Funzione per renderizzare la visualizzazione a lista delle FAQ
+        function renderFAQsList(faqs) {
+            const listContainer = document.getElementById('faqListContainer');
+            if (!listContainer) return;
             
             // Cancella il contenuto attuale
-            cardContainer.innerHTML = '';
+            listContainer.innerHTML = '';
             
             // Controlla se ci sono FAQ da mostrare
             if (!faqs || faqs.length === 0) {
-                cardContainer.innerHTML = `
-                    <div class="col-span-full py-8 text-center text-gray-400">
+                listContainer.innerHTML = `
+                    <div class="py-8 text-center text-gray-400">
                         Nessuna FAQ disponibile
                     </div>
                 `;
                 return;
             }
             
-            // Crea le card per ogni FAQ
+            // Determina se siamo su mobile
+            const isMobile = window.innerWidth < 768;
+            
+            // Crea le righe per ogni FAQ
             faqs.forEach((faq, index) => {
                 // Assicurati che tutti i campi esistano per evitare errori
                 const title = faq.title || 'Titolo non disponibile';
@@ -444,121 +381,156 @@
                 // Genera un ID unico per questa FAQ
                 const faqId = `faq-${index}`;
                 
-                const card = document.createElement('div');
-                card.className = 'bg-gray-800/50 rounded-xl border border-gray-700 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-accent-yellow/10 hover:border-gray-600';
-                card.innerHTML = `
-                    <div class="flex justify-between items-start p-5 border-b border-gray-700/50 bg-gray-800/30">
-                        <h3 class="font-semibold text-accent-yellow text-lg">${title}</h3>
-                        <span class="px-3 py-1 bg-accent-yellow/20 text-accent-yellow rounded-full text-xs font-medium ml-2 whitespace-nowrap">
-                            ${category}
-                        </span>
-                    </div>
-                    <div class="p-5 space-y-4">
-                        <div>
-                            <h4 class="text-xs text-gray-400 uppercase tracking-wider mb-2">Problema:</h4>
-                            <p class="text-gray-300">${description}</p>
+                const row = document.createElement('div');
+                row.id = faqId;
+                row.className = 'group hover:bg-gray-800/50 border-b border-gray-700/50 transition-colors duration-150';
+                
+                if (isMobile) {
+                    // Visualizzazione mobile
+                    row.innerHTML = `
+                        <div class="p-4">
+                            <div class="flex flex-col mb-2">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-medium text-accent-yellow">${title}</h3>
+                                    <span class="px-2 py-1 bg-accent-yellow/20 text-accent-yellow rounded-full text-xs">
+                                        ${category}
+                                    </span>
+                                </div>
+                                <div class="text-xs text-gray-500 mb-3">${formattedDate}</div>
+                                <div class="mb-3">
+                                    <p class="text-sm text-gray-300">${truncateText(description, 100)}</p>
+                                </div>
+                                <div class="p-3 bg-gray-800/70 rounded border border-gray-700/50 mb-3">
+                                    <p class="text-sm text-gray-200">${truncateText(resolution, 100)}</p>
+                                </div>
+                                <div class="flex justify-end">
+                                    <button data-faq-id="${faqId}" class="faq-expand-btn text-accent-yellow text-xs hover:underline">
+                                        Mostra dettagli
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="p-4 bg-gray-800/70 rounded-lg border border-gray-700/50 shadow-inner">
-                            <h4 class="text-xs text-accent-yellow uppercase tracking-wider mb-2">Soluzione:</h4>
-                            <p class="text-gray-200">${resolution}</p>
+                    `;
+                } else {
+                    // Visualizzazione desktop
+                    row.innerHTML = `
+                        <div class="grid grid-cols-12 items-center py-4 px-6">
+                            <div class="col-span-3">
+                                <h3 class="font-medium text-accent-yellow">${truncateText(title, 50)}</h3>
+                            </div>
+                            <div class="col-span-4">
+                                <p class="text-sm text-gray-300">${truncateText(description, 80)}</p>
+                                <div class="mt-2 p-2 bg-gray-800/70 rounded border border-gray-700/50">
+                                    <p class="text-sm text-gray-200">${truncateText(resolution, 80)}</p>
+                                </div>
+                            </div>
+                            <div class="col-span-2">
+                                <span class="px-2 py-1 bg-accent-yellow/20 text-accent-yellow rounded-full text-xs">
+                                    ${category}
+                                </span>
+                            </div>
+                            <div class="col-span-2 text-xs text-gray-400">
+                                ${formattedDate}
+                            </div>
+                            <div class="col-span-1 text-right">
+                                <button data-faq-id="${faqId}" class="faq-expand-btn text-accent-yellow text-xs hover:underline opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                                    Dettagli
+                                </button>
+                            </div>
                         </div>
-                        <div class="pt-2 text-right">
-                            <span class="text-xs text-gray-500">${formattedDate}</span>
+                        <div id="${faqId}-details" class="hidden bg-gray-800/20 px-6 py-4 border-t border-gray-700/50">
+                            <div class="grid grid-cols-12 gap-4">
+                                <div class="col-span-6">
+                                    <h4 class="text-xs uppercase text-accent-yellow font-medium mb-2">Problema:</h4>
+                                    <p class="text-gray-300">${description}</p>
+                                </div>
+                                <div class="col-span-6">
+                                    <h4 class="text-xs uppercase text-accent-yellow font-medium mb-2">Soluzione:</h4>
+                                    <div class="p-3 bg-gray-800/70 rounded border border-gray-700/50">
+                                        <p class="text-gray-200">${resolution}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                listContainer.appendChild(row);
+            });
+            
+            // Aggiungi i listener per i pulsanti di espansione
+            document.querySelectorAll('.faq-expand-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const faqId = e.target.getAttribute('data-faq-id');
+                    const detailsEl = document.getElementById(`${faqId}-details`);
+                    if (detailsEl) {
+                        // Toggle dettagli desktop
+                        if (detailsEl.classList.contains('hidden')) {
+                            detailsEl.classList.remove('hidden');
+                            e.target.textContent = 'Nascondi';
+                        } else {
+                            detailsEl.classList.add('hidden');
+                            e.target.textContent = 'Dettagli';
+                        }
+                    } else {
+                        // Apri la FAQ completa su mobile
+                        showFAQModal(faqId);
+                    }
+                });
+            });
+            
+            // Funzione per mostrare una finestra modale con i dettagli della FAQ (mobile)
+            function showFAQModal(faqId) {
+                const index = parseInt(faqId.split('-')[1]);
+                const faq = faqs[index];
+                
+                // Crea la finestra modale
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70';
+                modal.innerHTML = `
+                    <div class="bg-gray-800 rounded-lg shadow-lg w-full max-w-lg max-h-[80vh] overflow-y-auto">
+                        <div class="flex justify-between items-center p-4 border-b border-gray-700">
+                            <h3 class="font-semibold text-accent-yellow text-lg">${faq.title}</h3>
+                            <button id="closeModal" class="text-gray-400 hover:text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <div>
+                                <h4 class="text-xs text-gray-400 uppercase tracking-wider mb-2">Categoria:</h4>
+                                <span class="px-3 py-1 bg-accent-yellow/20 text-accent-yellow rounded-full text-xs font-medium">
+                                    ${faq.category}
+                                </span>
+                            </div>
+                            <div>
+                                <h4 class="text-xs text-gray-400 uppercase tracking-wider mb-2">Problema:</h4>
+                                <p class="text-gray-300">${faq.description}</p>
+                            </div>
+                            <div class="p-4 bg-gray-800/70 rounded-lg border border-gray-700/50 shadow-inner">
+                                <h4 class="text-xs text-accent-yellow uppercase tracking-wider mb-2">Soluzione:</h4>
+                                <p class="text-gray-200">${faq.resolution}</p>
+                            </div>
+                            <div class="pt-2 text-right">
+                                <span class="text-xs text-gray-500">${formatDate(faq.created_at)}</span>
+                            </div>
                         </div>
                     </div>
                 `;
                 
-                cardContainer.appendChild(card);
-            });
-        }
-
-        // Funzione per renderizzare la tabella delle FAQ
-        function renderFAQsTable(faqs) {
-            const tableBody = document.getElementById('faqTableBody');
-            if (!tableBody) return;
-            
-            // Cancella il contenuto attuale
-            tableBody.innerHTML = '';
-            
-            // Controlla se ci sono FAQ da mostrare
-            if (!faqs || faqs.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="py-4 text-center text-gray-400">Nessuna FAQ disponibile</td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            // Determina se siamo su mobile
-            const isMobile = window.innerWidth < 768;
-            
-            if (isMobile) {
-                // Visualizzazione mobile
-                faqs.forEach(faq => {
-                    const row = document.createElement('tr');
-                    row.className = 'block mb-5 bg-gray-800/50 rounded-lg border border-gray-700 shadow-md overflow-hidden';
-
-                    // Assicurati che tutti i campi esistano per evitare errori
-                    const title = faq.title || 'Titolo non disponibile';
-                    const category = faq.category || 'Categoria non specificata';
-                    const description = faq.description || 'Descrizione non disponibile';
-                    const resolution = faq.resolution || 'Risoluzione non disponibile';
-                    const formattedDate = formatDate(faq.created_at);
-
-                    row.innerHTML = `
-                        <td class="block p-4 border-b border-gray-700/50">
-                            <div class="flex justify-between items-start">
-                                <h4 class="font-medium text-accent-yellow text-base">${title}</h4>
-                                <span class="px-3 py-1 bg-accent-yellow/20 text-accent-yellow rounded-full text-xs font-medium ml-2">
-                                    ${category}
-                                </span>
-                            </div>
-                            <div class="text-xs text-gray-500 mt-2">${formattedDate}</div>
-                        </td>
-                        <td class="block p-4">
-                            <p class="text-sm text-gray-300 mb-4">${description}</p>
-                            <div class="p-4 bg-gray-800/70 rounded-md shadow-inner border border-gray-700/50">
-                                <h5 class="text-xs text-accent-yellow mb-2 font-medium uppercase tracking-wide">Soluzione:</h5>
-                                <p class="text-sm text-gray-200">${resolution}</p>
-                            </div>
-                        </td>
-                    `;
-
-                    tableBody.appendChild(row);
+                document.body.appendChild(modal);
+                
+                // Gestisci la chiusura della modale
+                document.getElementById('closeModal').addEventListener('click', () => {
+                    document.body.removeChild(modal);
                 });
-            } else {
-                // Visualizzazione desktop
-                faqs.forEach(faq => {
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-800/50 transition-colors duration-150';
-
-                    // Assicurati che tutti i campi esistano per evitare errori
-                    const title = faq.title || 'Titolo non disponibile';
-                    const category = faq.category || 'Categoria non specificata';
-                    const description = faq.description || 'Descrizione non disponibile';
-                    const resolution = faq.resolution || 'Risoluzione non disponibile';
-                    const formattedDate = formatDate(faq.created_at);
-
-                    row.innerHTML = `
-                        <td class="py-4 px-6 border-b border-gray-700">${title}</td>
-                        <td class="py-4 px-6 border-b border-gray-700">
-                            <p class="text-sm text-gray-300 mb-3">${description}</p>
-                            <div class="p-4 bg-gray-800/70 rounded-md shadow-inner border border-gray-700/50">
-                                <p class="text-sm text-gray-200">${resolution}</p>
-                            </div>
-                        </td>
-                        <td class="py-4 px-6 border-b border-gray-700">
-                            <span class="px-3 py-1.5 bg-accent-yellow/20 text-accent-yellow rounded-full text-xs font-medium">
-                                ${category}
-                            </span>
-                        </td>
-                        <td class="py-4 px-6 border-b border-gray-700 text-xs text-gray-400">
-                            ${formattedDate}
-                        </td>
-                    `;
-
-                    tableBody.appendChild(row);
+                
+                // Chiudi la modale quando si clicca fuori
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        document.body.removeChild(modal);
+                    }
                 });
             }
             
@@ -566,7 +538,7 @@
             window.removeEventListener('resize', window.resizeHandler);
             window.resizeHandler = () => {
                 const faqs = window.currentFaqs || [];
-                renderFAQsTable(faqs);
+                renderFAQsList(faqs);
             };
             window.addEventListener('resize', window.resizeHandler);
         }
