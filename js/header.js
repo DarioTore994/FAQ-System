@@ -1,8 +1,7 @@
 document.addEventListener('DOMContentLoaded', async function() {
     try {
         const logoutBtn = document.getElementById('logoutBtn');
-        const loginBtn = document.getElementById('loginBtn');
-
+        
         // Gestione errori duplicazione FAQ
         const urlPath = window.location.pathname;
 
@@ -14,9 +13,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const response = await fetch('/api/auth/check');
 
         if (!response.ok) {
-            // Non autenticato - mostra solo login e Home
-            if (loginBtn) loginBtn.classList.remove('hidden');
-
+            // Non autenticato - nascondiamo le opzioni utente 
             const authUserContainer = document.getElementById('authUserContainer');
             if (authUserContainer) authUserContainer.classList.add('hidden');
 
@@ -29,8 +26,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         if (data.authenticated) {
             // Utente autenticato
-            if (loginBtn) loginBtn.classList.add('hidden');
-
             const authUserContainer = document.getElementById('authUserContainer');
             if (authUserContainer) authUserContainer.classList.remove('hidden');
 
@@ -40,9 +35,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 if (adminMenu) adminMenu.classList.remove('hidden');
             }
         } else {
-            // Non autenticato - mostra solo login
-            if (loginBtn) loginBtn.classList.remove('hidden');
-
+            // Non autenticato - nascondi opzioni utente
             const authUserContainer = document.getElementById('authUserContainer');
             if (authUserContainer) authUserContainer.classList.add('hidden');
 
@@ -51,10 +44,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     } catch (error) {
         console.error('Errore header.js:', error);
-        // In caso di errore, mostra solo login
-        const loginBtn = document.getElementById('loginBtn');
-        if (loginBtn) loginBtn.classList.remove('hidden');
-
+        // In caso di errore, nascondi opzioni utente
         const authUserContainer = document.getElementById('authUserContainer');
         if (authUserContainer) authUserContainer.classList.add('hidden');
     }
