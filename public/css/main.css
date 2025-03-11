@@ -632,17 +632,8 @@ video {
   inset: 0px;
 }
 
-.inset-y-0 {
-  top: 0px;
-  bottom: 0px;
-}
-
 .bottom-4 {
   bottom: 1rem;
-}
-
-.left-0 {
-  left: 0px;
 }
 
 .left-3 {
@@ -1155,10 +1146,6 @@ video {
 
 .pl-10 {
   padding-left: 2.5rem;
-}
-
-.pl-3 {
-  padding-left: 0.75rem;
 }
 
 .pr-4 {
