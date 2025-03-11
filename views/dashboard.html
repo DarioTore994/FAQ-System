@@ -23,7 +23,7 @@
         .faq-detail {
             @apply hidden p-4 pt-0 border-t border-gray-700/30;
         }
-        
+
         /* Badge per categoria */
         .category-badge {
             display: inline-block;
@@ -36,12 +36,12 @@
             background-color: var(--accent-color);
             color: var(--bg-primary);
         }
-        
+
         /* Animazione per dettagli FAQ */
         .faq-detail.show {
             animation: slideDown 0.3s ease-out forwards;
         }
-        
+
         @keyframes slideDown {
             from { max-height: 0; opacity: 0; }
             to { max-height: 500px; opacity: 1; }
@@ -148,12 +148,17 @@
                 const data = await response.json();
 
                 if (data.authenticated) {
-                    // Mostra pulsante Crea FAQ solo se l'utente è admin
-                    if (data.user.role !== 'admin') {
-                        document.getElementById('createFaqBtn').classList.add('hidden');
-                    }
+                    // Gestione elementi basati sul ruolo utente
                     if (data.user.role === 'admin') {
+                        // Mostra pulsante Crea FAQ e la sezione di gestione categorie solo agli admin
+                        document.getElementById('createFaqBtn').classList.remove('hidden');
                         document.getElementById('adminCategorySection').classList.remove('hidden');
+                        document.getElementById('adminLink').classList.remove('hidden');
+                    } else {
+                        // Nascondi elementi di amministrazione agli utenti normali
+                        document.getElementById('createFaqBtn').classList.add('hidden');
+                        document.getElementById('adminCategorySection').classList.add('hidden');
+                        document.getElementById('adminLink').classList.add('hidden');
                     }
                 }
             } catch (error) {
