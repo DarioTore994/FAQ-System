@@ -15,7 +15,7 @@ window.performLogout = async function() {
             document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 
             // Reindirizza alla pagina di login
-            window.location.href = '/auth';
+            window.location.href = '/login';
         } else {
             console.error('Errore durante il logout');
             showErrorAlert('Errore durante il logout');

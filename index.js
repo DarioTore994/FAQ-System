@@ -187,6 +187,9 @@ app.get("/", (req, res) =>
 app.get("/auth", (req, res) =>
   res.sendFile(path.join(__dirname, "views/auth.html")),
 );
+app.get("/login", (req, res) =>
+  res.sendFile(path.join(__dirname, "views/auth.html")),
+);
 app.get("/create", requireAdmin, (req, res) =>
   res.sendFile(path.join(__dirname, "views/faq-create.html")),
 );
