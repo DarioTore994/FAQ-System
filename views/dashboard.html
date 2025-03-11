@@ -250,8 +250,9 @@
             try {
                 // Prima verifichiamo la struttura della tabella e la inizializziamo se necessario
                 try {
-                    await fetch('/api/init-db', { method: 'POST' });
-                    console.log('Database verificato correttamente');
+                    const initResponse = await fetch('/api/init-db', { method: 'POST' });
+                    const initData = await initResponse.json();
+                    console.log('Database verificato correttamente', initData);
                 } catch (initError) {
                     console.error('Errore durante l\'inizializzazione:', initError);
                 }
@@ -262,8 +263,18 @@
                     throw new Error('Errore nel recupero delle FAQ');
                 }
                 
-                const faqs = await response.json();
+                // Debug - visualizza la risposta grezza
+                const responseText = await response.text();
+                console.log('Risposta API grezza:', responseText);
+                
+                // Converti di nuovo in JSON
+                const faqs = JSON.parse(responseText);
                 console.log('FAQ recuperate:', faqs);
+                
+                if (!Array.isArray(faqs)) {
+                    console.error('Risposta non è un array:', faqs);
+                    throw new Error('Formato di risposta non valido');
+                }
                 
                 // Memorizza le FAQ per l'uso con la ricerca
                 window.currentFaqs = faqs;
@@ -358,6 +369,8 @@
                 `;
                 return;
             }
+            
+            console.log('FAQ da renderizzare:', faqs);
             
             // Determina se siamo su mobile
             const isMobile = window.innerWidth < 768;

@@ -871,6 +871,45 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
 app.get("/api/faqs", async (req, res) => {
   const client = await pool.connect();
   try {
+    // Verifica la struttura della tabella faqs prima di eseguire la query
+    try {
+      const tableCheck = await client.query(`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_schema = 'public' 
+          AND table_name = 'faqs'
+        );
+      `);
+      
+      if (!tableCheck.rows[0].exists) {
+        // Crea la tabella se non esiste
+        await client.query(`
+          CREATE TABLE faqs (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id),
+            category TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            resolution TEXT NOT NULL,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+          );
+        `);
+        console.log('Tabella faqs creata automaticamente');
+        
+        // Inserisci almeno una FAQ di esempio
+        const adminResult = await client.query('SELECT id FROM users WHERE role = $1 LIMIT 1', ['admin']);
+        if (adminResult.rows.length > 0) {
+          const adminId = adminResult.rows[0].id;
+          await client.query(
+            'INSERT INTO faqs (user_id, category, title, description, resolution) VALUES ($1, $2, $3, $4, $5)',
+            [adminId, 'Generale', 'Benvenuto nel FAQ Portal', 'Questa è una FAQ di esempio', 'Puoi creare nuove FAQ dal pannello di amministrazione.']
+          );
+        }
+      }
+    } catch (tableError) {
+      console.error('Errore verifica tabella:', tableError);
+    }
+
     const { category, limit = 50 } = req.query;
     const limitNum = parseInt(limit, 10) || 50;
 
@@ -883,10 +922,11 @@ app.get("/api/faqs", async (req, res) => {
       result = await client.query(query, [limitNum]);
     }
 
+    console.log(`FAQ recuperate: ${result.rows.length}`);
     return res.json(result.rows);
   } catch (error) {
     console.error("Errore nel recupero delle FAQ:", error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message, stack: error.stack });
   } finally {
     client.release();
   }
