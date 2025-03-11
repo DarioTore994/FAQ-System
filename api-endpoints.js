@@ -627,4 +627,97 @@ router.delete('/users/:id', verificaAutenticazione, async (req, res) => {
   }
 });
 
+// Endpoint per richiedere il recupero password di un utente (per admin)
+router.post('/users/recover', verificaAutenticazione, async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    // Verifica se l'utente è un amministratore
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        error: 'Accesso non autorizzato: è richiesto il ruolo di amministratore'
+      });
+    }
+    
+    // Verifica se l'email esiste nel database
+    const userQuery = 'SELECT * FROM users WHERE email = $1';
+    const userResult = await pool.query(userQuery, [email]);
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Utente non trovato' });
+    }
+
+    const user = userResult.rows[0];
+
+    // Genera un token univoco per il reset della password
+    const crypto = require('crypto');
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const tokenExpiry = new Date();
+    tokenExpiry.setHours(tokenExpiry.getHours() + 1); // Token valido per 1 ora
+
+    // Salva il token nel database
+    const updateQuery = 'UPDATE users SET reset_token = $1, reset_token_expiry = $2 WHERE id = $3';
+    await pool.query(updateQuery, [resetToken, tokenExpiry, user.id]);
+
+    // Invio email configurato in server
+    const nodemailer = require('nodemailer');
+    
+    try {
+      // Configura il trasporto email con le credenziali dal file .env
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: parseInt(process.env.SMTP_PORT || '587', 10),
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASSWORD
+        }
+      });
+
+      // Costruisci l'URL di reset con il token
+      const appUrl = process.env.APP_URL || `http://${req.headers.host}`;
+      const resetUrl = `${appUrl}/reset-password?token=${resetToken}`;
+
+      // Contenuto dell'email
+      const mailOptions = {
+        from: process.env.SMTP_FROM || '"FAQ Portal" <noreply@faqportal.com>',
+        to: email,
+        subject: 'Recupero Password - FAQ Portal',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #FFD700; text-align: center;">FAQ Portal - Recupero Password</h2>
+            <p>Gentile utente,</p>
+            <p>È stato richiesto il recupero della tua password. Clicca sul pulsante qui sotto per impostare una nuova password:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}" style="background-color: #FFD700; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Reimposta Password</a>
+            </div>
+            <p>Il link sarà valido per un'ora.</p>
+            <p>Cordiali saluti,<br>Il team di FAQ Portal</p>
+          </div>
+        `
+      };
+
+      // Invio dell'email
+      await transporter.sendMail(mailOptions);
+      
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Email di recupero inviata con successo' 
+      });
+    } catch (emailError) {
+      console.error('Errore invio email:', emailError);
+      return res.status(500).json({ 
+        error: 'Errore durante l\'invio dell\'email di recupero',
+        details: emailError.message
+      });
+    }
+  } catch (err) {
+    console.error('Errore recupero password:', err);
+    return res.status(500).json({ 
+      error: 'Errore durante il recupero della password',
+      details: err.message 
+    });
+  }
+});
+
 module.exports = router;

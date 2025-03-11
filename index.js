@@ -45,6 +45,10 @@ app.get('/modifica', (req, res) => {
   res.sendFile(__dirname + '/views/modifica.html');
 });
 
+app.get('/reset-password', (req, res) => {
+  res.sendFile(__dirname + '/views/reset-password.html');
+});
+
 // Use API endpoints from api-endpoints.js
 const apiEndpoints = require('./api-endpoints');
 app.use('/api', apiEndpoints);
@@ -237,6 +241,40 @@ app.post('/api/auth/register', async (req, res) => {
   } catch (error) {
     console.error('Errore nella registrazione:', error);
     return res.status(500).json({ error: 'Errore nella registrazione' });
+  }
+});
+
+// Endpoint per completare il reset della password
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ error: 'Token e password sono obbligatori' });
+    }
+
+    // Verifica se il token esiste e non è scaduto
+    const now = new Date();
+    const tokenQuery = 'SELECT * FROM users WHERE reset_token = $1 AND reset_token_expiry > $2';
+    const tokenResult = await pool.query(tokenQuery, [token, now]);
+
+    if (tokenResult.rows.length === 0) {
+      return res.status(400).json({ error: 'Token non valido o scaduto' });
+    }
+
+    const user = tokenResult.rows[0];
+
+    // Hash della nuova password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Aggiorna la password e rimuove il token
+    const updateQuery = 'UPDATE users SET password = $1, reset_token = NULL, reset_token_expiry = NULL WHERE id = $2';
+    await pool.query(updateQuery, [hashedPassword, user.id]);
+
+    return res.status(200).json({ message: 'Password reimpostata con successo' });
+  } catch (error) {
+    console.error('Errore reset password:', error);
+    return res.status(500).json({ error: 'Errore durante il reset della password' });
   }
 });
 
