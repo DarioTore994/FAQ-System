@@ -27,6 +27,38 @@ app.get('/admin', (req, res) => {
 const apiEndpoints = require('./api-endpoints');
 app.use('/api', apiEndpoints);
 
+// Endpoint per verificare lo stato di autenticazione
+app.get('/api/auth/check', async (req, res) => {
+  try {
+    // Verifica se il token è presente nei cookie o nell'header
+    const token = req.headers.authorization?.split(' ')[1] || req.cookies?.token;
+    
+    if (!token) {
+      return res.status(401).json({ authenticated: false, error: 'Accesso non autorizzato' });
+    }
+    
+    // Verifica il token
+    const userQuery = 'SELECT * FROM users WHERE id = $1';
+    const userResult = await pool.query(userQuery, [token]);
+    
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ authenticated: false, error: 'Utente non trovato' });
+    }
+    
+    const user = userResult.rows[0];
+    
+    // Ritorna le informazioni dell'utente (esclusa la password)
+    const { password, ...userInfo } = user;
+    return res.status(200).json({ 
+      authenticated: true, 
+      user: userInfo
+    });
+  } catch (error) {
+    console.error('Errore nel controllo autenticazione:', error);
+    return res.status(500).json({ authenticated: false, error: 'Errore nel controllo autenticazione' });
+  }
+});
+
 // Endpoint per verificare se un'email è già registrata
 app.get('/api/auth/check-email', async (req, res) => {
   const { email } = req.query;
@@ -173,6 +205,19 @@ app.post('/api/faq/create', async (req, res) => {
         if (!category || !title || !description || !resolution) {
             return res.status(400).json({ error: { message: 'Tutti i campi sono obbligatori' } });
         }
+
+        // Verifica che la tabella esista prima di inserire
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS faqs (
+                id SERIAL PRIMARY KEY,
+                category VARCHAR(100) NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                description TEXT NOT NULL,
+                resolution TEXT NOT NULL,
+                status VARCHAR(50) DEFAULT 'Nuovo',
+                created_at TIMESTAMP NOT NULL DEFAULT NOW()
+            );
+        `);
 
         // Inserisci la nuova FAQ nel database
         const result = await pool.query(
