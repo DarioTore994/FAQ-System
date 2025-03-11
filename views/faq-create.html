@@ -216,7 +216,7 @@
                             placeholder="Spiega passo passo come risolvere il problema"
                         ></textarea>
                     </div>
-                    
+
                     <div class="form-control">
                         <label class="form-label">Stato</label>
                         <select name="status" class="form-select">
@@ -295,11 +295,11 @@
                 document.getElementById('faqForm').addEventListener('submit', async (e) => {
                     e.preventDefault();
                     console.log('Salvataggio in corso...');
-                    
+
                     // Gestione stato pulsante di invio
                     const submitButton = e.target.querySelector('.submit-btn');
                     const originalButtonText = submitButton.innerHTML;
-                    
+
                     // Funzione per aggiornare lo stato del pulsante
                     const updateButtonState = (isLoading, text) => {
                         submitButton.disabled = isLoading;
@@ -307,7 +307,7 @@
                         submitButton.classList.toggle('opacity-50', isLoading);
                         submitButton.classList.toggle('cursor-not-allowed', isLoading);
                     };
-                    
+
                     // Imposta pulsante in stato di caricamento
                     updateButtonState(true, `
                         <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-primary-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -328,7 +328,7 @@
                         };
 
                         console.log('Sending FAQ data:', faqData);
-                        
+
                         // Mostro messaggio di stato
                         showErrorAlert('Verifica tabella in corso...', 'info');
 
@@ -345,7 +345,7 @@
 
                         console.log('Tabella verificata');
                         showErrorAlert('Salvataggio FAQ in corso...', 'info');
-                        
+
                         // Salvataggio della FAQ
                         const response = await fetch('/api/faqs', {
                             method: 'POST',
@@ -359,11 +359,11 @@
                         // Gestione errori più specifica
                         if (!response.ok) {
                             const contentType = response.headers.get('content-type');
-                            
+
                             if (contentType && contentType.includes('application/json')) {
                                 const errorData = await response.json();
                                 console.log('Risposta grezza del server:', JSON.stringify(errorData));
-                                
+
                                 // Controlli specifici per vari tipi di errori
                                 if (errorData.error?.details && (
                                     errorData.error.details.includes('user_id') || 
@@ -372,7 +372,7 @@
                                     // Resetto il pulsante e mostro un errore chiaro
                                     updateButtonState(false);
                                     showErrorAlert('Errore database strutturale. Riprova tra qualche istante.', 'error');
-                                    
+
                                     // Attendi un po' e ricarica la pagina per forzare reinizializzazione
                                     setTimeout(() => {
                                         window.location.reload();
@@ -394,7 +394,7 @@
                         // Successo!
                         const data = await response.json();
                         console.log('Risposta grezza del server:', JSON.stringify(data));
-                        
+
                         // Aggiorna UI per successo
                         updateButtonState(true, `
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -402,7 +402,7 @@
                             </svg>
                             Salvato!
                         `);
-                        
+
                         showErrorAlert('FAQ salvata con successo!', 'success');
                         e.target.reset();
 
@@ -417,9 +417,9 @@
                         if (error.message.includes('sessione scaduta') || 
                             error.message.includes('login') || 
                             error.message.includes('autenticazione')) {
-                            
+
                             showErrorAlert('Sessione scaduta. Reindirizzamento alla pagina di login...', 'error');
-                            
+
                             // Aggiorna pulsante per indicare reindirizzamento
                             updateButtonState(true, `
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -427,7 +427,7 @@
                                 </svg>
                                 Reindirizzamento...
                             `);
-                            
+
                             setTimeout(() => {
                                 window.location.href = '/auth';
                             }, 2000);
@@ -492,6 +492,33 @@
             console.error('Errore JavaScript:', event.error);
             showErrorAlert('Errore JavaScript: ' + (event.error?.message || 'Errore sconosciuto'));
         });
+
+        // Funzione per mostrare notifiche all'utente
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 transform transition-all duration-300 ease-in-out ${
+                type === 'error' ? 'bg-red-600 text-white' : 
+                type === 'success' ? 'bg-green-600 text-white' : 
+                'bg-blue-600 text-white'
+            }`;
+            notification.innerHTML = message;
+            document.body.appendChild(notification);
+
+            // Animazione di entrata
+            setTimeout(() => {
+                notification.style.transform = 'translateY(0)';
+            }, 10);
+
+            // Rimuovi dopo 8 secondi (aumentato da 3 a 8 secondi)
+            setTimeout(() => {
+                notification.style.transform = 'translateY(-100%)';
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 8000);
+        }
+
     </script>
 </body>
 </html>

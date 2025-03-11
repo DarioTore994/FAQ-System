@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -12,7 +11,7 @@
         .faq-item {
             @apply bg-gray-800/30 border-l-4 border-accent-yellow/20 hover:border-accent-yellow/50 transition-colors rounded-md mb-3;
         }
-        
+
         .category-badge {
             display: inline-block;
             padding: 0.25rem 0.75rem;
@@ -28,20 +27,20 @@
         .faq-list-item {
             transition: all 0.3s ease;
         }
-        
+
         .faq-list-item:hover {
             background-color: rgba(31, 41, 55, 0.5);
         }
-        
+
         .faq-list-item .faq-actions {
             opacity: 0;
             transition: opacity 0.2s ease;
         }
-        
+
         .faq-list-item:hover .faq-actions {
             opacity: 1;
         }
-        
+
         .btn-primary {
             background-color: #FFD700;
             color: #0a0a0a !important;
@@ -127,7 +126,7 @@
                             <!-- Opzioni categorie verranno popolate via JavaScript -->
                         </select>
                     </div>
-                    
+
                     <div>
                         <label for="statusFilter" class="text-sm font-medium text-gray-300">Filtra per stato:</label>
                         <select id="statusFilter" class="bg-gray-700 text-white border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-accent-yellow">
@@ -161,7 +160,7 @@
             console.error('Errore JavaScript:', event.error);
             showErrorAlert('Errore JavaScript: ' + (event.error?.message || 'Errore sconosciuto'));
         });
-        
+
         // Verifica ruolo utente e mostra/nascondi pulsanti appropriati
         window.addEventListener('DOMContentLoaded', async () => {
             try {
@@ -170,7 +169,7 @@
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
                     const errorMessage = errorData.error || 'Errore nella risposta API';
-                    
+
                     if (errorMessage.includes('Accesso non autorizzato')) {
                         // Mostra l'errore ma non reindirizza
                         showErrorAlert(errorMessage);
@@ -211,7 +210,7 @@
                         // Menu admin visibile solo per amministratori
                         if (adminMenu) adminMenu.classList.remove('hidden');
                     }
-                    
+
                     // Carica le FAQ e le categorie
                     loadFAQs();
                     loadCategories();
@@ -232,9 +231,9 @@
                 if (!response.ok) {
                     throw new Error('Errore nel recupero delle categorie');
                 }
-                
+
                 const categories = await response.json();
-                
+
                 // Popola il filtro categorie
                 const categoryFilter = document.getElementById('categoryFilter');
                 if (categoryFilter) {
@@ -244,12 +243,12 @@
                         option.textContent = category.name;
                         categoryFilter.appendChild(option);
                     });
-                    
+
                     // Aggiungi event listener per il filtro di categoria
                     categoryFilter.addEventListener('change', () => {
                         applyFilters();
                     });
-                    
+
                     // Aggiungi event listener per il filtro di stato
                     const statusFilter = document.getElementById('statusFilter');
                     if (statusFilter) {
@@ -263,32 +262,32 @@
                 showErrorAlert('Errore nel caricamento delle categorie');
             }
         }
-        
+
         // Funzione per applicare i filtri (sia categoria che stato)
         function applyFilters() {
             if (!window.allFaqs) return;
-            
+
             const categoryFilter = document.getElementById('categoryFilter');
             const statusFilter = document.getElementById('statusFilter');
-            
+
             const selectedCategory = categoryFilter ? categoryFilter.value : 'all';
             const selectedStatus = statusFilter ? statusFilter.value : 'all';
-            
+
             let filteredFaqs = window.allFaqs;
-            
+
             // Applica filtro per categoria
             if (selectedCategory !== 'all') {
                 filteredFaqs = filteredFaqs.filter(faq => faq.category === selectedCategory);
             }
-            
+
             // Applica filtro per stato
             if (selectedStatus !== 'all') {
                 filteredFaqs = filteredFaqs.filter(faq => faq.status === selectedStatus);
             }
-            
+
             renderFAQsList(filteredFaqs);
         }
-        
+
         // Funzione per ottenere la classe CSS in base allo stato
         function getStatusClass(status) {
             switch(status) {
@@ -302,20 +301,20 @@
                     return 'bg-gray-500/20 text-gray-400';
             }
         }
-        
+
         // Funzione per reindirizzare alla pagina di modifica della FAQ
         function editFaq(faqId, event) {
             event.stopPropagation(); // Evita che il click propaghi all'elemento padre
             window.location.href = `/modifica?id=${faqId}`;
         }
-        
+
         // Funzione per aggiornare lo stato della FAQ
         async function updateFaqStatus(faqId, newStatus, event) {
             event.stopPropagation(); // Evita che il click propaghi all'elemento padre
-            
+
             try {
                 showErrorAlert(`Aggiornamento stato a "${newStatus}" in corso...`, 'info');
-                
+
                 const response = await fetch(`/api/faqs/${faqId}/status`, {
                     method: 'PUT',
                     headers: {
@@ -323,22 +322,22 @@
                     },
                     body: JSON.stringify({ status: newStatus })
                 });
-                
+
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.error?.message || 'Errore durante l\'aggiornamento dello stato');
                 }
-                
+
                 showErrorAlert(`Stato aggiornato a "${newStatus}" con successo!`, 'success');
-                
+
                 // Aggiorna la UI senza ricaricare la pagina
                 const updatedFaq = await response.json();
-                
+
                 // Aggiorna l'elemento nella lista delle FAQ
                 window.allFaqs = window.allFaqs.map(faq => 
                     faq.id === faqId ? { ...faq, status: newStatus } : faq
                 );
-                
+
                 // Ricarica la lista
                 const currentCategory = document.getElementById('categoryFilter').value;
                 filterFAQsByCategory(currentCategory);
@@ -359,13 +358,13 @@
                 } catch (initError) {
                     console.error('Errore durante l\'inizializzazione:', initError);
                 }
-                
+
                 // Ora recuperiamo le FAQ
                 const response = await fetch('/api/faqs');
                 if (!response.ok) {
                     throw new Error('Errore nel recupero delle FAQ');
                 }
-                
+
                 let faqs;
                 try {
                     faqs = await response.json();
@@ -375,18 +374,18 @@
                     console.log('Risposta API grezza:', responseText);
                     throw new Error('Formato di risposta non valido');
                 }
-                
+
                 if (!Array.isArray(faqs)) {
                     console.error('Risposta non è un array:', faqs);
                     throw new Error('Formato di risposta non valido');
                 }
-                
+
                 // Memorizza le FAQ per l'uso con la ricerca e i filtri
                 window.allFaqs = faqs;
-                
+
                 // Renderizza la visualizzazione a lista
                 renderFAQsList(faqs);
-                
+
                 // Aggiunta listener per ricerca
                 const searchInput = document.getElementById('searchInput');
                 if (searchInput) {
@@ -413,7 +412,7 @@
                         </button>
                     </div>
                 `;
-                
+
                 // Aggiungi listener per i pulsanti di inizializzazione
                 document.querySelectorAll('#initDbBtn').forEach(btn => {
                     btn.addEventListener('click', async () => {
@@ -436,7 +435,7 @@
         // Funzione per formattare la data
         function formatDate(dateStr) {
             if (!dateStr) return 'Data non disponibile';
-            
+
             try {
                 const date = new Date(dateStr);
                 return date.toLocaleDateString('it-IT', {
@@ -462,10 +461,10 @@
         function renderFAQsList(faqs) {
             const listContainer = document.getElementById('faqListContainer');
             if (!listContainer) return;
-            
+
             // Cancella il contenuto attuale
             listContainer.innerHTML = '';
-            
+
             // Controlla se ci sono FAQ da mostrare
             if (!faqs || faqs.length === 0) {
                 listContainer.innerHTML = `
@@ -475,10 +474,10 @@
                 `;
                 return;
             }
-            
+
             // Determina se siamo su mobile
             const isMobile = window.innerWidth < 768;
-            
+
             // Aggiungi intestazione
             if (!isMobile) {
                 const header = document.createElement('div');
@@ -494,7 +493,7 @@
                 `;
                 listContainer.appendChild(header);
             }
-            
+
             // Crea le righe per ogni FAQ
             faqs.forEach((faq, index) => {
                 // Assicurati che tutti i campi esistano per evitare errori
@@ -503,10 +502,10 @@
                 const description = faq.description || 'Descrizione non disponibile';
                 const resolution = faq.resolution || 'Risoluzione non disponibile';
                 const formattedDate = formatDate(faq.created_at);
-                
+
                 const faqItem = document.createElement('div');
                 faqItem.className = 'faq-list-item border-t border-gray-700/30 transition-colors';
-                
+
                 if (isMobile) {
                     // Layout per dispositivi mobili
                     faqItem.innerHTML = `
@@ -569,17 +568,17 @@
                             </div>
                         </div>
                     `;
-                    
+
                     // Aggiungi event listener per mostrare i dettagli al click
                     faqItem.addEventListener('click', () => {
                         showFAQDetails(faq);
                     });
                 }
-                
+
                 listContainer.appendChild(faqItem);
             });
         }
-        
+
         // Funzione per mostrare i dettagli completi di una FAQ
         function showFAQDetails(faq) {
             // Crea un elemento modale per mostrare i dettagli completi
@@ -616,20 +615,47 @@
                     </div>
                 </div>
             `;
-            
+
             document.body.appendChild(modal);
-            
+
             // Gestisci la chiusura della modale
             document.getElementById('closeModal').addEventListener('click', () => {
                 document.body.removeChild(modal);
             });
-            
+
             // Chiudi la modale quando si clicca fuori
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     document.body.removeChild(modal);
                 }
             });
+        }
+
+
+        // Funzione per mostrare notifiche all'utente
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 transform transition-all duration-300 ease-in-out ${
+                type === 'error' ? 'bg-red-600 text-white' : 
+                type === 'success' ? 'bg-green-600 text-white' : 
+                'bg-blue-600 text-white'
+            }`;
+            notification.innerHTML = message;
+            document.body.appendChild(notification);
+
+            // Animazione di entrata
+            setTimeout(() => {
+                notification.style.transform = 'translateY(0)';
+            }, 10);
+
+            // Rimuovi dopo 8 secondi (aumentato da 3 a 8 secondi)
+            setTimeout(() => {
+                notification.style.transform = 'translateY(-100%)';
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 8000);
         }
     </script>
     <script src="/js/header.js"></script>
