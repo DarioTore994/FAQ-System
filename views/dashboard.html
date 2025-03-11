@@ -36,8 +36,10 @@
     <header class="bg-dark-gray py-4 px-6 border-b border-gray-800">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
-            <nav class="space-x-4">
-                <a href="/create" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Crea FAQ</a>
+            <nav class="space-x-4" id="headerNav">
+                <!-- I pulsanti Admin e Crea FAQ saranno mostrati in base al ruolo -->
+                <a href="/admin" id="adminBtn" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors hidden">Admin</a>
+                <a href="/create" id="createFaqBtn" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Crea FAQ</a>
                 <button id="logoutBtn" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Logout</button>
             </nav>
         </div>
@@ -73,6 +75,28 @@
     <script src="/js/error-alert.js"></script>
     <script src="/js/app.js"></script>
     <script>
+        // Verifica ruolo utente e mostra/nascondi pulsanti appropriati
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/auth/check');
+                const data = await response.json();
+                
+                if (data.authenticated) {
+                    // Mostra pulsante Admin solo se l'utente è admin
+                    if (data.user.role === 'admin') {
+                        document.getElementById('adminBtn').classList.remove('hidden');
+                    }
+                    
+                    // Mostra pulsante Crea FAQ solo se l'utente è admin
+                    if (data.user.role !== 'admin') {
+                        document.getElementById('createFaqBtn').classList.add('hidden');
+                    }
+                }
+            } catch (error) {
+                console.error('Errore controllo autenticazione:', error);
+            }
+        });
+        
         // Gestione logout
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             try {
