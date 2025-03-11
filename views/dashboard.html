@@ -7,6 +7,56 @@
     <link href="/css/main.css" rel="stylesheet">
     <!-- Use local Tailwind CSS build -->
     <style>
+        /* Tema scuro (default) */
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-color: #FFD700;
+            --border-color: #374151;
+            --table-border: #374151;
+            --table-header: #1f2937;
+        }
+        
+        /* Tema chiaro */
+        [data-theme="light"] {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --accent-color: #FFD700;
+            --border-color: #e5e7eb;
+            --table-border: #e5e7eb;
+            --table-header: #f3f4f6;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        header, footer {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+        
+        th, td {
+            border-color: var(--table-border) !important;
+        }
+        
+        th {
+            background-color: var(--table-header) !important;
+            color: var(--text-primary) !important;
+        }
+        
+        select, input {
+            background-color: var(--bg-secondary) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border-color) !important;
+        }
+        
         .category-accordion {
             @apply bg-gray-800 rounded-xl border border-gray-700 mb-4 overflow-hidden transition-all duration-300;
         }
@@ -37,13 +87,17 @@
     </style>
 </head>
 <body class="bg-primary-black text-gray-100" id="body">
-    <header class="bg-dark-gray py-4 px-6 border-b border-gray-800">
+    <header class="py-4 px-6 border-b">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
-            <nav class="space-x-4" id="headerNav">
+            <nav class="flex items-center space-x-4" id="headerNav">
                 <a href="/create" id="createFaqBtn" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Crea FAQ</a>
+                <button class="theme-toggle-btn p-2 rounded-full border border-gray-700 hover:border-accent-yellow" title="Cambia tema">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 theme-toggle-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                    </svg>
+                </button>
                 <button id="logoutBtn" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Logout</button>
-                <button id="themeToggle" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Tema</button>
             </nav>
         </div>
     </header>
@@ -94,6 +148,7 @@
 
     <script src="/js/error-alert.js"></script>
     <script src="/js/app.js"></script>
+    <script src="/js/theme-toggle.js"></script>
     <script>
         // Verifica ruolo utente e mostra/nascondi pulsanti appropriati
         window.addEventListener('DOMContentLoaded', async () => {
@@ -131,21 +186,6 @@
             }
         });
 
-        // Theme Toggle
-        const body = document.getElementById('body');
-        const themeToggle = document.getElementById('themeToggle');
-        let isDarkMode = false;
-
-        themeToggle.addEventListener('click', () => {
-            isDarkMode = !isDarkMode;
-            body.classList.toggle('dark', isDarkMode);
-            // Adjust colors/styles based on dark/light mode
-            if (isDarkMode) {
-                themeToggle.textContent = 'Tema Chiaro';
-            } else {
-                themeToggle.textContent = 'Tema Scuro';
-            }
-        });
-    </script>
+        </script>
 </body>
 </html>

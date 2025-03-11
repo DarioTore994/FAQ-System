@@ -6,12 +6,61 @@
     <title>FAQ Portal</title>
     <link href="/css/main.css" rel="stylesheet">
     <!-- Use local Tailwind CSS build -->
+    <style>
+        /* Tema scuro (default) */
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-color: #FFD700;
+            --border-color: #374151;
+        }
+        
+        /* Tema chiaro */
+        [data-theme="light"] {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --accent-color: #FFD700;
+            --border-color: #e5e7eb;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        header, footer {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+
+        .bg-primary-black {
+            background-color: var(--bg-primary);
+        }
+        
+        .bg-dark-gray {
+            background-color: var(--bg-secondary);
+        }
+        
+        .text-gray-300, .text-gray-400, .text-gray-500 {
+            color: var(--text-secondary);
+        }
+    </style>
 </head>
-<body class="bg-primary-black text-gray-100 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col">
     <header class="bg-dark-gray py-4 px-6 border-b border-gray-800">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
-            <div id="headerNav">
+            <div id="headerNav" class="flex items-center space-x-2">
+                <button class="theme-toggle-btn p-2 rounded-full bg-dark-gray border border-gray-700 hover:border-accent-yellow" title="Cambia tema">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 theme-toggle-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                    </svg>
+                </button>
                 <button id="logoutBtn" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Logout</button>
             </div>
         </div>
@@ -101,6 +150,7 @@
     <!-- Load Supabase client first -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/error-alert.js"></script>
+    <script src="/js/theme-toggle.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
             // Gestione stato login dal backend
