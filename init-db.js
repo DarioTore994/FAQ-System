@@ -31,7 +31,7 @@ async function initDatabase() {
       
       CREATE TABLE IF NOT EXISTS faqs (
         id SERIAL PRIMARY KEY,
-        user_id INTEGER NULL, -- Rendere nullable per supportare inserimenti senza utente
+        user_id INTEGER, -- Campo nullable per supportare inserimenti senza utente
         category VARCHAR(100) NOT NULL,
         title VARCHAR(255) NOT NULL,
         description TEXT NOT NULL,
