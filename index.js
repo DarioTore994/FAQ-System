@@ -4,6 +4,28 @@ const bcrypt = require('bcrypt');
 
 const app = express();
 app.use(express.json());
+app.use(express.static('public'));
+
+// Serve the HTML files from the views directory
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/views/index.html');
+});
+
+app.get('/auth', (req, res) => {
+  res.sendFile(__dirname + '/views/auth.html');
+});
+
+app.get('/dashboard', (req, res) => {
+  res.sendFile(__dirname + '/views/dashboard.html');
+});
+
+app.get('/admin', (req, res) => {
+  res.sendFile(__dirname + '/views/admin.html');
+});
+
+// Use API endpoints from api-endpoints.js
+const apiEndpoints = require('./api-endpoints');
+app.use('/api', apiEndpoints);
 
 // Endpoint per verificare se un'email è già registrata
 app.get('/api/auth/check-email', async (req, res) => {
