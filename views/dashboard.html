@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -45,15 +46,6 @@
         @keyframes slideDown {
             from { max-height: 0; opacity: 0; }
             to { max-height: 500px; opacity: 1; }
-        }
-
-        /* Stili tabella */
-        table thead {
-            background-color: #1a1a1a !important;
-        }
-
-        table th {
-            color: #FFD700 !important;
         }
 
         /* Bottoni e link */
@@ -114,7 +106,7 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div>
                 <h2 class="text-2xl font-bold text-accent-yellow">Domande Frequenti</h2>
-                <p class="text-gray-400 mt-1">Ultime 10 FAQ disponibili</p>
+                <p class="text-gray-400 mt-1">Ultime FAQ disponibili</p>
             </div>
             <div class="relative flex items-center w-full md:w-auto">
                 <div class="relative w-full">
@@ -134,22 +126,22 @@
         <div id="faqContainer" class="card p-0 overflow-hidden animate-fade-in border border-gray-700 rounded-xl shadow-lg">
             <div class="overflow-x-auto">
                 <div id="faqListView" class="overflow-hidden">
-                <div class="bg-gray-800/20 border-b border-gray-700">
-                    <div class="grid grid-cols-12 text-left py-4 px-6">
-                        <div class="col-span-3 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Domanda</div>
-                        <div class="col-span-4 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Descrizione/Soluzione</div>
-                        <div class="col-span-2 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Categoria</div>
-                        <div class="col-span-2 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Data</div>
-                        <div class="col-span-1 font-semibold text-accent-yellow text-sm uppercase tracking-wider text-right">Azioni</div>
+                    <div class="bg-gray-800/20 border-b border-gray-700">
+                        <div class="grid grid-cols-12 text-left py-4 px-6">
+                            <div class="col-span-3 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Domanda</div>
+                            <div class="col-span-4 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Descrizione/Soluzione</div>
+                            <div class="col-span-2 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Categoria</div>
+                            <div class="col-span-2 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Data</div>
+                            <div class="col-span-1 font-semibold text-accent-yellow text-sm uppercase tracking-wider text-right">Azioni</div>
+                        </div>
+                    </div>
+                    <div id="faqListContainer" class="divide-y divide-gray-700/50">
+                        <!-- FAQ items verranno inseriti qui -->
+                        <div class="py-6 text-center text-gray-400">
+                            Caricamento FAQ in corso...
+                        </div>
                     </div>
                 </div>
-                <div id="faqListContainer" class="divide-y divide-gray-700/50">
-                    <!-- FAQ items verranno inseriti qui -->
-                    <div class="py-6 text-center text-gray-400">
-                        Caricamento FAQ in corso...
-                    </div>
-                </div>
-            </div>
             </div>
 
             <!-- Admin Section (hidden by default) -->
@@ -513,7 +505,7 @@
                                 <p class="text-gray-200">${faq.resolution}</p>
                             </div>
                             <div class="pt-2 text-right">
-                                <span class="text-xs text-gray-500">${formatDate(faq.created_at)}</span>
+                                <span class="text-xs text-gray-500">${formattedDate}</span>
                             </div>
                         </div>
                     </div>
