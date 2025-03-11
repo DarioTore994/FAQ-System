@@ -133,6 +133,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     faqForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
+      // Visualizza messaggio di caricamento
+      showErrorAlert('Salvataggio in corso...');
+      
       const formData = new FormData(faqForm);
       const faqData = {
         category: formData.get('category'),
@@ -144,28 +147,42 @@ document.addEventListener("DOMContentLoaded", async () => {
       try {
         console.log('Sending FAQ data:', faqData);
         
+        // Verifica autenticazione prima di inviare
+        const authCheck = await fetch('/api/auth/check');
+        const authData = await authCheck.json();
+        
+        if (!authData.authenticated) {
+          showErrorAlert('Sessione scaduta. Effettua nuovamente il login.');
+          setTimeout(() => {
+            window.location.href = '/auth';
+          }, 1500);
+          return;
+        }
+        
         const response = await fetch('/api/faqs', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(faqData),
+          credentials: 'include'
         });
         
+        const responseData = await response.json().catch(() => ({}));
+        
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error?.message || 'Errore durante il salvataggio');
+          throw new Error(responseData.error?.message || 'Errore durante il salvataggio');
         }
         
         showErrorAlert('FAQ salvata con successo!');
         
         // Redirect to home after successful creation (with a small delay to show success message)
         setTimeout(() => {
-          window.location.href = '/';
+          window.location.href = '/dashboard';
         }, 1500);
       } catch (error) {
         console.error('Error saving FAQ:', error);
-        showErrorAlert('Errore nel salvataggio della FAQ. Verifica di essere autenticato e che la tabella faqs esista.');
+        showErrorAlert('Errore nel salvataggio della FAQ: ' + error.message);
       }
     });
   }

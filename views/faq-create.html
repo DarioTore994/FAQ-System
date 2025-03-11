@@ -100,12 +100,16 @@
     <script>
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             try {
-                const { error } = await supabase.auth.signOut();
-                if (error) throw error;
-                window.location.href = '/'; // Redirect to login page after logout
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/';
+                }
             } catch (error) {
-                console.error("Error logging out:", error);
-                //Handle error appropriately, e.g., display an error message.
+                console.error('Errore durante il logout:', error);
+                showErrorAlert('Errore durante il logout');
             }
         });
     </script>
