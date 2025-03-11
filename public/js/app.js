@@ -447,7 +447,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     const authResponse = await fetch('/api/auth/check');
-    const authData = await authResponse.json();
+    
+    // Verifica se la risposta è valida
+    if (!authResponse.ok) {
+      console.error('Errore API auth/check:', authResponse.status, authResponse.statusText);
+      return;
+    }
+    
+    // Gestione sicura del parsing JSON
+    let authData;
+    try {
+      authData = await authResponse.json();
+    } catch (parseError) {
+      console.error('Errore parsing risposta auth/check:', parseError);
+      return;
+    }
 
     if (authData.authenticated) {
       userRole = authData.user.role;
@@ -468,7 +482,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           createFaqBtn.classList.remove('hidden');
         }
 
-        // Mostra pulsante admin
+        // Mostra pulsante admin (solo se non esiste già)
         if (!document.getElementById('adminLink')) {
           const createBtn = document.createElement('a');
           createBtn.href = '/admin';
@@ -480,7 +494,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
   } catch (error) {
-    console.error('Errore verifica autenticazione:', error);
+    console.error('Errore verifica autenticazione:', error);;
   }
 
   // Variabili globali per le FAQ

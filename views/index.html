@@ -173,19 +173,42 @@
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 const response = await fetch('/api/auth/check');
-                const data = await response.json();
+                // Controlla se la risposta è valida
+                if (!response.ok) {
+                    console.error('Errore nella risposta API:', response.status, response.statusText);
+                    document.getElementById('loginContainer')?.classList.remove('hidden');
+                    document.getElementById('loggedInContainer')?.classList.add('hidden');
+                    document.getElementById('headerNav')?.classList.add('hidden');
+                    return;
+                }
+                
+                // Gestione sicura del parsing JSON
+                let data;
+                try {
+                    data = await response.json();
+                } catch (jsonError) {
+                    console.error('Errore parsing JSON:', jsonError);
+                    document.getElementById('loginContainer')?.classList.remove('hidden');
+                    document.getElementById('loggedInContainer')?.classList.add('hidden');
+                    document.getElementById('headerNav')?.classList.add('hidden');
+                    return;
+                }
                 
                 if (data.authenticated) {
-                    document.getElementById('loginContainer').classList.add('hidden');
-                    document.getElementById('loggedInContainer').classList.remove('hidden');
-                    document.getElementById('headerNav').classList.remove('hidden');
+                    document.getElementById('loginContainer')?.classList.add('hidden');
+                    document.getElementById('loggedInContainer')?.classList.remove('hidden');
+                    document.getElementById('headerNav')?.classList.remove('hidden');
                 } else {
-                    document.getElementById('loginContainer').classList.remove('hidden');
-                    document.getElementById('loggedInContainer').classList.add('hidden');
-                    document.getElementById('headerNav').classList.add('hidden');
+                    document.getElementById('loginContainer')?.classList.remove('hidden');
+                    document.getElementById('loggedInContainer')?.classList.add('hidden');
+                    document.getElementById('headerNav')?.classList.add('hidden');
                 }
             } catch (error) {
                 console.error('Errore controllo autenticazione:', error);
+                // Fallback in caso di errore: mostra login
+                document.getElementById('loginContainer')?.classList.remove('hidden');
+                document.getElementById('loggedInContainer')?.classList.add('hidden');
+                document.getElementById('headerNav')?.classList.add('hidden');
             }
         });
 

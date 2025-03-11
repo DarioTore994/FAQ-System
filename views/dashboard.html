@@ -166,7 +166,23 @@
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 const response = await fetch('/api/auth/check');
-                const data = await response.json();
+
+                // Controlla se la risposta è valida
+                if (!response.ok) {
+                    console.error('Errore nella risposta API:', response.status, response.statusText);
+                    window.location.href = '/auth';
+                    return;
+                }
+
+                // Gestione sicura del parsing JSON
+                let data;
+                try {
+                    data = await response.json();
+                } catch (jsonError) {
+                    console.error('Errore parsing JSON:', jsonError);
+                    window.location.href = '/auth';
+                    return;
+                }
 
                 // Di default, nascondi elementi admin
                 const createFaqBtn = document.getElementById('createFaqBtn');
@@ -195,6 +211,7 @@
                 }
             } catch (error) {
                 console.error('Errore controllo autenticazione:', error);
+                window.location.href = '/auth';
             }
         });
 
@@ -214,6 +231,6 @@
             }
         });
 
-        </script>
+    </script>
 </body>
 </html>
