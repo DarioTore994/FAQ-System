@@ -107,21 +107,25 @@
                 </svg>
                 <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
             </div>
-            <div id="headerNav" class="hidden flex items-center space-x-4">
-                <button id="logoutBtn" class="btn btn-secondary">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Logout
-                </button>
-            </div>
-            <div id="loginNavBtn" class="hidden">
-                <a href="/auth" class="btn btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                    </svg>
-                    Accedi
-                </a>
+            <div class="flex items-center space-x-4">
+                <!-- Elementi per utenti autenticati -->
+                <div id="headerNav" class="hidden">
+                    <button id="logoutBtn" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Logout
+                    </button>
+                </div>
+                <!-- Elementi per utenti non autenticati -->
+                <div id="loginNavBtn" class="hidden">
+                    <a href="/auth" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                        Accedi
+                    </a>
+                </div>
             </div>
         </div>
     </header>
@@ -137,31 +141,37 @@
             <h1 class="text-3xl sm:text-4xl font-bold text-accent-yellow mb-4 sm:mb-6">Benvenuto nel FAQ Portal</h1>
             <p class="text-lg sm:text-xl text-gray-300 mb-8 sm:mb-10">La piattaforma per gestire le domande tecniche frequenti</p>
 
-            <div id="loginContainer" class="hidden flex flex-col items-center">
-                <p class="text-gray-400 mb-6">Effettua il login per accedere e gestire le FAQ</p>
-                <a href="/auth" class="btn-accent">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                    </svg>
-                    Accedi
-                </a>
+            <!-- Contenitore per utenti non autenticati -->
+            <div id="loginContainer" class="hidden">
+                <div class="flex flex-col items-center">
+                    <p class="text-gray-400 mb-6">Effettua il login per accedere e gestire le FAQ</p>
+                    <a href="/auth" class="btn-accent">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                        Accedi
+                    </a>
+                </div>
             </div>
 
-            <div id="loggedInContainer" class="hidden flex flex-col items-center">
-                <p class="text-gray-400 mb-6">Sei autenticato. Ora puoi:</p>
-                <div class="flex gap-4 flex-wrap justify-center">
-                    <a href="/dashboard" class="btn-outline">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                        Visualizza FAQ
-                    </a>
-                    <a href="/create" class="btn-accent">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Crea FAQ
-                    </a>
+            <!-- Contenitore per utenti autenticati -->
+            <div id="loggedInContainer" class="hidden">
+                <div class="flex flex-col items-center">
+                    <p class="text-gray-400 mb-6">Sei autenticato. Ora puoi:</p>
+                    <div class="flex gap-4 flex-wrap justify-center">
+                        <a href="/dashboard" class="btn-outline">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            Visualizza FAQ
+                        </a>
+                        <a href="/create" class="btn-accent">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Crea FAQ
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -176,17 +186,31 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="/js/error-alert.js"></script>
     <script>
-        // Mostra/nascondi pulsanti login/logout in base allo stato di autenticazione
+        // Funzione per mostrare/nascondere elementi
+        function toggleAuthUI(isAuthenticated) {
+            if (isAuthenticated) {
+                // Utente autenticato: nascondi login, mostra logout e contenuti autenticati
+                document.getElementById('loginContainer')?.classList.add('hidden');
+                document.getElementById('loggedInContainer')?.classList.remove('hidden');
+                document.getElementById('headerNav')?.classList.remove('hidden');
+                document.getElementById('loginNavBtn')?.classList.add('hidden');
+            } else {
+                // Utente non autenticato: mostra login, nascondi logout e contenuti autenticati
+                document.getElementById('loginContainer')?.classList.remove('hidden');
+                document.getElementById('loggedInContainer')?.classList.add('hidden');
+                document.getElementById('headerNav')?.classList.add('hidden');
+                document.getElementById('loginNavBtn')?.classList.remove('hidden');
+            }
+        }
+        
+        // Verifica lo stato di autenticazione al caricamento della pagina
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 const response = await fetch('/api/auth/check');
                 // Controlla se la risposta è valida
                 if (!response.ok) {
                     console.error('Errore nella risposta API:', response.status, response.statusText);
-                    // Utente non autenticato: mostra login, nascondi logout e contenuti autenticati
-                    document.getElementById('loginContainer')?.classList.remove('hidden');
-                    document.getElementById('loggedInContainer')?.classList.add('hidden');
-                    document.getElementById('headerNav')?.classList.add('hidden');
+                    toggleAuthUI(false);
                     return;
                 }
                 
@@ -196,33 +220,16 @@
                     data = await response.json();
                 } catch (jsonError) {
                     console.error('Errore parsing JSON:', jsonError);
-                    // Errore parsing: mostra login, nascondi logout e contenuti autenticati
-                    document.getElementById('loginContainer')?.classList.remove('hidden');
-                    document.getElementById('loggedInContainer')?.classList.add('hidden');
-                    document.getElementById('headerNav')?.classList.add('hidden');
+                    toggleAuthUI(false);
                     return;
                 }
                 
-                if (data.authenticated) {
-                    // Utente autenticato: nascondi login, mostra logout e contenuti autenticati
-                    document.getElementById('loginContainer')?.classList.add('hidden');
-                    document.getElementById('loggedInContainer')?.classList.remove('hidden');
-                    document.getElementById('headerNav')?.classList.remove('hidden');
-                    document.getElementById('loginNavBtn')?.classList.add('hidden');
-                } else {
-                    // Utente non autenticato: mostra login, nascondi logout e contenuti autenticati
-                    document.getElementById('loginContainer')?.classList.remove('hidden');
-                    document.getElementById('loggedInContainer')?.classList.add('hidden');
-                    document.getElementById('headerNav')?.classList.add('hidden');
-                    document.getElementById('loginNavBtn')?.classList.remove('hidden');
-                }
+                // Imposta l'interfaccia in base allo stato di autenticazione
+                toggleAuthUI(data.authenticated);
             } catch (error) {
                 console.error('Errore controllo autenticazione:', error);
-                // Fallback in caso di errore: mostra login, nascondi logout e contenuti autenticati
-                document.getElementById('loginContainer')?.classList.remove('hidden');
-                document.getElementById('loggedInContainer')?.classList.add('hidden');
-                document.getElementById('headerNav')?.classList.add('hidden');
-                document.getElementById('loginNavBtn')?.classList.remove('hidden');
+                // Fallback in caso di errore
+                toggleAuthUI(false);
             }
         });
 
