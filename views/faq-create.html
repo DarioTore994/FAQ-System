@@ -138,21 +138,21 @@
                     <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
                     <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
                 </div>
-                
+
                 <!-- Menu per utenti autenticati -->
                 <div id="authUserMenu" class="flex items-center gap-4">
                     <a href="/create" id="createFaqBtn" class="text-gray-300 hover:text-accent-yellow border-b-2 border-accent-yellow pb-1">
                         <span>Crea FAQ</span>
                     </a>
                 </div>
-                
+
                 <!-- Menu solo per admin -->
                 <div id="adminMenu" class="hidden flex items-center gap-4">
                     <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow">Admin</a>
                     <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow">Utenti</a>
                     <a href="/categories" id="categoriesLink" class="text-gray-300 hover:text-accent-yellow">Categorie</a>
                 </div>
-                
+
                 <button id="logoutBtn" class="btn btn-secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -280,12 +280,18 @@
                 } else {
                     console.log('Database verificato correttamente');
                 }
-                
+
                 // Aggiungi event listener al form di creazione FAQ
                 document.getElementById('faqForm').addEventListener('submit', async (e) => {
                     e.preventDefault();
                     console.log('Salvataggio in corso...');
-                    
+                    let isSubmitting = true;
+                    const submitButton = e.target.querySelector('.submit-btn');
+                    const originalButtonText = submitButton.innerHTML;
+                    submitButton.innerHTML = 'Salvataggio...';
+                    submitButton.disabled = true;
+
+
                     try {
                         const formData = new FormData(e.target);
                         const faqData = {
@@ -294,63 +300,16 @@
                             description: formData.get('description'),
                             resolution: formData.get('resolution')
                         };
-                        
+
                         console.log('Sending FAQ data:', faqData);
-                        
+
                         // Verifica che la tabella esista
                         console.log('Verifica tabella in corso...');
 
-<script>
-// Verifica ruolo utente e mostra/nascondi pulsanti appropriati
-window.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const response = await fetch('/api/auth/check');
-        
-        // Controlla se la risposta è valida
-        if (!response.ok) {
-            console.error('Errore nella risposta API:', response.status, response.statusText);
-            window.location.href = '/auth';
-            return;
-        }
-        
-        // Gestione sicura del parsing JSON
-        let data;
-        try {
-            data = await response.json();
-        } catch (jsonError) {
-            console.error('Errore parsing JSON:', jsonError);
-            window.location.href = '/auth';
-            return;
-        }
-        
-        // Riferimento al menu admin
-        const adminMenu = document.getElementById('adminMenu');
-
-        // Nascondi di default il menu admin
-        if (adminMenu) adminMenu.classList.add('hidden');
-        
-        if (data.authenticated) {
-            // Controllo ruolo admin
-            if (data.user.role === 'admin') {
-                // Menu admin visibile solo per amministratori
-                if (adminMenu) adminMenu.classList.remove('hidden');
-            }
-        } else {
-            // Non autenticato: reindirizza a login
-            window.location.href = '/auth';
-        }
-    } catch (error) {
-        console.error('Errore controllo autenticazione:', error);
-        window.location.href = '/auth';
-    }
-});
-</script>
-
                         await fetch('/api/init-db', { method: 'POST' });
                         console.log('Tabella verificata');
-                        
-                        // Invia i dati al server
-                        console.log('Salvataggio FAQ in corso...');
+
+                        // Salvataggio della FAQ
                         const response = await fetch('/api/faqs', {
                             method: 'POST',
                             headers: {
@@ -359,24 +318,53 @@ window.addEventListener('DOMContentLoaded', async () => {
                             body: JSON.stringify(faqData),
                             credentials: 'include'
                         });
-                        
-                        const jsonResponse = await response.json();
-                        console.log('Risposta grezza del server:', JSON.stringify(jsonResponse));
-                        
+
+                        // Verifica risposta
                         if (!response.ok) {
-                            throw new Error('Errore di autenticazione: sessione scaduta o utente non valido. Rieffettua il login.');
+                            // Verifica se la risposta è in formato JSON
+                            const contentType = response.headers.get('content-type');
+                            if (contentType && contentType.includes('application/json')) {
+                                const errorData = await response.json();
+                                console.log('Risposta grezza del server:', JSON.stringify(errorData));
+                                const errorMsg = errorData.error?.message || 'Errore sconosciuto';
+                                throw new Error(errorMsg);
+                            } else {
+                                // Se non è JSON (probabilmente HTML di un errore), gestisci diversamente
+                                if (response.status === 401 || response.status === 403) {
+                                    throw new Error('Errore di autenticazione: sessione scaduta o utente non valido. Rieffettua il login.');
+                                } else {
+                                    throw new Error(`Errore del server (${response.status}): Impossibile elaborare la richiesta`);
+                                }
+                            }
                         }
-                        
+
+                        // Analizza la risposta solo se il server ha risposto con successo
+                        const data = await response.json();
+                        console.log('Risposta grezza del server:', JSON.stringify(data));
+
                         showErrorAlert('FAQ salvata con successo!');
                         e.target.reset();
-                        
+
                         // Redirigi alla dashboard dopo un breve ritardo
                         setTimeout(() => {
                             window.location.href = '/dashboard';
                         }, 1500);
                     } catch (error) {
                         console.error('Errore nel salvataggio della FAQ:', error.message);
-                        showErrorAlert('Errore nel salvataggio della FAQ: ' + error.message);
+
+                        // Se è un errore di sessione, reindirizza alla pagina di login
+                        if (error.message.includes('sessione scaduta') || error.message.includes('autenticazione')) {
+                            showErrorAlert('Sessione scaduta. Reindirizzamento alla pagina di login...');
+                            setTimeout(() => {
+                                window.location.href = '/auth';
+                            }, 2000);
+                        } else {
+                            showErrorAlert('Errore nel salvataggio della FAQ: ' + error.message);
+                        }
+
+                        isSubmitting = false;
+                        submitButton.innerHTML = originalButtonText;
+                        submitButton.disabled = false;
                     }
                 });
             } catch (error) {
