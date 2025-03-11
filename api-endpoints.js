@@ -23,16 +23,16 @@ router.post('/auth/login', async (req, res) => {
     try {
       const result = await client.query('SELECT id, email, role FROM users WHERE email = $1 AND password = $2', 
         [email, password]);
-      
+
       if (result.rows.length === 0) {
         return res.status(401).json({ error: 'Credenziali non valide' });
       }
-      
+
       const user = result.rows[0];
-      
+
       // Usa l'ID utente come token (semplificato, in produzione usa JWT)
       const token = user.id.toString();
-      
+
       return res.status(200).json({ 
         session: {
           access_token: token,
@@ -78,60 +78,84 @@ router.get('/faqs', async (req, res) => {
 
 // Endpoint per salvare una nuova FAQ
 router.post('/faqs', async (req, res) => {
-  const client = await pool.connect();
   try {
-    const { category, title, description, resolution, userId } = req.body;
-
-    console.log('API Mobile - Richiesta inserimento FAQ:', {
-      category, 
-      title,
-      userId,
-      descriptionLength: description?.length || 0,
-      resolutionLength: resolution?.length || 0
-    });
+    const { category, title, description, resolution, status } = req.body;
 
     if (!category || !title || !description || !resolution) {
-      console.error('API Mobile - Campi mancanti:', { category, title, description, resolution });
-      return res.status(400).json({ error: 'Tutti i campi sono obbligatori' });
+      return res.status(400).json({ error: { message: 'Tutti i campi sono obbligatori' } });
     }
 
-    // Se non è fornito un ID utente, utilizziamo l'utente admin predefinito
-    let user_id = userId;
-    if (!user_id) {
-      // Ottieni l'ID del primo utente admin
-      const adminResult = await client.query(
-        'SELECT id FROM users WHERE role = $1 LIMIT 1',
-        ['admin']
-      );
-      
-      if (adminResult.rows.length === 0) {
-        console.error('API Mobile - Nessun utente admin trovato');
-        return res.status(500).json({ 
-          error: 'Non è possibile salvare la FAQ: nessun utente admin trovato nel sistema' 
-        });
-      }
-      
-      user_id = adminResult.rows[0].id;
-      console.log('API Mobile - Utilizzando utente admin predefinito:', user_id);
-    }
-
-    // Inserimento della FAQ
-    const result = await client.query(
-      'INSERT INTO faqs (user_id, category, title, description, resolution) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [user_id, category, title, description, resolution]
+    // Inserisci la nuova FAQ nel database senza user_id
+    const result = await pool.query(
+      'INSERT INTO faqs (category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [category, title, description, resolution, status || 'Nuovo']
     );
 
-    console.log('API Mobile - FAQ inserita con successo:', result.rows[0]);
-    return res.status(201).json({ success: true, data: result.rows[0] });
-  } catch (err) {
-    console.error('API Mobile - Errore salvataggio FAQ:', err);
-    return res.status(500).json({ 
-      error: 'Errore durante il salvataggio della FAQ',
-      details: err.message,
-      stack: err.stack
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('Errore salvataggio FAQ:', error);
+    res.status(500).json({ 
+      error: { 
+        message: 'Errore interno del server',
+        details: error.message
+      } 
     });
-  } finally {
-    client.release();
+  }
+});
+
+// Inizializzazione database (crea tabelle se non esistono)
+router.post('/init-db', async (req, res) => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        role VARCHAR(50) NOT NULL DEFAULT 'user',
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        reset_token VARCHAR(255),
+        reset_token_expiry TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS categories (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) UNIQUE NOT NULL,
+        description TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+
+      CREATE TABLE IF NOT EXISTS faqs (
+        id SERIAL PRIMARY KEY,
+        category VARCHAR(100) NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        resolution TEXT NOT NULL,
+        status VARCHAR(50) DEFAULT 'Nuovo',
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP
+      );
+    `);
+
+    // Inserisci categorie di base se non esistono già
+    await pool.query(`
+      INSERT INTO categories (name, description)
+      VALUES 
+        ('Hardware', 'Problemi relativi a dispositivi fisici'),
+        ('Software', 'Problemi relativi a programmi e applicazioni'),
+        ('Network', 'Problemi di rete e connettività'),
+        ('Security', 'Problemi di sicurezza informatica')
+      ON CONFLICT (name) DO NOTHING;
+    `);
+
+    res.json({ success: true, message: 'Database inizializzato correttamente' });
+  } catch (error) {
+    console.error('Errore inizializzazione database:', error);
+    res.status(500).json({ 
+      error: { 
+        message: 'Errore inizializzazione database',
+        details: error.message
+      } 
+    });
   }
 });
 

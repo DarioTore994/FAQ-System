@@ -166,18 +166,18 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-app.post('/api/faq/create', authenticateUser, async (req, res) => {
+app.post('/api/faq/create', async (req, res) => {
     try {
-        const { category, title, description, resolution } = req.body;
+        const { category, title, description, resolution, status } = req.body;
 
         if (!category || !title || !description || !resolution) {
             return res.status(400).json({ error: { message: 'Tutti i campi sono obbligatori' } });
         }
 
-        // Inserisci la nuova FAQ nel database (senza user_id che non esiste nella tabella)
+        // Inserisci la nuova FAQ nel database
         const result = await pool.query(
-            'INSERT INTO faqs (category, title, description, resolution) VALUES ($1, $2, $3, $4) RETURNING *',
-            [category, title, description, resolution]
+            'INSERT INTO faqs (category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [category, title, description, resolution, status || 'Nuovo']
         );
 
         res.json({ success: true, data: result.rows[0] });
