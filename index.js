@@ -196,6 +196,9 @@ app.get("/admin", requireAdmin, (req, res) =>
 app.get("/users", requireAdmin, (req, res) =>
   res.sendFile(path.join(__dirname, "views/users.html")),
 );
+app.get("/categories", requireAdmin, (req, res) =>
+  res.sendFile(path.join(__dirname, "views/categories.html")),
+);
 
 // API autenticazione
 app.get("/api/auth/check", async (req, res) => {
@@ -496,6 +499,51 @@ app.delete("/api/categories/:id", requireAdmin, async (req, res) => {
     return res.json({ success: true, message: 'Categoria eliminata con successo' });
   } catch (error) {
     console.error("Errore durante l'eliminazione della categoria:", error);
+    return res.status(500).json({ error: 'Errore interno del server' });
+  } finally {
+    client.release();
+  }
+});
+
+// API per modificare una categoria (solo admin)
+app.put("/api/categories/:id", requireAdmin, async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const categoryId = parseInt(req.params.id, 10);
+    const { name } = req.body;
+    
+    if (isNaN(categoryId)) {
+      return res.status(400).json({ error: 'ID categoria non valido' });
+    }
+    
+    if (!name) {
+      return res.status(400).json({ error: 'Il nome della categoria è obbligatorio' });
+    }
+    
+    // Verifica se la categoria esiste
+    const categoryCheck = await client.query('SELECT id FROM categories WHERE id = $1', [categoryId]);
+    if (categoryCheck.rows.length === 0) {
+      return res.status(404).json({ error: 'Categoria non trovata' });
+    }
+    
+    // Verifica se il nuovo nome esiste già
+    const existingCategory = await client.query('SELECT id FROM categories WHERE name = $1 AND id != $2', [name, categoryId]);
+    if (existingCategory.rows.length > 0) {
+      return res.status(400).json({ error: 'Esiste già una categoria con questo nome' });
+    }
+    
+    // Aggiorna la categoria
+    await client.query('UPDATE categories SET name = $1 WHERE id = $2', [name, categoryId]);
+    
+    // Aggiorna anche le FAQ associate alla categoria
+    const oldCategoryName = await client.query('SELECT name FROM categories WHERE id = $1', [categoryId]);
+    if (oldCategoryName.rows.length > 0) {
+      await client.query('UPDATE faqs SET category = $1 WHERE category = $2', [name, oldCategoryName.rows[0].name]);
+    }
+    
+    return res.json({ success: true, message: 'Categoria aggiornata con successo' });
+  } catch (error) {
+    console.error("Errore durante l'aggiornamento della categoria:", error);
     return res.status(500).json({ error: 'Errore interno del server' });
   } finally {
     client.release();

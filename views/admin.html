@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -18,7 +17,7 @@
             color: #f3f4f6;
             border: 1px solid #374151;
         }
-        
+
         .category-pill button {
             margin-left: 0.5rem;
         }
@@ -33,7 +32,7 @@
                 <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
                 <a href="/create" class="text-gray-300 hover:text-accent-yellow">Crea FAQ</a>
                 <a href="/users" class="text-gray-300 hover:text-accent-yellow">Utenti</a>
-                
+                <a href="/categories" class="text-gray-300 hover:text-accent-yellow">Categorie</a>
                 <button id="logoutBtn" class="text-gray-300 hover:text-accent-yellow">Logout</button>
             </nav>
         </div>
@@ -41,7 +40,7 @@
 
     <main class="container mx-auto px-6 py-8">
         <h1 class="text-3xl font-bold mb-8 text-center text-accent-yellow">Pannello di Amministrazione</h1>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <div class="bg-dark-gray p-6 rounded-lg shadow-md">
                 <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Gestione FAQ</h2>
@@ -50,7 +49,7 @@
                     Crea nuova FAQ
                 </a>
             </div>
-            
+
             <div class="bg-dark-gray p-6 rounded-lg shadow-md">
                 <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Gestione Utenti</h2>
                 <p class="text-gray-300 mb-4">Visualizza e gestisci gli utenti registrati nel portale.</p>
@@ -58,7 +57,7 @@
                     Gestisci utenti
                 </a>
             </div>
-            
+
             <div class="bg-dark-gray p-6 rounded-lg shadow-md">
                 <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Gestione Categorie</h2>
                 <p class="text-gray-300 mb-4">Aggiungi e gestisci le categorie delle FAQ.</p>
@@ -67,7 +66,7 @@
                 </button>
             </div>
         </div>
-        
+
         <div class="bg-dark-gray p-6 rounded-lg shadow-md mb-6">
             <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Crea nuovo utente</h2>
             <form id="createUserForm" class="space-y-4">
@@ -110,18 +109,18 @@
                 </button>
             </form>
         </div>
-        
+
         <!-- Gestione categorie (inizialmente nascosto) -->
         <div id="categoryManagement" class="bg-dark-gray p-6 rounded-lg shadow-md" style="display: none;">
             <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Gestione Categorie</h2>
-            
+
             <div class="mb-6">
                 <h3 class="text-lg font-medium mb-2">Categorie esistenti</h3>
                 <div id="categoriesList" class="mb-4">
                     <!-- Le categorie verranno caricate qui -->
                 </div>
             </div>
-            
+
             <form id="addCategoryForm" class="space-y-4">
                 <div>
                     <label class="block mb-2 text-accent-yellow">Nome categoria</label>
@@ -151,7 +150,7 @@
 
     <script src="/js/error-alert.js"></script>
     <script>
-        
+
         // Funzione per caricare le categorie
         async function loadCategories() {
             try {
@@ -159,17 +158,17 @@
                 if (!response.ok) {
                     throw new Error('Errore nel caricamento delle categorie');
                 }
-                
+
                 const categories = await response.json();
                 const categoriesList = document.getElementById('categoriesList');
-                
+
                 categoriesList.innerHTML = '';
-                
+
                 if (categories.length === 0) {
                     categoriesList.innerHTML = '<p class="text-gray-400">Nessuna categoria presente.</p>';
                     return;
                 }
-                
+
                 categories.forEach(category => {
                     const categoryPill = document.createElement('div');
                     categoryPill.className = 'category-pill';
@@ -179,23 +178,23 @@
                     `;
                     categoriesList.appendChild(categoryPill);
                 });
-                
+
                 // Aggiungi listener per eliminazione
                 document.querySelectorAll('.delete-category').forEach(button => {
                     button.addEventListener('click', async (e) => {
                         e.stopPropagation();
                         const categoryId = button.getAttribute('data-id');
-                        
+
                         if (confirm('Sei sicuro di voler eliminare questa categoria?')) {
                             try {
                                 const response = await fetch(`/api/categories/${categoryId}`, {
                                     method: 'DELETE'
                                 });
-                                
+
                                 if (!response.ok) {
                                     throw new Error('Errore nell\'eliminazione della categoria');
                                 }
-                                
+
                                 showErrorAlert('Categoria eliminata con successo!');
                                 loadCategories();
                             } catch (error) {
@@ -210,23 +209,23 @@
                 showErrorAlert('Errore: ' + error.message);
             }
         }
-        
+
         // Verifica che l'utente sia autenticato e sia admin
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 const response = await fetch('/api/auth/check');
                 const data = await response.json();
-                
+
                 if (!data.authenticated) {
                     window.location.href = '/auth';
                     return;
                 }
-                
+
                 if (data.user.role !== 'admin') {
                     window.location.href = '/dashboard';
                     return;
                 }
-                
+
                 // Gestione visualizzazione form categorie
                 document.getElementById('showCategoriesBtn').addEventListener('click', () => {
                     const categoryManagement = document.getElementById('categoryManagement');
@@ -242,11 +241,11 @@
                 showErrorAlert('Errore verifica autenticazione');
             }
         });
-        
+
         // Gestione form creazione utente
         document.getElementById('createUserForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             try {
                 const formData = new FormData(e.target);
                 const userData = {
@@ -254,7 +253,7 @@
                     password: formData.get('password'),
                     role: formData.get('role')
                 };
-                
+
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: {
@@ -278,17 +277,17 @@
                 showErrorAlert('Errore: ' + error.message);
             }
         });
-        
+
         // Gestione form aggiunta categorie
         document.getElementById('addCategoryForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             try {
                 const formData = new FormData(e.target);
                 const categoryData = {
                     name: formData.get('categoryName')
                 };
-                
+
                 const response = await fetch('/api/categories', {
                     method: 'POST',
                     headers: {
@@ -297,12 +296,12 @@
                     body: JSON.stringify(categoryData),
                     credentials: 'include'
                 });
-                
+
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.error || 'Errore creazione categoria');
                 }
-                
+
                 showErrorAlert('Categoria aggiunta con successo!');
                 e.target.reset();
                 loadCategories();
@@ -311,14 +310,14 @@
                 showErrorAlert('Errore: ' + error.message);
             }
         });
-        
+
         // Gestione logout
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             try {
                 const response = await fetch('/api/auth/logout', {
                     method: 'POST'
                 });
-                
+
                 if (response.ok) {
                     window.location.href = '/';
                 }

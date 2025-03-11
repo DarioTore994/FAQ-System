@@ -58,6 +58,8 @@
                 <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
             </div>
             <nav class="flex items-center flex-wrap justify-center gap-2 md:gap-4" id="headerNav">
+                <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
+                <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
                 <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow hidden">Admin</a>
                 <a href="/create" id="createFaqBtn" class="btn btn-primary shadow-md flex items-center hidden">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -66,7 +68,8 @@
                     <span class="hidden sm:inline">Crea FAQ</span>
                     <span class="sm:hidden">Crea</span>
                 </a>
-                
+                <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow hidden">Utenti</a>
+                <a href="/categories" id="categoriesLink" class="text-gray-300 hover:text-accent-yellow hidden">Categorie</a>
                 <button id="logoutBtn" class="btn btn-secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -150,10 +153,15 @@
                 const createFaqBtn = document.getElementById('createFaqBtn');
                 const adminCategorySection = document.getElementById('adminCategorySection');
                 const adminLink = document.getElementById('adminLink');
-                
+                const usersLink = document.getElementById('usersLink');
+                const categoriesLink = document.getElementById('categoriesLink');
+
                 if (createFaqBtn) createFaqBtn.classList.add('hidden');
                 if (adminCategorySection) adminCategorySection.classList.add('hidden');
                 if (adminLink) adminLink.classList.add('hidden');
+                if (usersLink) usersLink.classList.add('hidden');
+                if (categoriesLink) categoriesLink.classList.add('hidden');
+
 
                 if (data.authenticated) {
                     // Gestione elementi basati sul ruolo utente
@@ -162,6 +170,8 @@
                         if (createFaqBtn) createFaqBtn.classList.remove('hidden');
                         if (adminCategorySection) adminCategorySection.classList.remove('hidden');
                         if (adminLink) adminLink.classList.remove('hidden');
+                        if (usersLink) usersLink.classList.remove('hidden');
+                        if (categoriesLink) categoriesLink.classList.remove('hidden');
                     }
                 }
             } catch (error) {
