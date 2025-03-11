@@ -369,13 +369,13 @@
 
                 // Ottenere i dati della FAQ specifica
                 const response = await fetch(`/api/faqs/${faqId}`);
-                
+
                 // Ottieni il testo della risposta
                 const responseText = await response.text();
-                
+
                 // Log per il debug
                 console.log(`Risposta caricamento FAQ ${faqId}:`, responseText);
-                
+
                 // Analizza il testo come JSON solo se non vuoto
                 let faq;
                 try {
@@ -384,11 +384,11 @@
                     console.error('Errore parsing JSON:', jsonError, 'Risposta:', responseText);
                     throw new Error(`Errore nel formato della risposta: ${jsonError.message}`);
                 }
-                
+
                 if (!response.ok) {
                     throw new Error(faq?.error?.message || `Errore nel caricamento della FAQ (${response.status})`);
                 }
-                
+
                 if (!faq) {
                     throw new Error('Nessun dato ricevuto dal server');
                 }
@@ -399,7 +399,7 @@
                 document.getElementById('description').value = faq.description || '';
                 document.getElementById('resolution').value = faq.resolution || '';
                 document.getElementById('notes').value = faq.notes || '';
-                
+
                 // Mostra anteprima immagine se presente
                 if (faq.image_url) {
                     document.getElementById('imagePreview').classList.remove('hidden');
@@ -509,7 +509,7 @@
                     notes: formData.get('notes'),
                     image_url: document.getElementById('previewImg').src // Usa l'immagine convertita in base64
                 };
-                
+
                 // Se non è stata selezionata una nuova immagine ma c'era già un'immagine caricata,
                 // mantenere l'URL dell'immagine esistente
                 if (!document.getElementById('image').files.length && faqData.image_url === '') {
@@ -634,20 +634,20 @@
             const imageInput = document.getElementById('image');
             const imagePreview = document.getElementById('imagePreview');
             const previewImg = document.getElementById('previewImg');
-            
+
             if (imageInput.files && imageInput.files[0]) {
                 const reader = new FileReader();
-                
+
                 reader.onload = function(e) {
                     previewImg.src = e.target.result;
                     imagePreview.classList.remove('hidden');
                 };
-                
+
                 reader.onerror = function() {
                     imagePreview.classList.add('hidden');
                     showErrorAlert('Impossibile leggere il file immagine', 'error');
                 };
-                
+
                 reader.readAsDataURL(imageInput.files[0]);
             } else {
                 // Se c'è un'immagine già caricata, mantieni la preview
@@ -656,13 +656,13 @@
                 }
             }
         }
-        
+
         // Carica i dati della FAQ all'avvio
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 // Configura l'anteprima dell'immagine
                 document.getElementById('image').addEventListener('change', updateImagePreview);
-                
+
                 // Verifica autenticazione
                 const authResponse = await fetch('/api/auth/check');
                 const authData = await authResponse.json();
@@ -682,20 +682,20 @@
                     if (logoutBtn) logoutBtn.classList.remove('hidden');
                     if (authUserMenu) authUserMenu.classList.remove('hidden');
 
-                    // Se è admin, mostra il menu admin
-                    if (authData.user && authData.user.role === 'admin') {
-                        if (adminMenu) adminMenu.classList.remove('hidden');
+                    // Se è admin o editor, mostra il giusto menu e consenti accesso
+                    if (authData.user && (authData.user.role === 'admin' || authData.user.role === 'editor')) {
+                        if (adminMenu && authData.user.role === 'admin') adminMenu.classList.remove('hidden');
+
+                        // Carica i dati della FAQ
+                        await loadFaqData();
                     } else {
-                        // Utente non admin non può modificare le FAQ
-                        showErrorAlert('Solo gli amministratori possono modificare le FAQ', 'error');
+                        // Non ha i permessi, reindirizza
+                        showErrorAlert('Non hai i permessi per accedere a questa pagina.', 'error');
                         setTimeout(() => {
                             window.location.href = '/dashboard';
                         }, 2000);
                         return;
                     }
-
-                    // Carica i dati della FAQ
-                    await loadFaqData();
                 }
             } catch (error) {
                 console.error('Errore durante il caricamento:', error);

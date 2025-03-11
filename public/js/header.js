@@ -27,6 +27,14 @@ async function initializeHeader() {
       if (data.user && data.user.role === 'admin') {
         if (adminMenu) adminMenu.classList.remove('hidden');
       }
+      
+      // Per editor, mostra opzioni specifiche ma non il menu admin completo
+      if (data.user && data.user.role === 'editor') {
+        // Qui eventuali elementi UI specifici per editor
+        document.querySelectorAll('.editor-content').forEach(el => {
+          if (el) el.classList.remove('hidden');
+        });
+      }
     } else {
       // Utente non autenticato
       if (loginNavBtn) loginNavBtn.classList.remove('hidden');

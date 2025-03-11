@@ -521,7 +521,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       userRole = authData.user.role;
       userId = authData.user.id;
 
-      // Se è un admin, mostra pulsante admin nella navbar
+      // Gestione dei pulsanti in base al ruolo
       const headerNav = document.getElementById('headerNav');
       const createFaqBtn = document.getElementById('createFaqBtn');
 
@@ -530,8 +530,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         createFaqBtn.classList.add('hidden');
       }
 
-      if (headerNav && userRole === 'admin') {
-        // Mostra il pulsante "Crea FAQ" solo per gli admin
+      // Mostra il pulsante "Crea FAQ" per admin e editor
+      if (headerNav && (userRole === 'admin' || userRole === 'editor')) {
         if (createFaqBtn) {
           createFaqBtn.classList.remove('hidden');
         }

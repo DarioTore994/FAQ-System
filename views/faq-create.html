@@ -493,6 +493,11 @@
                     if (data.user && data.user.role === 'admin') {
                         if (adminMenu) adminMenu.classList.remove('hidden');
                     }
+                    
+                    // Se è un utente normale (non admin e non editor), non dovrebbe accedere a questa pagina
+                    if (data.user && data.user.role === 'user') {
+                        window.location.href = '/dashboard';
+                    }
                 } else {
                     // Non autenticato: reindirizza alla pagina di login
                     window.location.href = '/auth';

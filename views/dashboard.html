@@ -211,6 +211,20 @@
                         if (adminMenu) adminMenu.classList.remove('hidden');
                     }
 
+                    // Mostra contenuti per admin se l'utente è admin
+                    if (data.user.role === 'admin') {
+                        document.querySelectorAll('.admin-content').forEach(element => {
+                            element.classList.remove('hidden');
+                        });
+                    }
+
+                    // Mostra contenuti per editor e admin
+                    if (data.user.role === 'admin' || data.user.role === 'editor') {
+                        document.querySelectorAll('.editor-admin-content').forEach(element => {
+                            element.classList.remove('hidden');
+                        });
+                    }
+
                     // Carica le FAQ e le categorie
                     loadFAQs();
                     loadCategories();

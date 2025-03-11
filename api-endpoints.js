@@ -537,10 +537,10 @@ router.put('/users/:id/role', verificaAutenticazione, async (req, res) => {
       });
     }
 
-    if (!role || !['admin', 'user'].includes(role)) {
+    if (!role || !['admin', 'editor', 'user'].includes(role)) {
       return res.status(400).json({ 
         error: {
-          message: 'Ruolo non valido. I ruoli consentiti sono: admin, user'
+          message: 'Ruolo non valido. I ruoli consentiti sono: admin, editor, user'
         }
       });
     }
