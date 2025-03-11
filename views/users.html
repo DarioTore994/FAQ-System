@@ -60,7 +60,7 @@
 </style>
 </head>
 <body class="bg-primary-black text-gray-100">
-    <header class="py-4 px-6 border-b sticky top-0 z-10">
+    <header class="py-4 px-6 border-b sticky top-0 z-10 bg-primary-black">
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center">
                 <a href="/" class="flex items-center">
@@ -78,20 +78,28 @@
                 </div>
 
                 <!-- Menu per utenti autenticati -->
-                <div id="authUserMenu" class="flex items-center gap-4">
+                <div id="authUserMenu" class="hidden flex items-center gap-4">
                     <a href="/create" id="createFaqBtn" class="text-gray-300 hover:text-accent-yellow">
                         <span>Crea FAQ</span>
                     </a>
                 </div>
 
                 <!-- Menu solo per admin -->
-                <div id="adminMenu" class="flex items-center gap-4">
+                <div id="adminMenu" class="hidden flex items-center gap-4">
                     <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow">Admin</a>
                     <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow border-b-2 border-accent-yellow pb-1">Utenti</a>
                     <a href="/categories" id="categoriesLink" class="text-gray-300 hover:text-accent-yellow">Categorie</a>
                 </div>
 
-                <button id="logoutBtn" class="btn btn-secondary">
+                <!-- Bottone di accesso -->
+                <a href="/auth" id="loginBtn" class="hidden btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Accedi</span>
+                </a>
+
+                <button id="logoutBtn" class="hidden btn btn-secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
@@ -175,6 +183,7 @@
     </footer>
 
     <script src="/js/error-alert.js"></script>
+    <script src="/js/header.js"></script>
     <script>
         // Verifica che l'utente sia autenticato e sia admin
         window.addEventListener('DOMContentLoaded', async () => {
