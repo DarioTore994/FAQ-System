@@ -960,16 +960,8 @@ app.get("/api/faqs", async (req, res) => {
           );
         `);
         console.log('Tabella faqs creata automaticamente');
-
-        // Inserisci almeno una FAQ di esempio
-        const adminResult = await client.query('SELECT id FROM users WHERE role = $1 LIMIT 1', ['admin']);
-        if (adminResult.rows.length > 0) {
-          const adminId = adminResult.rows[0].id;
-          await client.query(
-            'INSERT INTO faqs (user_id, category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5, $6)',
-            [adminId, 'Generale', 'Benvenuto nel FAQ Portal', 'Questa è una FAQ di esempio', 'Puoi creare nuove FAQ dal pannello di amministrazione.', 'Nuovo']
-          );
-        }
+        
+        // Non inseriamo più FAQ di esempio automaticamente quando la tabella viene creata
       }
     } catch (tableError) {
       console.error('Errore verifica tabella:', tableError);
