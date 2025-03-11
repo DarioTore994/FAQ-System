@@ -150,6 +150,36 @@ router.get('/faqs', async (req, res) => {
   }
 });
 
+// Endpoint per ottenere una singola FAQ per ID
+router.get('/faqs/:id', async (req, res) => {
+  const { id } = req.params;
+  const client = await pool.connect();
+  
+  try {
+    console.log(`Recupero FAQ con ID: ${id}`);
+    const query = 'SELECT * FROM faqs WHERE id = $1';
+    const result = await client.query(query, [id]);
+    
+    if (result.rows.length === 0) {
+      console.log(`FAQ con ID ${id} non trovata`);
+      return res.status(404).json({ error: { message: 'FAQ non trovata' } });
+    }
+    
+    console.log(`FAQ con ID ${id} recuperata con successo`);
+    return res.status(200).json(result.rows[0]);
+  } catch (err) {
+    console.error(`Errore recupero FAQ con ID ${id}:`, err);
+    return res.status(500).json({ 
+      error: { 
+        message: 'Errore durante il recupero della FAQ',
+        details: err.message
+      } 
+    });
+  } finally {
+    client.release();
+  }
+});
+
 // Endpoint per ottenere tutte le categorie
 router.get('/categories', async (req, res) => {
   let client;

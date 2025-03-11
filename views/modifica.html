@@ -342,13 +342,29 @@
 
                 // Ottenere i dati della FAQ specifica
                 const response = await fetch(`/api/faqs/${faqId}`);
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error?.message || `Errore nel caricamento della FAQ (${response.status})`);
+                
+                // Ottieni il testo della risposta
+                const responseText = await response.text();
+                
+                // Log per il debug
+                console.log(`Risposta caricamento FAQ ${faqId}:`, responseText);
+                
+                // Analizza il testo come JSON solo se non vuoto
+                let faq;
+                try {
+                    faq = responseText ? JSON.parse(responseText) : null;
+                } catch (jsonError) {
+                    console.error('Errore parsing JSON:', jsonError, 'Risposta:', responseText);
+                    throw new Error(`Errore nel formato della risposta: ${jsonError.message}`);
                 }
-
-                const faq = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(faq?.error?.message || `Errore nel caricamento della FAQ (${response.status})`);
+                }
+                
+                if (!faq) {
+                    throw new Error('Nessun dato ricevuto dal server');
+                }
 
                 // Popola il form con i dati della FAQ
                 document.getElementById('faqId').value = faq.id;
