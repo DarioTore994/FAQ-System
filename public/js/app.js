@@ -233,9 +233,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (!response.ok) {
           console.error('Dettagli errore server:', responseData);
-          throw new Error(responseData.error?.message || 
-            (responseData.error?.details ? `Errore: ${responseData.error.details}` : 
-            'Errore durante il salvataggio nel database'));
+          
+          // Messaggi di errore più specifici
+          if (responseData.error?.details && responseData.error.details.includes("user_id")) {
+            throw new Error("Errore di autenticazione: sessione scaduta o utente non valido. Rieffettua il login.");
+          } else if (responseData.error?.code === "23502") {
+            throw new Error("Errore nel database: campo obbligatorio mancante.");
+          } else {
+            throw new Error(responseData.error?.message || 
+              (responseData.error?.details ? `Errore: ${responseData.error.details}` : 
+              'Errore durante il salvataggio nel database'));
+          }
         }
 
         showErrorAlert('FAQ salvata con successo!');

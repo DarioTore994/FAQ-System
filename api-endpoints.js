@@ -80,11 +80,12 @@ router.get('/faqs', async (req, res) => {
 router.post('/faqs', async (req, res) => {
   const client = await pool.connect();
   try {
-    const { category, title, description, resolution } = req.body;
+    const { category, title, description, resolution, userId } = req.body;
 
     console.log('API Mobile - Richiesta inserimento FAQ:', {
       category, 
       title,
+      userId,
       descriptionLength: description?.length || 0,
       resolutionLength: resolution?.length || 0
     });
@@ -94,10 +95,30 @@ router.post('/faqs', async (req, res) => {
       return res.status(400).json({ error: 'Tutti i campi sono obbligatori' });
     }
 
+    // Se non è fornito un ID utente, utilizziamo l'utente admin predefinito
+    let user_id = userId;
+    if (!user_id) {
+      // Ottieni l'ID del primo utente admin
+      const adminResult = await client.query(
+        'SELECT id FROM users WHERE role = $1 LIMIT 1',
+        ['admin']
+      );
+      
+      if (adminResult.rows.length === 0) {
+        console.error('API Mobile - Nessun utente admin trovato');
+        return res.status(500).json({ 
+          error: 'Non è possibile salvare la FAQ: nessun utente admin trovato nel sistema' 
+        });
+      }
+      
+      user_id = adminResult.rows[0].id;
+      console.log('API Mobile - Utilizzando utente admin predefinito:', user_id);
+    }
+
     // Inserimento della FAQ
     const result = await client.query(
-      'INSERT INTO faqs (category, title, description, resolution) VALUES ($1, $2, $3, $4) RETURNING *',
-      [category, title, description, resolution]
+      'INSERT INTO faqs (user_id, category, title, description, resolution) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [user_id, category, title, description, resolution]
     );
 
     console.log('API Mobile - FAQ inserita con successo:', result.rows[0]);
