@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -132,10 +131,10 @@
                     btn.classList.remove('bg-accent-yellow', 'text-primary-black');
                     btn.classList.add('border', 'border-gray-700');
                 });
-                
+
                 button.classList.add('bg-accent-yellow', 'text-primary-black');
                 button.classList.remove('border', 'border-gray-700');
-                
+
                 // Show corresponding form
                 const tabId = button.getAttribute('data-tab');
                 document.querySelectorAll('form').forEach(form => form.classList.add('hidden'));
@@ -154,60 +153,72 @@
             const formData = new FormData(e.target);
             const email = formData.get('email');
             const password = formData.get('password');
-            
+
             try {
                 const { data, error } = await supabase.auth.signUp({
                     email,
                     password,
                 });
-                
+
                 if (error) throw error;
-                
+
                 // Inviare il token al backend
+                const tokenToSend = data.session?.access_token || data?.access_token || '';
+
+                if (!tokenToSend) {
+                    throw new Error('Token non disponibile');
+                }
+
                 await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ token: data.session.access_token }),
+                    body: JSON.stringify({ token: tokenToSend }),
                 });
-                
+
                 // Redirect alla dashboard
                 window.location.href = '/dashboard';
-                
+
             } catch (error) {
                 console.error('Errore durante la registrazione:', error);
                 showErrorAlert('Errore durante la registrazione: ' + error.message);
             }
         });
-        
+
         // Gestione signin
         document.getElementById('signin-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
             const email = formData.get('email');
             const password = formData.get('password');
-            
+
             try {
                 const { data, error } = await supabase.auth.signInWithPassword({
                     email,
                     password,
                 });
-                
+
                 if (error) throw error;
-                
+
                 // Inviare il token al backend
+                const tokenToSend = data.session?.access_token || data?.access_token || '';
+
+                if (!tokenToSend) {
+                    throw new Error('Token non disponibile');
+                }
+
                 await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ token: data.session.access_token }),
+                    body: JSON.stringify({ token: tokenToSend }),
                 });
-                
+
                 // Redirect alla dashboard
                 window.location.href = '/dashboard';
-                
+
             } catch (error) {
                 console.error('Errore durante il login:', error);
                 showErrorAlert('Errore durante il login: ' + error.message);

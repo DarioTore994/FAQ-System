@@ -14,6 +14,36 @@ const supabase = createClient(
   process.env.SUPABASE_KEY,
 );
 
+// Inizializza la tabella faqs se non esiste
+async function initDatabase() {
+  try {
+    // Verifica se la tabella esiste
+    const { error } = await supabase
+      .from('faqs')
+      .select('*')
+      .limit(1);
+
+    // Se c'è un errore specifico sulla non esistenza della tabella
+    if (error && error.code === '42P01') {
+      console.log('Inizializzazione della tabella faqs...');
+      // In realtà non possiamo creare tabelle direttamente con la client API di Supabase
+      // Questo va fatto nell'interfaccia di Supabase o tramite la RDBMS API
+      console.log('Favor visitare l\'interfaccia di Supabase per creare la tabella faqs con i seguenti campi:');
+      console.log('- id (integer, primary key)');
+      console.log('- category (string)');
+      console.log('- title (string)');
+      console.log('- description (string)');
+      console.log('- resolution (string)');
+      console.log('- created_at (timestamp with timezone, default: now())');
+    }
+  } catch (err) {
+    console.error('Errore inizializzazione database:', err);
+  }
+}
+
+// Esegui l'inizializzazione
+initDatabase();
+
 // Middleware
 app.use(express.static("public"));
 app.use(express.json());
