@@ -230,7 +230,6 @@
     <script src="/js/app.js"></script>
 
     <script>
-
         // Caricamento categorie dinamiche
         async function loadCategories() {
             try {
@@ -273,6 +272,58 @@
                 } else {
                     console.log('Database verificato correttamente');
                 }
+                
+                // Aggiungi event listener al form di creazione FAQ
+                document.getElementById('faqForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    console.log('Salvataggio in corso...');
+                    
+                    try {
+                        const formData = new FormData(e.target);
+                        const faqData = {
+                            category: formData.get('category'),
+                            title: formData.get('title'),
+                            description: formData.get('description'),
+                            resolution: formData.get('resolution')
+                        };
+                        
+                        console.log('Sending FAQ data:', faqData);
+                        
+                        // Verifica che la tabella esista
+                        console.log('Verifica tabella in corso...');
+                        await fetch('/api/init-db', { method: 'POST' });
+                        console.log('Tabella verificata');
+                        
+                        // Invia i dati al server
+                        console.log('Salvataggio FAQ in corso...');
+                        const response = await fetch('/api/faqs', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(faqData),
+                            credentials: 'include'
+                        });
+                        
+                        const jsonResponse = await response.json();
+                        console.log('Risposta grezza del server:', JSON.stringify(jsonResponse));
+                        
+                        if (!response.ok) {
+                            throw new Error('Errore di autenticazione: sessione scaduta o utente non valido. Rieffettua il login.');
+                        }
+                        
+                        showErrorAlert('FAQ salvata con successo!');
+                        e.target.reset();
+                        
+                        // Redirigi alla dashboard dopo un breve ritardo
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 1500);
+                    } catch (error) {
+                        console.error('Errore nel salvataggio della FAQ:', error.message);
+                        showErrorAlert('Errore nel salvataggio della FAQ: ' + error.message);
+                    }
+                });
             } catch (error) {
                 console.error('Errore verifica database:', error);
             }
@@ -293,7 +344,7 @@
             }
         });
 
-        // Aggiunto listener di errore per debugging
+        // Listener di errore per debugging
         window.addEventListener('error', function(event) {
             console.error('Errore JavaScript:', event.error);
             showErrorAlert('Errore JavaScript: ' + (event.error?.message || 'Errore sconosciuto'));
