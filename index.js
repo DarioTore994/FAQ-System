@@ -50,19 +50,32 @@ async function initDatabase() {
     `);
     console.log('Tabella categories verificata/creata con successo');
 
-    // Crea la tabella faqs se non esiste
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS faqs (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id),
-        category TEXT NOT NULL,
-        title TEXT NOT NULL,
-        description TEXT NOT NULL,
-        resolution TEXT NOT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    // Controlla se la tabella faqs esiste
+    const faqsTableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'faqs'
       );
     `);
-    console.log('Tabella faqs verificata/creata con successo');
+    
+    // Crea la tabella faqs solo se non esiste
+    if (!faqsTableCheck.rows[0].exists) {
+      await client.query(`
+        CREATE TABLE faqs (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id),
+          category TEXT NOT NULL,
+          title TEXT NOT NULL,
+          description TEXT NOT NULL,
+          resolution TEXT NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+      `);
+      console.log('Tabella faqs creata con successo');
+    } else {
+      console.log('Tabella faqs esistente mantenuta');
+    }
 
     // Verifica se ci sono già utenti
     const existingUsers = await client.query('SELECT COUNT(*) FROM users');
@@ -725,23 +738,68 @@ app.get("/api/faqs", async (req, res) => {
 app.post("/api/init-db", async (req, res) => {
   const client = await pool.connect();
   try {
-    // Forza il drop della tabella faqs per ricrearla correttamente
-    await client.query(`DROP TABLE IF EXISTS faqs;`);
-    console.log('Tabella faqs eliminata con successo');
-    
-    // Crea la tabella con la struttura corretta
-    await client.query(`
-      CREATE TABLE faqs (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id),
-        category TEXT NOT NULL,
-        title TEXT NOT NULL,
-        description TEXT NOT NULL,
-        resolution TEXT NOT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    // Verifica se la tabella faqs esiste
+    const tableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'faqs'
       );
     `);
-    console.log('Tabella faqs ricreata con successo!');
+    
+    if (!tableCheck.rows[0].exists) {
+      // Crea la tabella solo se non esiste
+      await client.query(`
+        CREATE TABLE faqs (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id),
+          category TEXT NOT NULL,
+          title TEXT NOT NULL,
+          description TEXT NOT NULL,
+          resolution TEXT NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+      `);
+      console.log('Tabella faqs creata con successo!');
+    } else {
+      // Verifica la struttura della tabella esistente
+      const columnCheck = await client.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'faqs' AND column_name = 'user_id'
+      `);
+      
+      if (columnCheck.rows.length === 0) {
+        console.log('Tabella faqs esiste ma manca la colonna user_id, riparazione necessaria');
+        // ALTER TABLE per aggiungere la colonna mancante se necessario
+        await client.query(`
+          ALTER TABLE faqs 
+          ADD COLUMN IF NOT EXISTS user_id INTEGER;
+        `);
+        
+        // Ottieni l'ID dell'admin per riparare i record esistenti
+        const adminUser = await client.query(`
+          SELECT id FROM users WHERE role = 'admin' LIMIT 1
+        `);
+        
+        if (adminUser.rows.length > 0) {
+          const adminId = adminUser.rows[0].id;
+          // Aggiorna i record esistenti con l'ID admin
+          await client.query(`
+            UPDATE faqs SET user_id = $1 WHERE user_id IS NULL
+          `, [adminId]);
+          
+          // Aggiungi il vincolo NOT NULL e la referenza
+          await client.query(`
+            ALTER TABLE faqs 
+            ALTER COLUMN user_id SET NOT NULL,
+            ADD CONSTRAINT faqs_user_id_fkey 
+            FOREIGN KEY (user_id) REFERENCES users(id)
+          `);
+        }
+      }
+      console.log('Tabella faqs verificata e mantenuta');
+    }
 
     // Ottieni l'utente admin per l'inserimento dei dati demo
     const adminResult = await client.query('SELECT id FROM users WHERE role = $1 LIMIT 1', ['admin']);
