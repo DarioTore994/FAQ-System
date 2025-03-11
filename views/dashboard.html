@@ -350,14 +350,8 @@
         // Funzione per caricare le FAQ
         async function loadFAQs() {
             try {
-                // Prima verifichiamo la struttura della tabella e la inizializziamo se necessario
-                try {
-                    const initResponse = await fetch('/api/init-db', { method: 'POST' });
-                    const initData = await initResponse.json();
-                    console.log('Database verificato correttamente', initData);
-                } catch (initError) {
-                    console.error('Errore durante l\'inizializzazione:', initError);
-                }
+                // Non inizializziamo il database ogni volta che carichiamo le FAQ
+                // per evitare la creazione di duplicati ad ogni refresh
 
                 // Ora recuperiamo le FAQ
                 const response = await fetch('/api/faqs');

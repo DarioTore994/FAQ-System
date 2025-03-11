@@ -1138,22 +1138,30 @@ app.post("/api/init-db", async (req, res) => {
     if (adminResult.rows.length > 0) {
       const adminId = adminResult.rows[0].id;
 
-      // Inserimento dati demo
-      const demoFaqs = [
-        {
-          category: 'Network',
-          title: 'Problema di connessione alla rete',
-          description: 'Il computer non riesce a connettersi alla rete Wi-Fi',
-          resolution: 'Verifica che il Wi-Fi sia attivo. Riavvia il router. Controlla le impostazioni di rete.',
-          status: 'Risolto'
-        }
-      ];
+      // Verifico se ci sono già delle FAQ nella tabella prima di inserire dati demo
+      const existingFaqs = await client.query('SELECT COUNT(*) FROM faqs');
+      
+      // Inseriamo i dati demo solo se la tabella è completamente vuota
+      if (parseInt(existingFaqs.rows[0].count) === 0) {
+        const demoFaqs = [
+          {
+            category: 'Network',
+            title: 'Problema di connessione alla rete',
+            description: 'Il computer non riesce a connettersi alla rete Wi-Fi',
+            resolution: 'Verifica che il Wi-Fi sia attivo. Riavvia il router. Controlla le impostazioni di rete.',
+            status: 'Risolto'
+          }
+        ];
 
-      for (const faq of demoFaqs) {
-        await client.query(
-          'INSERT INTO faqs (user_id, category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5, $6)',
-          [adminId, faq.category, faq.title, faq.description, faq.resolution, faq.status]
-        );
+        for (const faq of demoFaqs) {
+          await client.query(
+            'INSERT INTO faqs (user_id, category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5, $6)',
+            [adminId, faq.category, faq.title, faq.description, faq.resolution, faq.status]
+          );
+        }
+        console.log('Inseriti dati demo');
+      } else {
+        console.log('La tabella FAQ contiene già dati, non inserisco nuove FAQ demo');
       }
     }
 
