@@ -133,27 +133,36 @@
                 </a>
             </div>
             <nav class="flex items-center gap-4">
-                <!-- Menu principale -->
+                <!-- Menu principale per tutti -->
                 <div class="flex items-center gap-4">
                     <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
-                    <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
                 </div>
 
-                <!-- Menu per utenti autenticati -->
-                <div id="authUserMenu" class="flex items-center gap-4">
+                <!-- Menu per utenti autenticati (nascosto di default) -->
+                <div id="authUserMenu" class="hidden flex items-center gap-4">
+                    <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
                     <a href="/create" id="createFaqBtn" class="text-gray-300 hover:text-accent-yellow border-b-2 border-accent-yellow pb-1">
                         <span>Crea FAQ</span>
                     </a>
                 </div>
 
-                <!-- Menu solo per admin -->
+                <!-- Menu solo per admin (nascosto di default) -->
                 <div id="adminMenu" class="hidden flex items-center gap-4">
                     <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow">Admin</a>
                     <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow">Utenti</a>
                     <a href="/categories" id="categoriesLink" class="text-gray-300 hover:text-accent-yellow">Categorie</a>
                 </div>
 
-                <button id="logoutBtn" class="btn btn-secondary">
+                <!-- Pulsante login (visibile solo per utenti non autenticati) -->
+                <a href="/auth" id="loginNavBtn" class="hidden btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    <span class="hidden sm:inline">Login</span>
+                </a>
+
+                <!-- Pulsante logout (nascosto di default) -->
+                <button id="logoutBtn" class="hidden btn btn-secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
@@ -319,6 +328,8 @@
                             credentials: 'include'
                         });
 
+                        console.log('Salvataggio FAQ in corso...');
+                        
                         // Verifica risposta
                         if (!response.ok) {
                             // Verifica se la risposta è in formato JSON
@@ -326,6 +337,12 @@
                             if (contentType && contentType.includes('application/json')) {
                                 const errorData = await response.json();
                                 console.log('Risposta grezza del server:', JSON.stringify(errorData));
+                                
+                                // Controlla specificamente per errori di colonna user_id
+                                if (errorData.error?.details && errorData.error.details.includes('user_id')) {
+                                    throw new Error('Errore di autenticazione: sessione scaduta o utente non valido. Rieffettua il login.');
+                                }
+                                
                                 const errorMsg = errorData.error?.message || 'Errore sconosciuto';
                                 throw new Error(errorMsg);
                             } else {
@@ -388,6 +405,48 @@
         });
 
         // Listener di errore per debugging
+
+<script>
+    // Verifica autenticazione all'avvio della pagina
+    window.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch('/api/auth/check');
+            
+            if (!response.ok) {
+                // Reindirizza alla pagina di login se non autenticato
+                window.location.href = '/auth';
+                return;
+            }
+            
+            const data = await response.json();
+            
+            // Elementi UI
+            const authUserMenu = document.getElementById('authUserMenu');
+            const adminMenu = document.getElementById('adminMenu');
+            const loginNavBtn = document.getElementById('loginNavBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            if (data.authenticated) {
+                // Utente autenticato
+                if (loginNavBtn) loginNavBtn.classList.add('hidden');
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+                if (authUserMenu) authUserMenu.classList.remove('hidden');
+                
+                // Se è admin, mostra il menu admin
+                if (data.user && data.user.role === 'admin') {
+                    if (adminMenu) adminMenu.classList.remove('hidden');
+                }
+            } else {
+                // Non autenticato: reindirizza alla pagina di login
+                window.location.href = '/auth';
+            }
+        } catch (error) {
+            console.error('Errore controllo autenticazione:', error);
+            window.location.href = '/auth';
+        }
+    });
+</script>
+
         window.addEventListener('error', function(event) {
             console.error('Errore JavaScript:', event.error);
             showErrorAlert('Errore JavaScript: ' + (event.error?.message || 'Errore sconosciuto'));
