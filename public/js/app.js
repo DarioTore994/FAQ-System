@@ -487,7 +487,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (adminLink) {
           adminLink.classList.remove('hidden');
         }
-        }
 
         // Mostra pulsante admin (solo se non esiste già)
         if (!document.getElementById('adminLink')) {
