@@ -1,5 +1,4 @@
-// Abilita ES modules
-require = require("esm")(module);
+// Load environment variables
 require("dotenv").config();
 const express = require("express");
 const path = require("path");
