@@ -119,12 +119,12 @@
                 <div id="authUserContainer" class="hidden">
                     <div class="flex items-center gap-4">
                         <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
-                    
+
                         <!-- Menu solo per admin - visibile solo se l'utente è admin -->
                         <span id="adminMenu" class="hidden">
                             <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow">Admin</a>
                         </span>
-                        
+
                         <!-- Bottone di logout - visibile solo se l'utente è loggato -->
                         <button id="logoutBtn" class="btn btn-secondary">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -199,56 +199,94 @@
     <script>
         window.addEventListener('DOMContentLoaded', async () => {
             try {
+                // Elementi che potrebbero non esistere
+                const elements = {
+                    logoutBtn: document.getElementById('logoutBtn'),
+                    authUserContainer: document.getElementById('authUserContainer'),
+                    adminMenu: document.getElementById('adminMenu'),
+                    loginContainer: document.getElementById('loginContainer'),
+                    loggedInContainer: document.getElementById('loggedInContainer')
+                };
+
+                // Funzione di supporto per gestire la visibilità degli elementi
+                const toggleElements = (elementConfig) => {
+                    Object.entries(elementConfig).forEach(([key, shouldShow]) => {
+                        const element = elements[key];
+                        if (element) {
+                            if (shouldShow) {
+                                element.classList.remove('hidden');
+                            } else {
+                                element.classList.add('hidden');
+                            }
+                        }
+                    });
+                };
+
                 const response = await fetch('/api/auth/check');
-                
+
                 if (!response.ok) {
-                    // Non autenticato: mostra solo il bottone login
-                    document.getElementById('loginBtn').classList.remove('hidden');
-                    document.getElementById('logoutBtn').classList.add('hidden');
-                    document.getElementById('authUserContainer').classList.add('hidden');
-                    document.getElementById('adminMenu').classList.add('hidden');
-                    document.getElementById('loginContainer').classList.remove('hidden');
-                    document.getElementById('loggedInContainer').classList.add('hidden');
+                    // Non autenticato
+                    toggleElements({
+                        logoutBtn: false,
+                        authUserContainer: false,
+                        adminMenu: false,
+                        loginContainer: true,
+                        loggedInContainer: false
+                    });
                     return;
                 }
-                
+
                 const data = await response.json();
-                
+
                 if (data.authenticated) {
-                    // Utente autenticato: mostra logout e menu utente
-                    document.getElementById('loginBtn').classList.add('hidden');
-                    document.getElementById('logoutBtn').classList.remove('hidden');
-                    document.getElementById('authUserContainer').classList.remove('hidden');
-                    document.getElementById('loginContainer').classList.add('hidden');
-                    document.getElementById('loggedInContainer').classList.remove('hidden');
-                    
-                    // Se è admin, mostra il menu admin
-                    if (data.user && data.user.role === 'admin') {
-                        document.getElementById('adminMenu').classList.remove('hidden');
-                    } else {
-                        document.getElementById('adminMenu').classList.add('hidden');
-                    }
+                    // Utente autenticato
+                    toggleElements({
+                        logoutBtn: true,
+                        authUserContainer: true,
+                        adminMenu: data.user && data.user.role === 'admin',
+                        loginContainer: false,
+                        loggedInContainer: true
+                    });
                 } else {
-                    // Non autenticato: mostra solo il bottone login
-                    document.getElementById('loginBtn').classList.remove('hidden');
-                    document.getElementById('logoutBtn').classList.add('hidden');
-                    document.getElementById('authUserContainer').classList.add('hidden');
-                    document.getElementById('adminMenu').classList.add('hidden');
-                    document.getElementById('loginContainer').classList.remove('hidden');
-                    document.getElementById('loggedInContainer').classList.add('hidden');
+                    // Non autenticato
+                    toggleElements({
+                        logoutBtn: false,
+                        authUserContainer: false,
+                        adminMenu: false,
+                        loginContainer: true,
+                        loggedInContainer: false
+                    });
                 }
             } catch (error) {
                 console.error('Errore controllo autenticazione:', error);
-                // In caso di errore, mostra solo il login
-                document.getElementById('loginBtn').classList.remove('hidden');
-                document.getElementById('logoutBtn').classList.add('hidden');
-                document.getElementById('authUserContainer').classList.add('hidden');
-                document.getElementById('adminMenu').classList.add('hidden');
-                document.getElementById('loginContainer').classList.remove('hidden');
-                document.getElementById('loggedInContainer').classList.add('hidden');
+                // In caso di errore, mostra contenitore login
+                const elements = {
+                    logoutBtn: document.getElementById('logoutBtn'),
+                    authUserContainer: document.getElementById('authUserContainer'),
+                    adminMenu: document.getElementById('adminMenu'),
+                    loginContainer: document.getElementById('loginContainer'),
+                    loggedInContainer: document.getElementById('loggedInContainer')
+                };
+
+                Object.entries({
+                    logoutBtn: false,
+                    authUserContainer: false,
+                    adminMenu: false,
+                    loginContainer: true,
+                    loggedInContainer: false
+                }).forEach(([key, shouldShow]) => {
+                    const element = elements[key];
+                    if (element) {
+                        if (shouldShow) {
+                            element.classList.remove('hidden');
+                        } else {
+                            element.classList.add('hidden');
+                        }
+                    }
+                });
             }
         });
-        
+
         window.addEventListener('error', function(event) {
             console.error('Errore JavaScript:', event.error);
             showErrorAlert('Errore JavaScript: ' + (event.error?.message || 'Errore sconosciuto'));

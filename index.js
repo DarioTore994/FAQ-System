@@ -71,19 +71,19 @@ app.post('/api/auth/recover-password', async (req, res) => {
     }
 
     const user = userResult.rows[0];
-    
+
     // Genera un token univoco per il reset della password
     const resetToken = require('crypto').randomBytes(32).toString('hex');
     const tokenExpiry = new Date();
     tokenExpiry.setHours(tokenExpiry.getHours() + 1); // Token valido per 1 ora
-    
+
     // Salva il token nel database
     const updateQuery = 'UPDATE users SET reset_token = $1, reset_token_expiry = $2 WHERE id = $3';
     await pool.query(updateQuery, [resetToken, tokenExpiry, user.id]);
-    
+
     // Configurazione dell'invio email
     const nodemailer = require('nodemailer');
-    
+
     // Configura il trasporto email con le credenziali dal file .env
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -94,10 +94,10 @@ app.post('/api/auth/recover-password', async (req, res) => {
         pass: process.env.SMTP_PASSWORD
       }
     });
-    
+
     // Costruisci l'URL di reset con il token
     const resetUrl = `${process.env.APP_URL || 'http://localhost:3001'}/reset-password?token=${resetToken}`;
-    
+
     // Contenuto dell'email
     const mailOptions = {
       from: process.env.SMTP_FROM || '"FAQ Portal" <noreply@faqportal.com>',
@@ -116,10 +116,10 @@ app.post('/api/auth/recover-password', async (req, res) => {
         </div>
       `
     };
-    
+
     // Invio dell'email
     await transporter.sendMail(mailOptions);
-    
+
     return res.status(200).json({ success: true, message: 'Email di recupero inviata con successo' });
 
   } catch (error) {
@@ -164,6 +164,33 @@ app.post('/api/auth/register', async (req, res) => {
     console.error('Errore nella registrazione:', error);
     return res.status(500).json({ error: 'Errore nella registrazione' });
   }
+});
+
+app.post('/api/faq/create', authenticateUser, async (req, res) => {
+    try {
+        const { category, title, description, resolution } = req.body;
+
+        if (!category || !title || !description || !resolution) {
+            return res.status(400).json({ error: { message: 'Tutti i campi sono obbligatori' } });
+        }
+
+        // Inserisci la nuova FAQ nel database (senza user_id che non esiste nella tabella)
+        const result = await pool.query(
+            'INSERT INTO faqs (category, title, description, resolution) VALUES ($1, $2, $3, $4) RETURNING *',
+            [category, title, description, resolution]
+        );
+
+        res.json({ success: true, data: result.rows[0] });
+    } catch (error) {
+        console.error('Errore salvataggio FAQ:', error);
+        res.status(500).json({ 
+            error: { 
+                message: 'Errore interno del server',
+                details: error.message,
+                stack: error.stack
+            } 
+        });
+    }
 });
 
 
