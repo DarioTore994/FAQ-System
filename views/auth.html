@@ -245,6 +245,8 @@
                                     required
                                     class="form-input"
                                     placeholder=""
+                                    pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+                                    title="Inserisci un indirizzo email valido"
                                 />
                             </div>
                         </div>
@@ -281,6 +283,8 @@
                                     required
                                     class="form-input"
                                     placeholder=""
+                                    pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+                                    title="Inserisci un indirizzo email valido"
                                 />
                             </div>
                         </div>
@@ -315,6 +319,8 @@
                                     required
                                     class="form-input"
                                     placeholder="Inserisci la tua email"
+                                    pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+                                    title="Inserisci un indirizzo email valido"
                                 />
                             </div>
                         </div>
@@ -502,6 +508,19 @@
                                 showErrorAlert("Inserisci l'email per recuperare la password");
                                 return;
                             }
+                            
+                            // Validazione email lato client
+                            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                            if (!emailPattern.test(email)) {
+                                showErrorAlert("Formato email non valido");
+                                return;
+                            }
+
+                            // Mostra indicatore di caricamento
+                            const submitBtn = recoverForm.querySelector('button[type="submit"]');
+                            const originalBtnText = submitBtn.innerHTML;
+                            submitBtn.innerHTML = '<span class="animate-pulse">Invio in corso...</span>';
+                            submitBtn.disabled = true;
 
                             const response = await fetch("/api/auth/recover-password", {
                                 method: "POST",
@@ -512,9 +531,17 @@
                             });
 
                             const data = await response.json();
+                            
+                            // Ripristina il bottone
+                            submitBtn.innerHTML = originalBtnText;
+                            submitBtn.disabled = false;
 
                             if (!response.ok) {
-                                showErrorAlert(data.error || "Errore durante la richiesta di recupero password");
+                                if (data.error === 'email_not_found') {
+                                    showErrorAlert("L'indirizzo email inserito non risulta registrato");
+                                } else {
+                                    showErrorAlert(data.error || "Errore durante la richiesta di recupero password");
+                                }
                                 return;
                             }
 
