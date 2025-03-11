@@ -559,7 +559,7 @@ app.use('/api/mobile', apiEndpoints);
 
 // Endpoint per inserire una nuova FAQ (solo admin)
 app.post("/api/faqs", requireAuth, async (req, res) => {
-  const client = await pool.connect();
+  let client;
   try {
     // Validate that all required fields are present
     const { category, title, description, resolution } = req.body;
@@ -579,7 +579,6 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
       return res.status(401).json({ error: 'Token non valido' });
     }
     
-
     console.log('Ricevuta richiesta di salvataggio FAQ:', {
       userId,
       category, 
@@ -594,6 +593,8 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
         error: { message: 'Tutti i campi sono obbligatori' } 
       });
     }
+
+    client = await pool.connect();
 
     // Verifica ruolo utente
     const userResult = await client.query('SELECT role FROM users WHERE id = $1', [userId]);
@@ -612,20 +613,43 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
       });
     }
 
-    console.log('Tentativo di inserimento FAQ...');
+    // Prima di fare l'inserimento, assicuriamoci che la tabella faqs esista con la struttura corretta
+    // Verifico se la tabella esiste, altrimenti la creo
+    const tableExists = await client.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'faqs'
+      );
+    `);
 
-    // Verifica struttura tabella
-    try {
-      const tableInfo = await client.query(`
-        SELECT column_name 
-        FROM information_schema.columns 
-        WHERE table_name = 'faqs' 
-        AND column_name = 'user_id'
+    if (!tableExists.rows[0].exists) {
+      // Tabella non esiste, la creiamo
+      await client.query(`
+        CREATE TABLE faqs (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id),
+          category TEXT NOT NULL,
+          title TEXT NOT NULL,
+          description TEXT NOT NULL,
+          resolution TEXT NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+      `);
+      console.log('Tabella faqs creata perché mancante');
+    } else {
+      // Verifica se la tabella ha la struttura corretta con user_id
+      const userIdExists = await client.query(`
+        SELECT EXISTS (
+          SELECT FROM information_schema.columns 
+          WHERE table_schema = 'public' 
+          AND table_name = 'faqs'
+          AND column_name = 'user_id'
+        );
       `);
 
-      // Se la colonna user_id non esiste, ricreiamo la tabella
-      if (tableInfo.rows.length === 0) {
-        console.log('Colonna user_id mancante, ricreo la tabella...');
+      if (!userIdExists.rows[0].exists) {
+        // Colonna user_id mancante, ricreiamo la tabella
         await client.query(`DROP TABLE IF EXISTS faqs;`);
         await client.query(`
           CREATE TABLE faqs (
@@ -638,10 +662,8 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
           );
         `);
-        console.log('Tabella faqs ricreata con successo');
+        console.log('Tabella faqs ricreata perché mancante colonna user_id');
       }
-    } catch (error) {
-      console.error('Errore verifica tabella:', error);
     }
 
     // Inserimento della FAQ
@@ -662,7 +684,7 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
       } 
     });
   } finally {
-    client.release();
+    if (client) client.release();
   }
 });
 

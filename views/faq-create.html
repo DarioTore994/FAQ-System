@@ -312,11 +312,23 @@
 
                         console.log('Sending FAQ data:', faqData);
 
-                        // Verifica che la tabella esista
-                        console.log('Verifica tabella in corso...');
+                        console.log('Reinizializzazione del database in corso...');
 
-                        await fetch('/api/init-db', { method: 'POST' });
-                        console.log('Tabella verificata');
+                        // Prima di inviare la FAQ, forziamo la ricreazione della tabella
+                        const initDbResponse = await fetch('/api/init-db', {
+                            method: 'POST'
+                        });
+
+                        if (!initDbResponse.ok) {
+                            const errorData = await initDbResponse.json();
+                            console.error('Errore inizializzazione database:', errorData);
+                            throw new Error('Errore inizializzazione database: ' + (errorData.message || 'Errore sconosciuto'));
+                        }
+
+                        console.log('Database reinizializzato con successo');
+
+                        // Ora possiamo procedere con il salvataggio della FAQ
+                        console.log('Salvataggio FAQ in corso...');
 
                         // Salvataggio della FAQ
                         const response = await fetch('/api/faqs', {
@@ -329,7 +341,7 @@
                         });
 
                         console.log('Salvataggio FAQ in corso...');
-                        
+
                         // Verifica risposta
                         if (!response.ok) {
                             // Verifica se la risposta è in formato JSON
@@ -337,12 +349,12 @@
                             if (contentType && contentType.includes('application/json')) {
                                 const errorData = await response.json();
                                 console.log('Risposta grezza del server:', JSON.stringify(errorData));
-                                
+
                                 // Controlla specificamente per errori di colonna user_id
                                 if (errorData.error?.details && errorData.error.details.includes('user_id')) {
                                     throw new Error('Errore di autenticazione: sessione scaduta o utente non valido. Rieffettua il login.');
                                 }
-                                
+
                                 const errorMsg = errorData.error?.message || 'Errore sconosciuto';
                                 throw new Error(errorMsg);
                             } else {
@@ -411,27 +423,27 @@
     window.addEventListener('DOMContentLoaded', async () => {
         try {
             const response = await fetch('/api/auth/check');
-            
+
             if (!response.ok) {
                 // Reindirizza alla pagina di login se non autenticato
                 window.location.href = '/auth';
                 return;
             }
-            
+
             const data = await response.json();
-            
+
             // Elementi UI
             const authUserMenu = document.getElementById('authUserMenu');
             const adminMenu = document.getElementById('adminMenu');
             const loginNavBtn = document.getElementById('loginNavBtn');
             const logoutBtn = document.getElementById('logoutBtn');
-            
+
             if (data.authenticated) {
                 // Utente autenticato
                 if (loginNavBtn) loginNavBtn.classList.add('hidden');
                 if (logoutBtn) logoutBtn.classList.remove('hidden');
                 if (authUserMenu) authUserMenu.classList.remove('hidden');
-                
+
                 // Se è admin, mostra il menu admin
                 if (data.user && data.user.role === 'admin') {
                     if (adminMenu) adminMenu.classList.remove('hidden');
