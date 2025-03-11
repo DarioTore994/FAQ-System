@@ -1,3 +1,11 @@
+
+// Gestione logout alla chiusura della pagina
+window.addEventListener('beforeunload', function(e) {
+    // Evita di mostrare la conferma standard del browser (la fetch sarà asincrona)
+    // ma invia comunque la richiesta di logout
+    navigator.sendBeacon('/api/auth/logout');
+});
+
 // Client-side JavaScript
 document.addEventListener("DOMContentLoaded", async () => {
   // Verifica ruolo utente

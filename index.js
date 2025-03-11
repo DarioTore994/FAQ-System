@@ -360,7 +360,16 @@ app.post("/api/auth/register", async (req, res) => {
 
 app.post("/api/auth/logout", (req, res) => {
   res.clearCookie('authToken');
-  res.json({ success: true });
+  
+  // Supporto per risposte sia alle richieste fetch che beacon
+  if (req.headers['content-type'] === 'text/plain;charset=UTF-8' || 
+      req.headers['content-type'] === 'application/x-www-form-urlencoded') {
+    // Richiesta inviata tramite sendBeacon
+    res.status(204).end();
+  } else {
+    // Richiesta standard
+    res.json({ success: true });
+  }
 });
 
 // API per ottenere tutti gli utenti (solo per admin)
