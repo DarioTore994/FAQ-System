@@ -106,8 +106,49 @@
         <h1 class="text-3xl font-bold mb-8 text-center text-accent-yellow">Gestione Utenti</h1>
 
         <div class="bg-dark-gray p-6 rounded-lg shadow-md mb-8 admin-content">
-            <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Lista Utenti</h2>
+            <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Crea Nuovo Utente</h2>
+            <form id="createUserForm" class="space-y-4 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-2 text-accent-yellow">Email</label>
+                        <input
+                            type="email"
+                            name="email"
+                            required
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                        />
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-accent-yellow">Password</label>
+                        <input
+                            type="password"
+                            name="password"
+                            required
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label class="block mb-2 text-accent-yellow">Ruolo</label>
+                    <select
+                        name="role"
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                    >
+                        <option value="user">Utente</option>
+                        <option value="admin">Amministratore</option>
+                    </select>
+                </div>
+                <button
+                    type="submit"
+                    class="px-4 py-2 bg-accent-yellow text-primary-black rounded-lg hover:bg-yellow-300 transition-colors"
+                    id="createUserBtn"
+                >
+                    Crea Utente
+                </button>
+            </form>
 
+            <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Lista Utenti</h2>
+            
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
@@ -388,6 +429,52 @@
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
             performLogout();
+        });
+
+        // Gestione creazione nuovo utente
+        document.getElementById('createUserForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = this.elements.email.value;
+            const password = this.elements.password.value;
+            const role = this.elements.role.value;
+            
+            if (!email || !password) {
+                showErrorAlert('Inserisci tutti i campi richiesti');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password, role }),
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await response.json();
+                        throw new Error(data.error || 'Errore durante la creazione dell\'utente');
+                    } else {
+                        throw new Error(`Errore server (${response.status}): ${response.statusText}`);
+                    }
+                }
+                
+                const data = await response.json();
+                
+                showErrorAlert('Utente creato con successo!');
+                this.reset();
+                
+                // Ricarica lista utenti
+                loadUsers();
+            } catch (error) {
+                console.error('Errore creazione utente:', error);
+                showErrorAlert('Errore: ' + error.message);
+            }
         });
     </script>
 </body>
