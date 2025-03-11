@@ -1,413 +1,560 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAQ Portal - Autenticazione</title>
-    <link href="/css/main.css" rel="stylesheet">
-    <link href="/css/theme.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .auth-card {
-            max-width: 400px;
-            width: 100%;
-            background-color: var(--card-bg);
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .auth-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .tab-btn {
-            padding: 0.5rem 1.5rem;
-            border-radius: 9999px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .tab-btn.active {
-            background-color: var(--accent-color);
-            color: var(--bg-primary);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .tab-btn:not(.active) {
-            background-color: transparent;
-            border: 1px solid var(--border-color);
-        }
-
-        .tab-btn:not(.active):hover {
-            border-color: var(--accent-color);
-            color: var(--accent-color);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--accent-color);
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid var(--border-color);
-            background-color: var(--input-bg);
-            color: var(--text-primary);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .form-input:focus {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.25);
-            outline: none;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 0.875rem;
-            border-radius: 0.5rem;
-            background-color: var(--accent-color);
-            color: var(--bg-primary);
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        .submit-btn:hover {
-            background-color: var(--btn-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .auth-form {
-            opacity: 0;
-            transform: translateY(10px);
-            animation: formFadeIn 0.5s forwards;
-        }
-
-        @keyframes formFadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>FAQ Portal - Autenticazione</title>
+        <link href="/css/main.css" rel="stylesheet" />
+        <link href="/css/theme.css" rel="stylesheet" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            .auth-card {
+                max-width: 400px;
+                width: 100%;
+                background-color: var(--card-bg);
+                border-radius: 1rem;
+                box-shadow:
+                    0 10px 15px -3px rgba(0, 0, 0, 0.2),
+                    0 4px 6px -2px rgba(0, 0, 0, 0.1);
+                border: 1px solid var(--border-color);
+                overflow: hidden;
+                transition:
+                    transform 0.3s ease,
+                    box-shadow 0.3s ease;
             }
-        }
 
-        /* Added styles from changes */
-        .form-container {
-            background-color: #1a1a1a;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: 1px solid #2a2a2a;
-            overflow: hidden;
-        }
+            .auth-card:hover {
+                transform: translateY(-5px);
+                box-shadow:
+                    0 20px 25px -5px rgba(0, 0, 0, 0.2),
+                    0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            }
 
-        .form-header {
-            background-color: #1a1a1a;
-            border-bottom: 1px solid #2a2a2a;
-        }
+            .tab-btn {
+                padding: 0.5rem 1.5rem;
+                border-radius: 9999px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
 
-        .tab-active {
-            color: #FFD700;
-            border-bottom: 2px solid #FFD700;
-        }
+            .tab-btn.active {
+                background-color: var(--accent-color);
+                color: var(--bg-primary);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
 
-        .btn-submit {
-            background-color: #FFD700;
-            color: #0a0a0a;
-        }
+            .tab-btn:not(.active) {
+                background-color: transparent;
+                border: 1px solid var(--border-color);
+            }
 
-        .btn-submit:hover {
-            background-color: #ffc700;
-        }
+            .tab-btn:not(.active):hover {
+                border-color: var(--accent-color);
+                color: var(--accent-color);
+            }
 
-        input, select {
-            background-color: #1a1a1a !important;
-            border: 1px solid #2a2a2a !important;
-            color: #f3f4f6 !important;
-        }
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
 
-        input:focus, select:focus {
-            border-color: #FFD700 !important;
-            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.25) !important;
-        }
+            .form-label {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-weight: 500;
+                color: var(--accent-color);
+            }
 
-        .form-label {
-            color: #FFD700;
-        }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col">
-    <header class="py-4 px-6 border-b sticky top-0 z-10">
-        <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center">
-            <div class="flex items-center mb-3 sm:mb-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-yellow mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
-            </div>
-            <div class="flex items-center gap-4">
+            .form-input {
+                width: 100%;
+                padding: 0.75rem 1rem;
+                border-radius: 0.5rem;
+                border: 1px solid var(--border-color);
+                background-color: var(--input-bg);
+                color: var(--text-primary);
+                transition:
+                    border-color 0.2s ease,
+                    box-shadow 0.2s ease;
+            }
 
-                <a href="/" class="text-gray-300 hover:text-accent-yellow flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7m-7-7v14" />
-                    </svg>
-                    Home
-                </a>
-            </div>
-        </div>
-    </header>
+            .form-input:focus {
+                border-color: var(--accent-color);
+                box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.25);
+                outline: none;
+            }
 
-    <main class="container mx-auto py-12 px-4 flex-grow flex flex-col items-center justify-center">
-        <div class="auth-card form-container">
-            <div class="bg-gradient-to-r from-accent-yellow/20 to-accent-yellow/10 p-4 border-b border-accent-yellow/20 form-header">
-                <div class="text-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 text-accent-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                    </svg>
-                    <h2 class="text-2xl font-bold text-accent-yellow">Accedi al portale</h2>
-                    <p class="text-gray-400 mt-2">Gestisci la tua knowledge base</p>
-                </div>
-            </div>
+            .submit-btn {
+                width: 100%;
+                padding: 0.875rem;
+                border-radius: 0.5rem;
+                background-color: var(--accent-color);
+                color: var(--bg-primary);
+                font-weight: 600;
+                transition: all 0.2s ease;
+            }
 
-            <div class="p-8">
-                <div class="tabs flex gap-3 sm:gap-4 justify-center mb-6 sm:mb-8">
-                    <button
-                        data-tab="signin"
-                        class="tab-btn active text-sm sm:text-base w-full sm:w-auto tab-active"
-                    >
-                        Accedi
-                    </button>
-                    <button
-                        data-tab="signup"
-                        class="tab-btn text-sm sm:text-base w-full sm:w-auto"
-                    >
-                        Registrati
-                    </button>
-                </div>
+            .submit-btn:hover {
+                background-color: var(--btn-hover);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
 
-                <form id="signin-form" class="auth-form">
-                    <div class="form-group">
-                        <label class="form-label" for="signin-email">Email</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                                </svg>
-                            </span>
-                            <input
-                                id="signin-email"
-                                type="email"
-                                name="email"
-                                required
-                                class="form-input pl-10"
-                                placeholder="Inserisci la tua email"
-                            />
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="signin-password">Password</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                            </span>
-                            <input
-                                id="signin-password"
-                                type="password"
-                                name="password"
-                                required
-                                class="form-input pl-10"
-                                placeholder="Inserisci la password"
-                            />
-                        </div>
-                    </div>
-                    <button type="submit" class="submit-btn btn-submit">
-                        Accedi
-                    </button>
-                </form>
+            .auth-form {
+                opacity: 0;
+                transform: translateY(10px);
+                animation: formFadeIn 0.5s forwards;
+            }
 
-                <form id="signup-form" class="auth-form hidden">
-                    <div class="form-group">
-                        <label class="form-label" for="signup-email">Email</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                                </svg>
-                            </span>
-                            <input
-                                id="signup-email"
-                                type="email"
-                                name="email"
-                                required
-                                class="form-input pl-10"
-                                placeholder="Inserisci la tua email"
-                            />
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="signup-password">Password</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                            </span>
-                            <input
-                                id="signup-password"
-                                type="password"
-                                name="password"
-                                required
-                                class="form-input pl-10"
-                                placeholder="Inserisci la password"
-                            />
-                        </div>
-                    </div>
-                    <button type="submit" class="submit-btn btn-submit">
-                        Registrati
-                    </button>
-                </form>
-            </div>
-        </div>
-    </main>
-
-    <footer class="bg-dark-gray py-6 px-4 mt-12 border-t border-gray-800">
-        <div class="container mx-auto text-center text-gray-500">
-            <p>© 2024 FAQ Portal - Tutti i diritti riservati</p>
-        </div>
-    </footer>
-
-    <script src="/js/error-alert.js"></script>
-
-    <script>
-        // Verifica autenticazione e reindirizza se già autenticato
-        window.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const response = await fetch('/api/auth/check');
-                const data = await response.json();
-
-                if (data.authenticated) {
-                    // Se già autenticato, reindirizza alla dashboard
-                    window.location.href = '/dashboard';
+            @keyframes formFadeIn {
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
                 }
-            } catch (error) {
-                console.error('Errore controllo autenticazione:', error);
             }
-        });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const signinForm = document.getElementById('signin-form');
-            const signupForm = document.getElementById('signup-form');
-            const tabBtns = document.querySelectorAll('.tab-btn');
+            /* Added styles from changes */
+            .form-container {
+                background-color: #1a1a1a;
+                border-radius: 1rem;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                border: 1px solid #2a2a2a;
+                overflow: hidden;
+            }
 
-            // Tab switching functionality
-            tabBtns.forEach(button => {
-                button.addEventListener('click', () => {
-                    // Update button styles
-                    tabBtns.forEach(btn => {
-                        btn.classList.remove('bg-accent-yellow', 'text-primary-black');
-                        btn.classList.add('border', 'border-gray-700');
+            .form-header {
+                background-color: #1a1a1a;
+                border-bottom: 1px solid #2a2a2a;
+            }
+
+            .tab-active {
+                color: #ffd700;
+                border-bottom: 2px solid #ffd700;
+            }
+
+            .btn-submit {
+                background-color: #ffd700;
+                color: #0a0a0a;
+            }
+
+            .btn-submit:hover {
+                background-color: #ffc700;
+            }
+
+            input,
+            select {
+                background-color: #1a1a1a !important;
+                border: 1px solid #2a2a2a !important;
+                color: #f3f4f6 !important;
+            }
+
+            input:focus,
+            select:focus {
+                border-color: #ffd700 !important;
+                box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.25) !important;
+            }
+
+            .form-label {
+                color: #ffd700;
+            }
+        </style>
+    </head>
+    <body class="min-h-screen flex flex-col">
+        <header class="py-4 px-6 border-b sticky top-0 z-10">
+            <div
+                class="container mx-auto flex flex-col sm:flex-row justify-between items-center"
+            >
+                <div class="flex items-center mb-3 sm:mb-0">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-6 w-6 text-accent-yellow mr-2"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                    <h1 class="text-xl font-bold text-accent-yellow">
+                        FAQ Portal
+                    </h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a
+                        href="/"
+                        class="text-gray-300 hover:text-accent-yellow flex items-center"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5 mr-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7m-7-7v14"
+                            />
+                        </svg>
+                        Home
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <main
+            class="container mx-auto py-12 px-4 flex-grow flex flex-col items-center justify-center"
+        >
+            <div class="auth-card form-container">
+                <div
+                    class="bg-gradient-to-r from-accent-yellow/20 to-accent-yellow/10 p-4 border-b border-accent-yellow/20 form-header"
+                >
+                    <div class="text-center">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-12 w-12 mx-auto mb-2 text-accent-yellow"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+                            />
+                        </svg>
+                        <h2 class="text-2xl font-bold text-accent-yellow">
+                            Accedi al portale
+                        </h2>
+                        <p class="text-gray-400 mt-2">
+                            Gestisci la tua knowledge base
+                        </p>
+                    </div>
+                </div>
+
+                <div class="p-8">
+                    <div
+                        class="tabs flex gap-3 sm:gap-4 justify-center mb-6 sm:mb-8"
+                    >
+                        <button
+                            data-tab="signin"
+                            class="tab-btn active text-sm sm:text-base w-full sm:w-auto tab-active"
+                        >
+                            Accedi
+                        </button>
+                        <button
+                            data-tab="signup"
+                            class="tab-btn text-sm sm:text-base w-full sm:w-auto"
+                        >
+                            Registrati
+                        </button>
+                    </div>
+
+                    <form id="signin-form" class="auth-form">
+                        <div class="form-group">
+                            <label class="form-label" for="signin-email"
+                                >Email</label
+                            >
+                            <div class="relative">
+                                <span
+                                    class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                                        />
+                                    </svg>
+                                </span>
+                                <input
+                                    id="signin-email"
+                                    type="email"
+                                    name="email"
+                                    required
+                                    class="form-input pl-10"
+                                    placeholder="Inserisci la tua email"
+                                />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="signin-password"
+                                >Password</label
+                            >
+                            <div class="relative">
+                                <span
+                                    class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                        />
+                                    </svg>
+                                </span>
+                                <input
+                                    id="signin-password"
+                                    type="password"
+                                    name="password"
+                                    required
+                                    class="form-input pl-10"
+                                    placeholder="Inserisci la password"
+                                />
+                            </div>
+                        </div>
+                        <button type="submit" class="submit-btn btn-submit">
+                            Accedi
+                        </button>
+                    </form>
+
+                    <form id="signup-form" class="auth-form hidden">
+                        <div class="form-group">
+                            <label class="form-label" for="signup-email"
+                                >Email</label
+                            >
+                            <div class="relative">
+                                <span
+                                    class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                                        />
+                                    </svg>
+                                </span>
+                                <input
+                                    id="signup-email"
+                                    type="email"
+                                    name="email"
+                                    required
+                                    class="form-input pl-10"
+                                    placeholder="Inserisci la tua email"
+                                />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="signup-password"
+                                >Password</label
+                            >
+                            <div class="relative">
+                                <span
+                                    class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                        />
+                                    </svg>
+                                </span>
+                                <input
+                                    id="signup-password"
+                                    type="password"
+                                    name="password"
+                                    required
+                                    class="form-input pl-10"
+                                    placeholder="Inserisci la password"
+                                />
+                            </div>
+                        </div>
+                        <button type="submit" class="submit-btn btn-submit">
+                            Registrati
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <footer class="bg-dark-gray py-6 px-4 mt-12 border-t border-gray-800">
+            <div class="container mx-auto text-center text-gray-500">
+                <p>© 2024 FAQ Portal - Tutti i diritti riservati</p>
+            </div>
+        </footer>
+
+        <script src="/js/error-alert.js"></script>
+
+        <script>
+            // Verifica autenticazione e reindirizza se già autenticato
+            window.addEventListener("DOMContentLoaded", async () => {
+                try {
+                    const response = await fetch("/api/auth/check");
+                    const data = await response.json();
+
+                    if (data.authenticated) {
+                        // Se già autenticato, reindirizza alla dashboard
+                        window.location.href = "/dashboard";
+                    }
+                } catch (error) {
+                    console.error("Errore controllo autenticazione:", error);
+                }
+            });
+
+            document.addEventListener("DOMContentLoaded", () => {
+                const signinForm = document.getElementById("signin-form");
+                const signupForm = document.getElementById("signup-form");
+                const tabBtns = document.querySelectorAll(".tab-btn");
+
+                // Tab switching functionality
+                tabBtns.forEach((button) => {
+                    button.addEventListener("click", () => {
+                        // Update button styles
+                        tabBtns.forEach((btn) => {
+                            btn.classList.remove(
+                                "bg-accent-yellow",
+                                "text-primary-black",
+                            );
+                            btn.classList.add("border", "border-gray-700");
+                        });
+
+                        button.classList.add(
+                            "bg-accent-yellow",
+                            "text-primary-black",
+                        );
+                        button.classList.remove("border", "border-gray-700");
+
+                        // Show corresponding form
+                        const tabId = button.getAttribute("data-tab");
+                        document
+                            .querySelectorAll("form")
+                            .forEach((form) => form.classList.add("hidden"));
+                        document
+                            .getElementById(tabId + "-form")
+                            .classList.remove("hidden");
                     });
+                });
 
-                    button.classList.add('bg-accent-yellow', 'text-primary-black');
-                    button.classList.remove('border', 'border-gray-700');
+                // Gestione login
+                signinForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
 
-                    // Show corresponding form
-                    const tabId = button.getAttribute('data-tab');
-                    document.querySelectorAll('form').forEach(form => form.classList.add('hidden'));
-                    document.getElementById(tabId + '-form').classList.remove('hidden');
+                    try {
+                        const formData = new FormData(e.target);
+                        const email = formData.get("email");
+                        const password = formData.get("password");
+
+                        if (!email || !password) {
+                            showErrorAlert("Inserisci email e password");
+                            return;
+                        }
+
+                        const response = await fetch("/api/auth/login", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ email, password }),
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            showErrorAlert(data.error || "Errore di accesso");
+                            return;
+                        }
+
+                        // Reindirizza alla dashboard in caso di successo
+                        window.location.href = "/dashboard";
+                    } catch (error) {
+                        console.error("Errore durante l'accesso:", error);
+                        showErrorAlert(
+                            "Errore durante l'accesso: " + error.message,
+                        );
+                    }
+                });
+
+                // Gestione registrazione
+                signupForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+
+                    try {
+                        const formData = new FormData(e.target);
+                        const email = formData.get("email");
+                        const password = formData.get("password");
+
+                        if (!email || !password) {
+                            showErrorAlert("Inserisci email e password");
+                            return;
+                        }
+
+                        const response = await fetch("/api/auth/register", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                email,
+                                password,
+                                role: "user",
+                            }),
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            showErrorAlert(
+                                data.error || "Errore di registrazione",
+                            );
+                            return;
+                        }
+
+                        // Mostra messaggio di successo e reindirizza
+                        showErrorAlert(
+                            "Registrazione completata con successo!",
+                        );
+                        setTimeout(() => {
+                            window.location.href = "/dashboard";
+                        }, 1500);
+                    } catch (error) {
+                        console.error(
+                            "Errore durante la registrazione:",
+                            error,
+                        );
+                        showErrorAlert(
+                            "Errore durante la registrazione: " + error.message,
+                        );
+                    }
                 });
             });
-
-            // Gestione login
-            signinForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                try {
-                    const formData = new FormData(e.target);
-                    const email = formData.get('email');
-                    const password = formData.get('password');
-
-                    if (!email || !password) {
-                        showErrorAlert('Inserisci email e password');
-                        return;
-                    }
-
-                    const response = await fetch('/api/auth/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ email, password }),
-                    });
-
-                    const data = await response.json();
-
-                    if (!response.ok) {
-                        showErrorAlert(data.error || 'Errore di accesso');
-                        return;
-                    }
-
-                    // Reindirizza alla dashboard in caso di successo
-                    window.location.href = '/dashboard';
-                } catch (error) {
-                    console.error('Errore durante l\'accesso:', error);
-                    showErrorAlert('Errore durante l\'accesso: ' + error.message);
-                }
-            });
-
-            // Gestione registrazione
-            signupForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                try {
-                    const formData = new FormData(e.target);
-                    const email = formData.get('email');
-                    const password = formData.get('password');
-
-                    if (!email || !password) {
-                        showErrorAlert('Inserisci email e password');
-                        return;
-                    }
-
-                    const response = await fetch('/api/auth/register', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ email, password, role: 'user' }),
-                    });
-
-                    const data = await response.json();
-
-                    if (!response.ok) {
-                        showErrorAlert(data.error || 'Errore di registrazione');
-                        return;
-                    }
-
-                    // Mostra messaggio di successo e reindirizza
-                    showErrorAlert('Registrazione completata con successo!');
-                    setTimeout(() => {
-                        window.location.href = '/dashboard';
-                    }, 1500);
-                } catch (error) {
-                    console.error('Errore durante la registrazione:', error);
-                    showErrorAlert('Errore durante la registrazione: ' + error.message);
-                }
-            });
-        });
-    </script>
-</body>
+        </script>
+    </body>
 </html>
