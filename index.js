@@ -29,6 +29,10 @@ app.get('/create-faq', (req, res) => {
   res.sendFile(__dirname + '/views/faq-create.html');
 });
 
+app.get('/create', (req, res) => {
+  res.sendFile(__dirname + '/views/faq-create.html');
+});
+
 app.get('/users', (req, res) => {
   res.sendFile(__dirname + '/views/users.html');
 });
