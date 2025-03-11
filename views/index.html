@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -19,49 +20,50 @@
             }
         }
     </script>
-    <style>
-        .category-accordion {
-            @apply bg-gray-800 rounded-xl border border-gray-700 mb-4 overflow-hidden transition-all duration-300;
-        }
-        .category-header {
-            @apply bg-gray-700/50 p-4 flex justify-between items-center cursor-pointer hover:bg-gray-700/70;
-        }
-        .faq-item {
-            @apply bg-gray-800/30 p-4 border-l-4 border-yellow-500/20 hover:border-yellow-500/50 transition-colors;
-        }
-    </style>
 </head>
-<body class="bg-primary-black text-gray-100">
+<body class="bg-primary-black text-gray-100 min-h-screen flex flex-col">
     <header class="bg-dark-gray py-4 px-6 border-b border-gray-800">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
-            <nav class="space-x-4">
-                <a href="/auth" class="text-gray-300 hover:text-accent-yellow">Login</a>
-                <a href="/create" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300">Crea FAQ</a>
-            </nav>
         </div>
     </header>
 
-    <main class="container mx-auto py-8 px-4">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-bold">Domande Frequenti</h2>
-            <div class="relative">
-                <select id="categoryFilter" class="bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-yellow">
-                    <option value="all">Tutte le categorie</option>
-                    <option value="Network">Network</option>
-                    <option value="Software">Software</option>
-                    <option value="Hardware">Hardware</option>
-                    <option value="Security">Security</option>
-                </select>
+    <main class="container mx-auto py-12 px-4 flex-grow flex flex-col items-center justify-center">
+        <div class="text-center animate-fade-in max-w-lg mx-auto">
+            <h1 class="text-4xl font-bold text-accent-yellow mb-6">Benvenuto nel FAQ Portal</h1>
+            <p class="text-xl text-gray-300 mb-10">La piattaforma per gestire le domande tecniche frequenti</p>
+            
+            <div id="loginContainer" class="flex flex-col items-center">
+                <p class="text-gray-400 mb-6">Effettua il login per accedere e gestire le FAQ</p>
+                <a href="/auth" class="bg-accent-yellow text-primary-black px-8 py-3 rounded-lg font-bold text-lg hover:bg-yellow-300 transition-colors flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    Accedi
+                </a>
             </div>
-        </div>
-
-        <div id="faqContainer" class="space-y-6">
-            <!-- FAQ content will be loaded here -->
+            
+            <div id="loggedInContainer" class="hidden flex flex-col items-center">
+                <p class="text-gray-400 mb-6">Sei autenticato. Ora puoi:</p>
+                <div class="flex gap-4 flex-wrap justify-center">
+                    <a href="/dashboard" class="bg-dark-gray border border-accent-yellow text-accent-yellow px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Visualizza FAQ
+                    </a>
+                    <a href="/create" class="bg-accent-yellow text-primary-black px-6 py-3 rounded-lg font-medium hover:bg-yellow-300 transition-colors flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Crea FAQ
+                    </a>
+                </div>
+            </div>
         </div>
     </main>
 
-    <footer class="bg-dark-gray py-6 px-4 mt-12 border-t border-gray-800">
+    <footer class="bg-dark-gray py-6 px-4 mt-auto border-t border-gray-800">
         <div class="container mx-auto text-center text-gray-500">
             <p>© 2024 FAQ Portal - Tutti i diritti riservati</p>
         </div>
@@ -70,6 +72,29 @@
     <!-- Load Supabase client first -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/error-alert.js"></script>
-    <script src="/js/app.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            // Gestione stato login dal backend
+            const checkLoginStatus = async () => {
+                try {
+                    const response = await fetch('/api/auth/check');
+                    const data = await response.json();
+                    
+                    if (data.authenticated) {
+                        document.getElementById('loginContainer').classList.add('hidden');
+                        document.getElementById('loggedInContainer').classList.remove('hidden');
+                    } else {
+                        document.getElementById('loginContainer').classList.remove('hidden');
+                        document.getElementById('loggedInContainer').classList.add('hidden');
+                    }
+                } catch (error) {
+                    console.error('Errore controllo autenticazione:', error);
+                }
+            };
+            
+            // Esegui controllo login
+            checkLoginStatus();
+        });
+    </script>
 </body>
 </html>

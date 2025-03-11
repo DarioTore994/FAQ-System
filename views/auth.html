@@ -63,6 +63,7 @@
                     <label class="block text-sm font-medium mb-1 text-accent-yellow">Email</label>
                     <input
                         type="email"
+                        name="email"
                         required
                         class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
                     />
@@ -71,6 +72,7 @@
                     <label class="block text-sm font-medium mb-1 text-accent-yellow">Password</label>
                     <input
                         type="password"
+                        name="password"
                         required
                         class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
                     />
@@ -88,6 +90,7 @@
                     <label class="block text-sm font-medium mb-1 text-accent-yellow">Email</label>
                     <input
                         type="email"
+                        name="email"
                         required
                         class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
                     />
@@ -96,6 +99,7 @@
                     <label class="block text-sm font-medium mb-1 text-accent-yellow">Password</label>
                     <input
                         type="password"
+                        name="password"
                         required
                         class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
                     />
@@ -119,7 +123,6 @@
     <!-- Load Supabase client first -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/error-alert.js"></script>
-    <script src="/js/app.js"></script>
     <script>
         // Tab switching functionality
         document.querySelectorAll('.tab-btn').forEach(button => {
@@ -138,6 +141,77 @@
                 document.querySelectorAll('form').forEach(form => form.classList.add('hidden'));
                 document.getElementById(tabId + '-form').classList.remove('hidden');
             });
+        });
+
+        // Initialize Supabase client
+        const supabaseUrl = 'https://ejlyrwotgkrjeunosrzo.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqbHlyd290Z2tyamV1bm9zcnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE2ODQxOTYsImV4cCI6MjA1NzI2MDE5Nn0.xmfOVAMsH5QqzjKmkLriEshZalP0Xj8xf_N_wpWE_40';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Gestione signup
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const email = formData.get('email');
+            const password = formData.get('password');
+            
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                });
+                
+                if (error) throw error;
+                
+                // Inviare il token al backend
+                await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token: data.session.access_token }),
+                });
+                
+                // Redirect alla dashboard
+                window.location.href = '/dashboard';
+                
+            } catch (error) {
+                console.error('Errore durante la registrazione:', error);
+                showErrorAlert('Errore durante la registrazione: ' + error.message);
+            }
+        });
+        
+        // Gestione signin
+        document.getElementById('signin-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const email = formData.get('email');
+            const password = formData.get('password');
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password,
+                });
+                
+                if (error) throw error;
+                
+                // Inviare il token al backend
+                await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token: data.session.access_token }),
+                });
+                
+                // Redirect alla dashboard
+                window.location.href = '/dashboard';
+                
+            } catch (error) {
+                console.error('Errore durante il login:', error);
+                showErrorAlert('Errore durante il login: ' + error.message);
+            }
         });
     </script>
 </body>
