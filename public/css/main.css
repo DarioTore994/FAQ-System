@@ -754,10 +754,6 @@ video {
   display: none;
 }
 
-.h-10 {
-  height: 2.5rem;
-}
-
 .h-12 {
   height: 3rem;
 }
@@ -784,10 +780,6 @@ video {
 
 .w-1\/4 {
   width: 25%;
-}
-
-.w-10 {
-  width: 2.5rem;
 }
 
 .w-12 {
@@ -1278,11 +1270,6 @@ video {
 }
 
 /* Custom CSS can go here */
-
-.hover\:border-accent-yellow:hover {
-  --tw-border-opacity: 1;
-  border-color: rgb(255 215 0 / var(--tw-border-opacity, 1));
-}
 
 .hover\:border-yellow-500\/50:hover {
   border-color: rgb(234 179 8 / 0.5);
