@@ -5,9 +5,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'primary-black': '#0a0a0a',
-        'accent-yellow': '#FFD700',
-        'dark-gray': '#1a1a1a',
+        'primary-black': '#ffffff',
+        'accent-yellow': '#2b6cb0',
+        'dark-gray': '#f5f7fa',
       }
     }
   },

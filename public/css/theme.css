@@ -1,10 +1,10 @@
 :root {
-    --bg-primary: #0a0a0a;
-    --bg-secondary: #1a1a1a;
-    --text-primary: #f3f4f6;
-    --text-secondary: #d1d5db;
-    --accent-color: #FFD700;
-    --border-color: #2a2a2a;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f7fa;
+    --text-primary: #333333;
+    --text-secondary: #4a5568;
+    --accent-color: #2b6cb0;
+    --border-color: #e2e8f0;
 }
 
 /* Stili globali ottimizzati */

@@ -19,7 +19,7 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
-            color: #FFD700;
+            color: #2b6cb0;
         }
 
         .form-input, 
@@ -28,17 +28,17 @@
             width: 100%;
             padding: 0.75rem 1rem;
             border-radius: 0.5rem;
-            border: 1px solid #2a2a2a;
-            background-color: #1a1a1a !important;
-            color: #f3f4f6 !important;
+            border: 1px solid #d1d5db;
+            background-color: #ffffff !important;
+            color: #2b6cb0 !important;
             transition: all 0.2s ease;
         }
 
         .form-input:focus, 
         .form-select:focus, 
         .form-textarea:focus {
-            border-color: #FFD700;
-            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.25);
+            border-color: #2b6cb0;
+            box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.25);
             outline: none;
         }
 
@@ -60,8 +60,8 @@
             width: 100%;
             padding: 0.875rem;
             border-radius: 0.5rem;
-            background-color: #FFD700;
-            color: #0a0a0a;
+            background-color: #2b6cb0;
+            color: #ffffff;
             font-weight: 600;
             transition: all 0.2s ease;
             display: flex;
@@ -70,23 +70,23 @@
         }
 
         .submit-btn:hover {
-            background-color: #ffc700;
+            background-color: #1d568f;
             transform: translateY(-2px);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .form-card {
-            background-color: #1a1a1a;
+            background-color: #ffffff;
             border-radius: 1rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            border: 1px solid #2a2a2a;
+            border: 1px solid #d1d5db;
         }
 
         .form-header {
             padding: 1.5rem;
-            border-bottom: 1px solid #2a2a2a;
-            background-color: #1a1a1a;
+            border-bottom: 1px solid #d1d5db;
+            background-color: #ffffff;
         }
 
         .form-body {
@@ -105,21 +105,50 @@
         }
 
         .btn-primary {
-            background-color: #FFD700;
-            color: #0a0a0a !important;
+            background-color: #2b6cb0;
+            color: #ffffff !important;
         }
 
         .btn-primary:hover {
-            background-color: #ffc700;
+            background-color: #1d568f;
         }
 
         .bg-accent-yellow {
-            background-color: #FFD700;
+            background-color: #2b6cb0;
         }
 
         .text-primary-black {
-            color: #0a0a0a;
+            color: #2b6cb0;
         }
+        body {
+            background-color: #ffffff;
+            color: #2b6cb0;
+        }
+        .text-gray-100 {
+            color: #2b6cb0;
+        }
+        .text-gray-300 {
+            color: #6b7280;
+        }
+        .text-gray-500 {
+            color: #6b7280;
+        }
+        .bg-primary-black {
+            background-color: #ffffff;
+        }
+        .border-gray-800 {
+            border-color: #d1d5db;
+        }
+        .border-b{
+            border-bottom-color: #d1d5db;
+        }
+        .text-accent-yellow{
+            color: #2b6cb0;
+        }
+        .hover\:text-accent-yellow:hover{
+            color: #1d568f;
+        }
+
     </style>
 </head>
 <body class="bg-primary-black text-gray-100 min-h-screen flex flex-col">
@@ -219,7 +248,7 @@
                         <input type="file" name="image" accept="image/*">
                         <div id="imagePreview"></div>  <!-- Placeholder for image preview -->
                     </div>
-                    
+
                     <div class="form-control">
                         <label class="form-label">Stato</label>
                         <select name="status" class="form-select">
@@ -492,7 +521,7 @@
                     if (data.user && data.user.role === 'admin') {
                         if (adminMenu) adminMenu.classList.remove('hidden');
                     }
-                    
+
                     // Se è un utente normale (non admin e non editor), non dovrebbe accedere a questa pagina
                     if (data.user && data.user.role === 'user') {
                         window.location.href = '/dashboard';
