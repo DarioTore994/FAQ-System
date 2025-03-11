@@ -1,6 +1,11 @@
 
 // Client-side JavaScript
 document.addEventListener("DOMContentLoaded", async () => {
+  // Initialize Supabase client
+  const supabaseUrl = 'https://ejlyrwotgkrjeunosrzo.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqbHlyd290Z2tyamV1bm9zcnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE2ODQxOTYsImV4cCI6MjA1NzI2MDE5Nn0.xmfOVAMsH5QqzjKmkLriEshZalP0Xj8xf_N_wpWE_40';
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
   // Initialize with appropriate API endpoints
   const loadFAQs = async (selectedCategory = "all") => {
     try {
@@ -19,21 +24,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error("Error loading FAQs:", error);
       showErrorAlert("Errore nel caricamento delle FAQ");
     }
-  };
-
-  // Function to show error alerts
-  const showErrorAlert = (message) => {
-    const alert = document.createElement("div");
-    alert.className =
-      "fixed bottom-4 right-4 bg-red-500/90 text-white px-6 py-3 rounded-lg shadow-lg";
-    alert.innerHTML = `
-      <div class="flex items-center gap-2">
-        <span>${message}</span>
-      </div>
-    `;
-
-    document.body.appendChild(alert);
-    setTimeout(() => alert.remove(), 5000);
   };
 
   // Render FAQs
