@@ -11,7 +11,7 @@
         .auth-card {
             max-width: 400px;
             width: 100%;
-            background-color: var(--card-bg); /*This and other color variables need to be redefined for black/yellow theme*/
+            background-color: var(--card-bg);
             border-radius: 1rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
             border: 1px solid var(--border-color);
@@ -32,8 +32,8 @@
         }
 
         .tab-btn.active {
-            background-color: var(--accent-color); /*Needs to be redefined*/
-            color: var(--bg-primary); /*Needs to be redefined*/
+            background-color: var(--accent-color);
+            color: var(--bg-primary);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
@@ -43,8 +43,8 @@
         }
 
         .tab-btn:not(.active):hover {
-            border-color: var(--accent-color); /*Needs to be redefined*/
-            color: var(--accent-color); /*Needs to be redefined*/
+            border-color: var(--accent-color);
+            color: var(--accent-color);
         }
 
         .form-group {
@@ -55,7 +55,7 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
-            color: var(--accent-color); /*Needs to be redefined*/
+            color: var(--accent-color);
         }
 
         .form-input {
@@ -63,13 +63,13 @@
             padding: 0.75rem 1rem;
             border-radius: 0.5rem;
             border: 1px solid var(--border-color);
-            background-color: var(--input-bg); /*Needs to be redefined*/
-            color: var(--text-primary); /*Needs to be redefined*/
+            background-color: var(--input-bg);
+            color: var(--text-primary);
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .form-input:focus {
-            border-color: var(--accent-color); /*Needs to be redefined*/
+            border-color: var(--accent-color);
             box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.25);
             outline: none;
         }
@@ -78,14 +78,14 @@
             width: 100%;
             padding: 0.875rem;
             border-radius: 0.5rem;
-            background-color: var(--accent-color); /*Needs to be redefined*/
-            color: var(--bg-primary); /*Needs to be redefined*/
+            background-color: var(--accent-color);
+            color: var(--bg-primary);
             font-weight: 600;
             transition: all 0.2s ease;
         }
 
         .submit-btn:hover {
-            background-color: var(--btn-hover); /*Needs to be redefined*/
+            background-color: var(--btn-hover);
             transform: translateY(-2px);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
@@ -101,6 +101,49 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        /* Added styles from changes */
+        .form-container {
+            background-color: #1a1a1a;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #2a2a2a;
+            overflow: hidden;
+        }
+
+        .form-header {
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .tab-active {
+            color: #FFD700;
+            border-bottom: 2px solid #FFD700;
+        }
+
+        .btn-submit {
+            background-color: #FFD700;
+            color: #0a0a0a;
+        }
+
+        .btn-submit:hover {
+            background-color: #ffc700;
+        }
+
+        input, select {
+            background-color: #1a1a1a !important;
+            border: 1px solid #2a2a2a !important;
+            color: #f3f4f6 !important;
+        }
+
+        input:focus, select:focus {
+            border-color: #FFD700 !important;
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.25) !important;
+        }
+
+        .form-label {
+            color: #FFD700;
         }
     </style>
 </head>
@@ -126,8 +169,8 @@
     </header>
 
     <main class="container mx-auto py-12 px-4 flex-grow flex flex-col items-center justify-center">
-        <div class="auth-card">
-            <div class="bg-gradient-to-r from-accent-yellow/20 to-accent-yellow/10 p-4 border-b border-accent-yellow/20">
+        <div class="auth-card form-container">
+            <div class="bg-gradient-to-r from-accent-yellow/20 to-accent-yellow/10 p-4 border-b border-accent-yellow/20 form-header">
                 <div class="text-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 text-accent-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
@@ -141,7 +184,7 @@
                 <div class="tabs flex gap-3 sm:gap-4 justify-center mb-6 sm:mb-8">
                     <button
                         data-tab="signin"
-                        class="tab-btn active text-sm sm:text-base w-full sm:w-auto"
+                        class="tab-btn active text-sm sm:text-base w-full sm:w-auto tab-active"
                     >
                         Accedi
                     </button>
@@ -169,7 +212,6 @@
                                 required
                                 class="form-input pl-10"
                                 placeholder="Inserisci la tua email"
-                                style="color: var(--text-primary);"
                             />
                         </div>
                     </div>
@@ -188,11 +230,10 @@
                                 required
                                 class="form-input pl-10"
                                 placeholder="Inserisci la password"
-                                style="color: var(--text-primary);"
                             />
                         </div>
                     </div>
-                    <button type="submit" class="submit-btn">
+                    <button type="submit" class="submit-btn btn-submit">
                         Accedi
                     </button>
                 </form>
@@ -213,7 +254,6 @@
                                 required
                                 class="form-input pl-10"
                                 placeholder="Inserisci la tua email"
-                                style="color: var(--text-primary);"
                             />
                         </div>
                     </div>
@@ -232,11 +272,10 @@
                                 required
                                 class="form-input pl-10"
                                 placeholder="Inserisci la password"
-                                style="color: var(--text-primary);"
                             />
                         </div>
                     </div>
-                    <button type="submit" class="submit-btn">
+                    <button type="submit" class="submit-btn btn-submit">
                         Registrati
                     </button>
                 </form>

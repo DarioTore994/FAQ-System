@@ -1,21 +1,20 @@
 /* Base styling */
 :root {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #1a1a1a;
-  --card-bg: #1f2937; /* Changed to a darker shade for contrast */
-  --text-primary: #FFD700; /* Yellow text */
-  --text-secondary: #FFFF00; /* Lighter Yellow */
-  --accent-color: #000000; /* Black accent */
-  --btn-hover: #000000; /* Darker black on hover */
-  --border-color: #FFD700; /* Yellow border */
-  --input-bg: #000000; /* Black input background */
-  --shadow-color: rgba(255, 215, 0, 0.5); /* Yellow shadow */
-  --header-shadow: rgba(255, 215, 0, 0.1); /* Lighter yellow header shadow */
-  --table-stripe: rgba(0, 0, 0, 0.7); /* Dark gray stripe */
-  --table-header: #000000; /* Black table header */
-  --table-border: #000000; /* Black table border */
-  --success-color: #FFFF00; /* Yellow success */
-  --error-color: #000000; /* Black error */
+  /* Colori principali */
+  --accent-color: #FFD700; /* Giallo */
+  --bg-primary: #0a0a0a; /* Nero */
+  --bg-secondary: #1a1a1a; /* Grigio scuro */
+  --text-primary: #f3f4f6; /* Bianco/grigio chiaro per testo */
+
+  /* Variabili per componenti specifici */
+  --card-bg: #1a1a1a;
+  --input-bg: #1a1a1a;
+  --border-color: #2a2a2a;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --table-header: #2a2a2a;
+  --table-border: #2a2a2a;
+  --table-stripe: #1e1e1e;
+  --btn-hover: #ffc700;
 }
 
 body {
@@ -27,7 +26,7 @@ body {
 /* Stilizzazione header e footer */
 header, footer {
   background-color: var(--bg-secondary);
-  border-color: var(--border-color);
+  border-color: var(--border-color) !important;
 }
 
 header {
@@ -43,12 +42,14 @@ header {
   background-color: var(--bg-secondary);
 }
 
+/* Stili card */
 .card {
   background-color: var(--card-bg);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 4px 6px var(--shadow-color);
   border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 6px var(--shadow-color);
 }
 
 .card:hover {
@@ -67,7 +68,7 @@ input, textarea, select {
 
 input:focus, textarea:focus, select:focus {
   border-color: var(--accent-color) !important;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.25) !important;
   outline: none;
 }
 
@@ -84,7 +85,7 @@ table {
 
 th {
   background-color: var(--table-header) !important;
-  color: var(--text-primary) !important;
+  color: var(--accent-color) !important;
   font-weight: 600;
   text-transform: uppercase;
   font-size: 0.75rem;
@@ -114,12 +115,11 @@ tbody tr:nth-child(even) {
 
 .btn-primary {
   background-color: var(--accent-color);
-  color: var(--text-primary);
+  color: var(--bg-primary) !important;
 }
 
 .btn-primary:hover {
   background-color: var(--btn-hover);
-  transform: translateY(-1px);
 }
 
 .btn-secondary {
@@ -129,7 +129,6 @@ tbody tr:nth-child(even) {
 }
 
 .btn-secondary:hover {
-  background-color: var(--bg-primary);
   border-color: var(--accent-color);
   color: var(--accent-color);
 }
@@ -145,6 +144,26 @@ form {
 .auth-card {
   width: 90% !important;
 }
+
+/* Link colori */
+a {
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--accent-color);
+}
+
+/* Badge */
+.badge, .category-badge {
+  background-color: var(--accent-color);
+  color: var(--bg-primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 
 @media (max-width: 640px) {
   #headerNav {
