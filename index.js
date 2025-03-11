@@ -34,30 +34,35 @@ app.get('/api/auth/check', async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1] || req.cookies?.token;
     
     if (!token) {
-      // Non ritornare 401 qui, ma solo un flag di autenticazione falso
+      console.log('Nessun token fornito');
       return res.status(200).json({ authenticated: false, message: 'Nessun token fornito' });
     }
     
     // Verifica il token
-    const userQuery = 'SELECT * FROM users WHERE id = $1';
-    const userResult = await pool.query(userQuery, [token]);
-    
-    if (userResult.rows.length === 0) {
-      // Non ritornare 401 qui, ma solo un flag di autenticazione falso
-      return res.status(200).json({ authenticated: false, message: 'Utente non trovato' });
+    try {
+      const userQuery = 'SELECT * FROM users WHERE id = $1';
+      const userResult = await pool.query(userQuery, [token]);
+      
+      if (userResult.rows.length === 0) {
+        console.log('Utente non trovato con token:', token);
+        return res.status(200).json({ authenticated: false, message: 'Utente non trovato' });
+      }
+      
+      const user = userResult.rows[0];
+      
+      // Ritorna le informazioni dell'utente (esclusa la password)
+      const { password, ...userInfo } = user;
+      return res.status(200).json({ 
+        authenticated: true, 
+        user: userInfo
+      });
+    } catch (dbError) {
+      console.error('Errore database:', dbError);
+      return res.status(200).json({ authenticated: false, message: 'Errore database' });
     }
-    
-    const user = userResult.rows[0];
-    
-    // Ritorna le informazioni dell'utente (esclusa la password)
-    const { password, ...userInfo } = user;
-    return res.status(200).json({ 
-      authenticated: true, 
-      user: userInfo
-    });
   } catch (error) {
     console.error('Errore nel controllo autenticazione:', error);
-    return res.status(500).json({ authenticated: false, error: 'Errore nel controllo autenticazione' });
+    return res.status(200).json({ authenticated: false, message: 'Errore nel controllo autenticazione' });
   }
 });
 

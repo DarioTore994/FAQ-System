@@ -29,7 +29,9 @@ async function initDatabase() {
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
       
-      CREATE TABLE IF NOT EXISTS faqs (
+      DROP TABLE IF EXISTS faqs;
+      
+      CREATE TABLE faqs (
         id SERIAL PRIMARY KEY,
         user_id INTEGER,
         category VARCHAR(100) NOT NULL,
