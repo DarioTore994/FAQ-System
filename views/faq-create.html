@@ -286,7 +286,8 @@
                 // Aggiungi event listener al form di creazione FAQ
                 document.getElementById('faqForm').addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    console.log('Salvataggio in corso...');
+                    if (window.isSavingFaq) return; // Prevenire invii multipli
+                    window.isSavingFaq = true; // Imposta flag per prevenire doppi invii
 
                     // Gestione stato pulsante di invio
                     const submitButton = e.target.querySelector('.submit-btn');

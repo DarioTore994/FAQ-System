@@ -620,6 +620,7 @@
         document.getElementById('faqForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (window.isSavingFaq) return; // Prevenire invii multipli
+            window.isSavingFaq = true; // Imposta il flag
 
             // Gestione stato pulsante di invio
             const submitButton = e.target.querySelector('.submit-btn');
@@ -641,7 +642,6 @@
                 </svg>
                 Aggiornamento...
             `);
-            window.isSavingFaq = true; // Imposta il flag
 
             try {
                 const formData = new FormData(e.target);
@@ -664,56 +664,6 @@
                     method: 'POST'
                 });
 
-                await saveFaq(faqData);
-
-
-                // Aggiorna UI per successo
-                updateButtonState(true, `
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Aggiornato!
-                `);
-
-                showErrorAlert('FAQ aggiornata con successo!', 'success');
-
-                // Redirigi alla dashboard dopo un breve ritardo
-                setTimeout(() => {
-                    window.location.href = '/dashboard';
-                }, 1500);
-            } catch (error) {
-                console.error('Errore nell\'aggiornamento della FAQ:', error.message);
-
-                // Gestione specifici messaggi di errore
-                if (error.message.includes('sessione scaduta') || 
-                    error.message.includes('login') || 
-                    error.message.includes('autenticazione')) {
-
-                    showErrorAlert('Sessione scaduta. Reindirizzamento alla pagina di login...', 'error');
-
-                    // Aggiorna pulsante per indicare reindirizzamento
-                    updateButtonState(true, `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        Reindirizzamento...
-                    `);
-
-                    setTimeout(() => {
-                        window.location.href = '/auth';
-                    }, 2000);
-                } else {
-                    // Errore generico
-                    showErrorAlert('Errore nell\'aggiornamento della FAQ: ' + error.message, 'error');
-                    updateButtonState(false);
-                }
-            } finally {
-                window.isSavingFaq = false; // Reimposta il flag
-            }
-        });
-
-        async function saveFaq(faqData) {
-            try {
                 console.log("Salvataggio in corso...");
                 // Ottieni i dati dal form
                 const faqId = getURLParameter('id'); // Ottiene l'ID della FAQ dall'URL
@@ -763,17 +713,51 @@
                     throw new Error(data.error || "Errore nel salvataggio della FAQ");
                 }
 
+                // Aggiorna UI per successo
+                updateButtonState(true, `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Aggiornato!
+                `);
+
                 // Visualizza un messaggio di successo
-                showErrorAlert(faqId ? "FAQ aggiornata con successo!" : "FAQ salvata con successo!");
+                showErrorAlert(faqId ? "FAQ aggiornata con successo!" : "FAQ salvata con successo!", 'success');
 
-                // Reindirizza alla dashboard dopo 1 secondo
-                setTimeout(() => window.location.href = '/dashboard', 1000);
-
+                // Redirigi alla dashboard dopo un breve ritardo
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1500);
             } catch (error) {
-                console.error("Errore nel salvataggio della FAQ:", error.message);
-                showErrorAlert("Errore nel salvataggio della FAQ: " + error.message);
+                console.error('Errore nell\'aggiornamento della FAQ:', error.message);
+
+                // Gestione specifici messaggi di errore
+                if (error.message.includes('sessione scaduta') || 
+                    error.message.includes('login') || 
+                    error.message.includes('autenticazione')) {
+
+                    showErrorAlert('Sessione scaduta. Reindirizzamento alla pagina di login...', 'error');
+
+                    // Aggiorna pulsante per indicare reindirizzamento
+                    updateButtonState(true, `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Reindirizzamento...
+                    `);
+
+                    setTimeout(() => {
+                        window.location.href = '/auth';
+                    }, 2000);
+                } else {
+                    // Errore generico
+                    showErrorAlert('Errore nell\'aggiornamento della FAQ: ' + error.message, 'error');
+                    updateButtonState(false);
+                }
+            } finally {
+                window.isSavingFaq = false; // Reimposta il flag
             }
-        }
+        });
 
         // Carica i dati della FAQ all'avvio
         window.addEventListener('DOMContentLoaded', async () => {
@@ -820,50 +804,58 @@
 
         // Funzione per mostrare notifiche all'utente senza sovrapposizioni
         function showErrorAlert(message, type = 'info') {
-            // Se c'è già una notifica attiva, rimuovila prima di mostrarne una nuova
-            let activeNotification = null;
-            let notificationTimeout = null;
-
-            if (activeNotification) {
-                document.body.removeChild(activeNotification);
-                clearTimeout(notificationTimeout);
-                activeNotification = null;
-            }
-
-            // Crea la nuova notifica
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 transform transition-all duration-300 ease-in-out ${
-                type === 'error' ? 'bg-red-600 text-white' : 
-                type === 'success' ? 'bg-green-600 text-white' : 
-                'bg-blue-600 text-white'
-            }`;
-            notification.innerHTML = message;
-            document.body.appendChild(notification);
-
-            // Conserva riferimento alla notifica attiva
-            activeNotification = notification;
-
-            // Animazione di entrata più rapida
-            setTimeout(() => {
-                notification.style.transform = 'translateY(0)';
-            }, 5); // Ridotto il ritardo da 10ms a 5ms
-
-            // Rimuovi dopo 4 secondi con timeout che possiamo cancellare (tempo ridotto)
-            notificationTimeout = setTimeout(() => {
-                notification.style.transform = 'translateY(-100%)';
-                notification.style.opacity = '0';
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        document.body.removeChild(notification);
+            // Variabili per gestire le notifiche
+            const notificationSystem = (() => {
+                let activeNotification = null;
+                let notificationTimeout = null;
+                
+                return {
+                    show: function(message, type) {
+                        // Se c'è già una notifica attiva, rimuovila
+                        if (activeNotification) {
+                            document.body.removeChild(activeNotification);
+                            clearTimeout(notificationTimeout);
+                            activeNotification = null;
+                        }
+            
+                        // Crea la nuova notifica
+                        const notification = document.createElement('div');
+                        notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 transform transition-all duration-300 ease-in-out ${
+                            type === 'error' ? 'bg-red-600 text-white' : 
+                            type === 'success' ? 'bg-green-600 text-white' : 
+                            'bg-blue-600 text-white'
+                        }`;
+                        notification.innerHTML = message;
+                        document.body.appendChild(notification);
+            
+                        // Conserva riferimento alla notifica attiva
+                        activeNotification = notification;
+            
+                        // Animazione di entrata
+                        setTimeout(() => {
+                            notification.style.transform = 'translateY(0)';
+                        }, 5);
+            
+                        // Rimuovi dopo un po'
+                        notificationTimeout = setTimeout(() => {
+                            notification.style.transform = 'translateY(-100%)';
+                            notification.style.opacity = '0';
+                            setTimeout(() => {
+                                if (notification.parentNode) {
+                                    document.body.removeChild(notification);
+                                }
+                                if (activeNotification === notification) {
+                                    activeNotification = null;
+                                }
+                            }, 200);
+                        }, 4000);
                     }
-                    // Pulisci il riferimento alla notifica attiva
-                    if (activeNotification === notification) {
-                        activeNotification = null;
-                    }
-                }, 200); // Transizione più veloce (ridotta da 300ms a 200ms)
-            }, 4000); // Tempo di visualizzazione dimezzato (da 8000ms a 4000ms)
+                };
+            })();
+            
+            // Mostra la notifica
+            notificationSystem.show(message, type);
         }
-
 
         // Funzione per mostrare notifiche
         function showNotification(message, type = 'info') {
