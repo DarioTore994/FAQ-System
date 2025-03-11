@@ -115,36 +115,33 @@
                     <a href="/" class="text-gray-300 hover:text-accent-yellow border-b-2 border-accent-yellow pb-1">Home</a>
                 </div>
 
-                <!-- Contenitore per utenti autenticati (solo dashboard) -->
+                <!-- Contenitore per elementi visibili solo quando autenticato -->
                 <div id="authUserContainer" class="hidden">
                     <div class="flex items-center gap-4">
                         <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
+                    
+                        <!-- Menu solo per admin - visibile solo se l'utente è admin -->
+                        <span id="adminMenu" class="hidden">
+                            <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow">Admin</a>
+                        </span>
+                        
+                        <!-- Bottone di logout - visibile solo se l'utente è loggato -->
+                        <button id="logoutBtn" class="btn btn-secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            <span class="hidden sm:inline">Logout</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Menu solo per admin - visibile solo se l'utente è admin -->
-                <div id="adminMenu" class="hidden flex items-center gap-4">
-                    <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow">Admin</a>
-                </div>
-
-                <!-- Contenitore per i bottoni di login/logout (solo nella home) -->
-                <div class="flex items-center gap-4">
-                    <!-- Bottone di accesso - visibile solo se l'utente non è loggato -->
-                    <a href="/auth" id="loginBtn" class="hidden btn btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                        </svg>
-                        <span>Accedi</span>
-                    </a>
-
-                    <!-- Bottone di logout - visibile solo se l'utente è loggato -->
-                    <button id="logoutBtn" class="hidden btn btn-secondary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        <span class="hidden sm:inline">Logout</span>
-                    </button>
-                </div>
+                <!-- Bottone di accesso - visibile solo se l'utente non è loggato -->
+                <a href="/auth" id="loginBtn" class="hidden btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Accedi</span>
+                </a>
             </nav>
         </div>
     </header>
