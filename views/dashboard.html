@@ -129,9 +129,10 @@
                     <div class="bg-gray-800/20 border-b border-gray-700">
                         <div class="grid grid-cols-12 text-left py-4 px-6">
                             <div class="col-span-3 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Domanda</div>
-                            <div class="col-span-4 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Descrizione/Soluzione</div>
+                            <div class="col-span-3 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Descrizione</div>
+                            <div class="col-span-2 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Soluzione</div>
                             <div class="col-span-2 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Categoria</div>
-                            <div class="col-span-2 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Data</div>
+                            <div class="col-span-1 font-semibold text-accent-yellow text-sm uppercase tracking-wider">Data</div>
                             <div class="col-span-1 font-semibold text-accent-yellow text-sm uppercase tracking-wider text-right">Azioni</div>
                         </div>
                     </div>
@@ -410,10 +411,12 @@
                             <div class="col-span-3">
                                 <h3 class="font-medium text-accent-yellow">${truncateText(title, 50)}</h3>
                             </div>
-                            <div class="col-span-4">
-                                <p class="text-sm text-gray-300">${truncateText(description, 80)}</p>
-                                <div class="mt-2 p-2 bg-gray-800/70 rounded border border-gray-700/50">
-                                    <p class="text-sm text-gray-200">${truncateText(resolution, 80)}</p>
+                            <div class="col-span-3">
+                                <p class="text-sm text-gray-300">${truncateText(description, 60)}</p>
+                            </div>
+                            <div class="col-span-2">
+                                <div class="p-2 bg-gray-800/70 rounded border border-gray-700/50">
+                                    <p class="text-sm text-gray-200">${truncateText(resolution, 60)}</p>
                                 </div>
                             </div>
                             <div class="col-span-2">
@@ -421,7 +424,7 @@
                                     ${category}
                                 </span>
                             </div>
-                            <div class="col-span-2 text-xs text-gray-400">
+                            <div class="col-span-1 text-xs text-gray-400">
                                 ${formattedDate}
                             </div>
                             <div class="col-span-1 text-right">
