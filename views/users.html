@@ -6,7 +6,8 @@
     <title>FAQ Portal - Gestione Utenti</title>
     <link href="/css/main.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
+    <link href="/css/theme.css" rel="stylesheet">
+<script>
         tailwind.config = {
             theme: {
                 extend: {
@@ -19,6 +20,58 @@
             }
         }
     </script>
+<style>
+    /* Stilizzazione tabelle utenti */
+    table {
+        border: 1px solid #2a2a2a;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    
+    th {
+        color: #FFD700 !important;
+        background-color: #1a1a1a !important;
+        text-transform: uppercase;
+        font-size: 0.875rem;
+        letter-spacing: 0.05em;
+    }
+    
+    td {
+        border-top: 1px solid #2a2a2a;
+    }
+    
+    tr:nth-child(even) {
+        background-color: rgba(26, 26, 26, 0.5);
+    }
+    
+    /* Bottoni */
+    button.bg-accent-yellow {
+        background-color: #FFD700;
+        color: #0a0a0a;
+    }
+    
+    button.bg-accent-yellow:hover {
+        background-color: #ffc700;
+    }
+    
+    button.hover\:bg-gray-700:hover {
+        background-color: #2a2a2a;
+    }
+    
+    /* Badge ruolo utente */
+    .bg-accent-yellow {
+        background-color: #FFD700;
+    }
+    
+    .text-primary-black {
+        color: #0a0a0a;
+    }
+    
+    /* Text colors */
+    .text-accent-yellow {
+        color: #FFD700;
+    }
+</style>
 </head>
 <body class="bg-primary-black text-gray-100">
     <header class="bg-dark-gray py-4 px-6 border-b border-gray-800">

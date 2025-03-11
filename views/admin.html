@@ -6,6 +6,7 @@
     <title>FAQ Portal - Admin</title>
     <link href="/css/main.css" rel="stylesheet">
     <!-- Use local Tailwind CSS build -->
+    <link href="/css/theme.css" rel="stylesheet">
     <style>
         .category-pill {
             display: inline-block;
@@ -27,24 +28,31 @@
             color: #ffc700;
         }
         
-        .bg-dark-gray {
-            background-color: #1a1a1a;
+        /* Form inputs */
+        input, select {
+            background-color: #1a1a1a !important;
+            border: 1px solid #2a2a2a !important;
+            color: #f3f4f6 !important;
         }
         
-        .text-accent-yellow {
+        input:focus, select:focus {
+            border-color: #FFD700 !important;
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.25) !important;
+        }
+        
+        /* Card styling */
+        .rounded-lg {
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .shadow-md {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Link styling */
+        a.text-gray-300:hover {
             color: #FFD700;
-        }
-        
-        .bg-accent-yellow {
-            background-color: #FFD700;
-        }
-        
-        .hover\:bg-yellow-300:hover {
-            background-color: #ffc700;
-        }
-        
-        .text-primary-black {
-            color: #0a0a0a;
         }
     </style>
 </head>
