@@ -103,35 +103,12 @@ document.addEventListener("DOMContentLoaded", async () => {
               </tr>
             </thead>
             <tbody>
-              ${faqs
-                .map(
-                  (faq) => `
-                <tr class="faq-row" data-faq-id="${faq.id}">
-                  <td class="font-medium">${faq.title}</td>
-                  <td class="text-sm text-secondary line-clamp-1">${faq.description}</td>
-                  <td class="text-xs">${new Date(faq.created_at).toLocaleDateString()}</td>
-                </tr>
-                <tr class="faq-detail-row" data-faq-id="${faq.id}">
-                  <td colspan="3" class="p-0">
-                    <div class="faq-detail">
-                      <div class="mb-3">
-                        <h5 class="font-medium mb-1">Descrizione completa:</h5>
-                        <p class="text-sm">${faq.description}</p>
-                      </div>
-                      <div class="resolution-box p-3 rounded-md mt-3" style="background-color: rgba(0,0,0,0.1);">
-                        <h5 class="text-accent-yellow text-sm font-medium mb-2">Procedura risolutiva:</h5>
-                        <p class="text-sm">${faq.resolution}</p>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              `,
-                )
-                .join("")}
             </tbody>
           </table>
         </div>
       `;
+    const tableBody = section.querySelector('tbody');
+    tableBody.innerHTML = renderFAQsTable(faqs);
     return section;
   };
 
@@ -346,4 +323,119 @@ document.addEventListener("DOMContentLoaded", async () => {
       showErrorAlert('Errore critico nella verifica del database: ' + error.message);
     }
   });
+
+  const renderFAQsTable = (faqs) => {
+    const faqContainer = document.getElementById('faqTableBody');
+    if (!faqContainer) return;
+
+    // Verifica se su dispositivo mobile
+    const isMobile = window.innerWidth < 768;
+
+    if (isMobile) {
+      // Visualizzazione a card per mobile
+      faqContainer.innerHTML = faqs.length === 0
+        ? `<tr><td colspan="3" class="text-center py-8 text-gray-400">Nessuna FAQ trovata</td></tr>`
+        : faqs
+            .map(
+              (faq) => `
+              <tr class="block mb-4 bg-gray-800/30 rounded-lg border border-gray-700">
+                <td class="block p-4 border-b border-gray-700">
+                  <div class="flex justify-between items-start">
+                    <h4 class="font-medium text-accent-yellow">${faq.title}</h4>
+                    <span class="px-3 py-1 bg-accent-yellow/10 text-accent-yellow rounded-full text-xs font-medium ml-2">
+                      ${faq.category}
+                    </span>
+                  </div>
+                  <div class="text-xs text-gray-500 mt-1">${new Date(faq.created_at).toLocaleDateString()}</div>
+                </td>
+                <td class="block p-4">
+                  <p class="text-sm text-gray-300 mb-3">${faq.description}</p>
+                  <div class="p-3 bg-gray-800/50 rounded-md">
+                    <h5 class="text-xs text-accent-yellow mb-1 font-medium">Soluzione:</h5>
+                    <p class="text-sm">${faq.resolution}</p>
+                  </div>
+                </td>
+              </tr>
+            `,
+            )
+            .join('');
+    } else {
+      // Visualizzazione a tabella per desktop
+      faqContainer.innerHTML = faqs.length === 0
+        ? `<tr><td colspan="3" class="text-center py-8 text-gray-400">Nessuna FAQ trovata</td></tr>`
+        : faqs
+            .map(
+              (faq) => `
+              <tr class="border-b border-gray-700 hover:bg-gray-800/30">
+                <td class="p-4">
+                  <h4 class="font-medium text-accent-yellow">${faq.title}</h4>
+                </td>
+                <td class="p-4">
+                  <p class="text-sm text-gray-300">${faq.description}</p>
+                  <div class="mt-2 p-3 bg-gray-800/50 rounded-md">
+                    <p class="text-sm">${faq.resolution}</p>
+                  </div>
+                </td>
+                <td class="p-4">
+                  <span class="px-3 py-1 bg-accent-yellow/10 text-accent-yellow rounded-full text-xs font-medium">
+                    ${faq.category}
+                  </span>
+                  <div class="text-xs text-gray-500 mt-2">${new Date(faq.created_at).toLocaleDateString()}</div>
+                </td>
+              </tr>
+            `,
+            )
+            .join('');
+    }
+  };
+
+  // Aggiungi listener per il ridimensionamento della finestra
+  window.addEventListener('resize', () => {
+    if (document.getElementById('faqTableBody')) {
+      const filteredFAQs = window.currentFAQs || [];
+      renderFAQsTable(filteredFAQs);
+    }
+  });
+
+  // Inizializza filtro categoria
+  const initCategoryFilter = () => {
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (!categoryFilter) return;
+
+    categoryFilter.addEventListener('change', async () => {
+      const category = categoryFilter.value;
+
+      try {
+        const faqs = await fetchFAQs(category);
+        // Salva i FAQs filtrati per poterli utilizzare in caso di ridimensionamento della finestra
+        window.currentFAQs = faqs;
+        renderFAQsTable(faqs);
+      } catch (error) {
+        console.error('Errore filtro categorie:', error);
+        showErrorAlert('Errore durante il filtraggio delle FAQ');
+      }
+    });
+  };
+
+
+  // Placeholder function -  needs to be defined elsewhere to work correctly
+  const fetchFAQs = async (category) => {
+    // Replace with your actual fetch call
+      let url = "/api/faqs";
+      if (category !== "all") {
+        url += `?category=${category}`;
+      }
+      const response = await fetch(url);
+      if (!response.ok) {
+          throw new Error("Failed to fetch FAQs");
+      }
+      return await response.json();
+  };
+
+  const showErrorAlert = (message) => {
+    // Replace with your actual alert implementation
+    console.log(message);
+  }
+
+  initCategoryFilter();
 });

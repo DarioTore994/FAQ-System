@@ -107,14 +107,14 @@
 </head>
 <body class="min-h-screen flex flex-col">
     <header class="py-4 px-6 border-b sticky top-0 z-10">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center">
+        <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center">
+            <div class="flex items-center mb-3 sm:mb-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-yellow mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
             </div>
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center gap-4">
                 <button class="theme-toggle-btn shadow-md" title="Cambia tema">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 theme-toggle-icon" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
@@ -143,16 +143,16 @@
             </div>
 
             <div class="p-8">
-                <div class="tabs flex gap-4 justify-center mb-8">
+                <div class="tabs flex gap-3 sm:gap-4 justify-center mb-6 sm:mb-8">
                     <button
                         data-tab="signin"
-                        class="tab-btn active"
+                        class="tab-btn active text-sm sm:text-base w-full sm:w-auto"
                     >
                         Accedi
                     </button>
                     <button
                         data-tab="signup"
-                        class="tab-btn"
+                        class="tab-btn text-sm sm:text-base w-full sm:w-auto"
                     >
                         Registrati
                     </button>

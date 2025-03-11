@@ -50,20 +50,21 @@
 </head>
 <body class="bg-primary-black text-gray-100 min-h-screen flex flex-col" id="body">
     <header class="py-4 px-6 border-b sticky top-0 z-10">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-3 md:mb-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-yellow mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
             </div>
-            <nav class="flex items-center space-x-4" id="headerNav">
+            <nav class="flex items-center flex-wrap justify-center gap-2 md:gap-4" id="headerNav">
                 <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow hidden">Admin</a>
                 <a href="/create" id="createFaqBtn" class="btn btn-primary shadow-md flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    Crea FAQ
+                    <span class="hidden sm:inline">Crea FAQ</span>
+                    <span class="sm:hidden">Crea</span>
                 </a>
                 <button class="theme-toggle-btn shadow-md" title="Cambia tema">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 theme-toggle-icon" viewBox="0 0 20 20" fill="currentColor">
@@ -74,23 +75,23 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
-                    Logout
+                    <span class="hidden sm:inline">Logout</span>
                 </button>
             </nav>
         </div>
     </header>
 
     <main class="container mx-auto py-8 px-4 flex-grow">
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div>
                 <h2 class="text-2xl font-bold text-accent-yellow">Domande Frequenti</h2>
                 <p class="text-gray-400 mt-1">Consulta la knowledge base disponibile</p>
             </div>
-            <div class="relative flex items-center">
+            <div class="relative flex items-center w-full md:w-auto">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent-yellow mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
-                <select id="categoryFilter" class="bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-yellow shadow-md">
+                <select id="categoryFilter" class="bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-yellow shadow-md w-full">
                     <option value="all">Tutte le categorie</option>
                     <option value="Network">Network</option>
                     <option value="Software">Software</option>
