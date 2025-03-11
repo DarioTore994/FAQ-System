@@ -229,6 +229,9 @@
                         if (adminMenu) adminMenu.classList.remove('hidden');
                         if (adminCategorySection) adminCategorySection.classList.remove('hidden');
                     }
+                    
+                    // Carica le FAQ
+                    loadFAQs();
                 } else {
                     // Non autenticato: reindirizza a login
                     window.location.href = '/auth';
@@ -239,9 +242,161 @@
             }
         });
 
-        // Utilizziamo la funzione di logout globale definita in app.js
-        // Questo elimina duplicazioni e problemi di sincronizzazione
+        // Funzione per caricare le FAQ
+        async function loadFAQs() {
+            try {
+                const response = await fetch('/api/faqs');
+                if (!response.ok) {
+                    throw new Error('Errore nel recupero delle FAQ');
+                }
+                
+                const faqs = await response.json();
+                renderFAQsTable(faqs);
+                
+                // Aggiunta listener per ricerca
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.addEventListener('input', (e) => {
+                        const searchTerm = e.target.value.toLowerCase();
+                        const filteredFaqs = faqs.filter(faq => 
+                            faq.title.toLowerCase().includes(searchTerm) || 
+                            faq.description.toLowerCase().includes(searchTerm) ||
+                            faq.resolution.toLowerCase().includes(searchTerm) ||
+                            faq.category.toLowerCase().includes(searchTerm)
+                        );
+                        renderFAQsTable(filteredFaqs);
+                    });
+                }
+            } catch (error) {
+                console.error('Errore nel caricamento delle FAQ:', error);
+                document.getElementById('faqTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="4" class="py-4 text-center text-gray-400">
+                            Errore nel caricamento delle FAQ. <br>
+                            <button id="initDbBtn" class="mt-2 px-4 py-2 bg-accent-yellow text-primary-black rounded-md">
+                                Inizializza il database
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                
+                // Aggiungi listener per il pulsante di inizializzazione
+                document.getElementById('initDbBtn')?.addEventListener('click', async () => {
+                    try {
+                        const response = await fetch('/api/init-db', { method: 'POST' });
+                        if (!response.ok) {
+                            throw new Error('Errore nell\'inizializzazione del database');
+                        }
+                        alert('Database inizializzato. Ricarico la pagina...');
+                        window.location.reload();
+                    } catch (error) {
+                        console.error('Errore:', error);
+                        alert('Errore durante l\'inizializzazione del database');
+                    }
+                });
+            }
+        }
 
+        // Funzione per renderizzare la tabella delle FAQ
+        function renderFAQsTable(faqs) {
+            const tableBody = document.getElementById('faqTableBody');
+            if (!tableBody) return;
+            
+            // Cancella il contenuto attuale
+            tableBody.innerHTML = '';
+            
+            // Controlla se ci sono FAQ da mostrare
+            if (faqs.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="py-4 text-center text-gray-400">Nessuna FAQ disponibile</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Determina se siamo su mobile
+            const isMobile = window.innerWidth < 768;
+            
+            if (isMobile) {
+                // Visualizzazione mobile
+                faqs.forEach(faq => {
+                    const row = document.createElement('tr');
+                    row.className = 'block mb-5 bg-gray-800/50 rounded-lg border border-gray-700 shadow-md overflow-hidden';
+
+                    const date = new Date(faq.created_at);
+                    const formattedDate = date.toLocaleDateString('it-IT', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    row.innerHTML = `
+                        <td class="block p-4 border-b border-gray-700/50">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-medium text-accent-yellow text-base">${faq.title}</h4>
+                                <span class="px-3 py-1 bg-accent-yellow/20 text-accent-yellow rounded-full text-xs font-medium ml-2">
+                                    ${faq.category}
+                                </span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-2">${formattedDate}</div>
+                        </td>
+                        <td class="block p-4">
+                            <p class="text-sm text-gray-300 mb-4">${faq.description}</p>
+                            <div class="p-4 bg-gray-800/70 rounded-md shadow-inner border border-gray-700/50">
+                                <h5 class="text-xs text-accent-yellow mb-2 font-medium uppercase tracking-wide">Soluzione:</h5>
+                                <p class="text-sm text-gray-200">${faq.resolution}</p>
+                            </div>
+                        </td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+            } else {
+                // Visualizzazione desktop
+                faqs.forEach(faq => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-800/50 transition-colors duration-150';
+
+                    const date = new Date(faq.created_at);
+                    const formattedDate = date.toLocaleDateString('it-IT', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    row.innerHTML = `
+                        <td class="py-4 px-6 border-b border-gray-700">${faq.title}</td>
+                        <td class="py-4 px-6 border-b border-gray-700">
+                            <p class="text-sm text-gray-300 mb-3">${faq.description}</p>
+                            <div class="p-4 bg-gray-800/70 rounded-md shadow-inner border border-gray-700/50">
+                                <p class="text-sm text-gray-200">${faq.resolution}</p>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6 border-b border-gray-700">
+                            <span class="px-3 py-1.5 bg-accent-yellow/20 text-accent-yellow rounded-full text-xs font-medium">
+                                ${faq.category}
+                            </span>
+                        </td>
+                        <td class="py-4 px-6 border-b border-gray-700 text-xs text-gray-400">
+                            ${formattedDate}
+                        </td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+            }
+            
+            // Listener per il ridimensionamento della finestra
+            window.addEventListener('resize', () => {
+                const faqs = window.currentFaqs || [];
+                renderFAQsTable(faqs);
+            });
+        }
     </script>
 </body>
 </html>

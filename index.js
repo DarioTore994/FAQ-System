@@ -592,16 +592,16 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
     let userId;
 
     if (!authToken) {
-      return res.status(401).json({ error: 'Non autenticato' });
+      return res.status(401).json({ error: { message: 'Non autenticato' } });
     }
 
     try {
       userId = parseInt(authToken, 10);
       if (isNaN(userId)) {
-          return res.status(401).json({ error: 'Token non valido' });
+          return res.status(401).json({ error: { message: 'Token non valido' } });
       }
     } catch (error) {
-      return res.status(401).json({ error: 'Token non valido' });
+      return res.status(401).json({ error: { message: 'Token non valido' } });
     }
     
     console.log('Ricevuta richiesta di salvataggio FAQ:', {
@@ -638,76 +638,23 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
       });
     }
 
-    // Prima di fare l'inserimento, assicuriamoci che la tabella faqs esista con la struttura corretta
-    // Verifico se la tabella esiste, altrimenti la creo
-    const tableExists = await client.query(`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'faqs'
+    // Forza il drop della tabella faqs per ricrearla correttamente
+    await client.query(`DROP TABLE IF EXISTS faqs;`);
+    console.log('Tabella faqs eliminata per ricostruzione');
+    
+    // Crea la tabella con la struttura corretta
+    await client.query(`
+      CREATE TABLE faqs (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id),
+        category TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        resolution TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
-
-    if (!tableExists.rows[0].exists) {
-      // Tabella non esiste, la creiamo
-      await client.query(`
-        CREATE TABLE faqs (
-          id SERIAL PRIMARY KEY,
-          user_id INTEGER NOT NULL REFERENCES users(id),
-          category TEXT NOT NULL,
-          title TEXT NOT NULL,
-          description TEXT NOT NULL,
-          resolution TEXT NOT NULL,
-          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        );
-      `);
-      console.log('Tabella faqs creata perché mancante');
-    } else {
-      // Verifica se la tabella ha la struttura corretta con user_id
-      try {
-        const userIdExists = await client.query(`
-          SELECT EXISTS (
-            SELECT FROM information_schema.columns 
-            WHERE table_schema = 'public' 
-            AND table_name = 'faqs'
-            AND column_name = 'user_id'
-          );
-        `);
-
-        if (!userIdExists.rows[0].exists) {
-          // Colonna user_id mancante, ricreiamo la tabella
-          await client.query(`DROP TABLE IF EXISTS faqs;`);
-          await client.query(`
-            CREATE TABLE faqs (
-              id SERIAL PRIMARY KEY,
-              user_id INTEGER NOT NULL REFERENCES users(id),
-              category TEXT NOT NULL,
-              title TEXT NOT NULL,
-              description TEXT NOT NULL,
-              resolution TEXT NOT NULL,
-              created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-            );
-          `);
-          console.log('Tabella faqs ricreata perché mancante colonna user_id');
-        }
-      } catch (err) {
-        // Se c'è un errore nel controllo, forziamo la ricreazione della tabella
-        console.error('Errore verifica tabella, ricreo completamente:', err);
-        await client.query(`DROP TABLE IF EXISTS faqs;`);
-        await client.query(`
-          CREATE TABLE faqs (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER NOT NULL REFERENCES users(id),
-            category TEXT NOT NULL,
-            title TEXT NOT NULL,
-            description TEXT NOT NULL,
-            resolution TEXT NOT NULL,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-          );
-        `);
-        console.log('Tabella faqs ricreata dopo errore');
-      }
-    }
+    console.log('Tabella faqs ricreata con successo!');
 
     // Inserimento della FAQ
     const result = await client.query(
@@ -719,6 +666,18 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
     return res.status(201).json({ success: true, data: result.rows[0] });
   } catch (err) {
     console.error('Errore imprevisto durante inserimento FAQ:', err);
+    
+    // Controlla se è un errore di colonna mancante
+    if (err.message && err.message.includes("column \"user_id\" of relation \"faqs\" does not exist")) {
+      return res.status(500).json({ 
+        error: { 
+          message: 'Errore durante il salvataggio nel database', 
+          details: 'La struttura della tabella FAQ non è corretta. Usa /api/init-db per inizializzarla.',
+          code: 'TABLE_STRUCTURE' 
+        } 
+      });
+    }
+    
     return res.status(500).json({ 
       error: { 
         message: 'Errore interno del server', 
