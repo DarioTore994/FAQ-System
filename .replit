@@ -12,9 +12,9 @@ channel = "stable-24_05"
 language = "nodejs"
 
 [deployment]
-run = ["node", "index.js"]
-deploymentTarget = "cloudrun"
+deploymentTarget = "static"
 ignorePorts = false
+publicDir = "public"
 
 [[ports]]
 localPort = 3000

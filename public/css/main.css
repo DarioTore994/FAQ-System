@@ -1386,10 +1386,6 @@ video {
     display: inline;
   }
 
-  .sm\:hidden {
-    display: none;
-  }
-
   .sm\:h-20 {
     height: 5rem;
   }
@@ -1447,10 +1443,6 @@ video {
 }
 
 @media (min-width: 768px) {
-  .md\:mb-0 {
-    margin-bottom: 0px;
-  }
-
   .md\:w-auto {
     width: auto;
   }
@@ -1465,9 +1457,5 @@ video {
 
   .md\:items-center {
     align-items: center;
-  }
-
-  .md\:gap-4 {
-    gap: 1rem;
   }
 }
