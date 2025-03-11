@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+:root {
+  --primary-black: #0a0a0a;
+  --accent-yellow: #FFD700;
+  --dark-gray: #1a1a1a;
+}
+
+body {
+  @apply bg-primary-black text-gray-100 font-['Inter'] min-h-screen;
+}
+
+/* Stili personalizzati */
+.faq-card {
+  @apply bg-dark-gray p-6 rounded-xl border border-gray-800 transition-all duration-300 hover:border-accent-yellow;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
+}
+
+.toggle-btn {
+  @apply bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium 
+         hover:bg-yellow-300 transition-colors flex items-center gap-2;
+}
+
+.auth-form {
+  @apply bg-dark-gray p-8 rounded-2xl border border-gray-800 
+         max-w-md w-full mx-auto space-y-6;
+}
+
+.nav-link {
+  @apply text-gray-300 hover:text-accent-yellow transition-colors 
+         flex items-center gap-2 py-3 px-4 rounded-lg;
+}
+
+/* Animazioni */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .faq-grid {
+    @apply grid-cols-1;
+  }
+
+  .nav-menu {
+    @apply fixed bottom-0 left-0 right-0 bg-dark-gray border-t border-gray-800 
+           flex justify-around py-3;
+  }
+}
+
+  /* Transizioni globali */
+  * {
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  /* Stili per gli input e select */
+  input, select, textarea {
+      @apply bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 
+             focus:ring-2 focus:ring-yellow-500 focus:border-transparent 
+             placeholder-gray-500 text-gray-100;
+  }
+
+  /* Pulsanti primari */
+  .btn-primary {
+      @apply bg-yellow-500 text-gray-900 px-6 py-2 rounded-lg font-semibold
+             hover:bg-yellow-400 transition-colors flex items-center gap-2;
+  }
+
+  /* Card consistenti */
+  .card {
+      @apply bg-gray-800 rounded-xl border border-gray-700 p-6;
+  }

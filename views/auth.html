@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="it">
+    <head>
+        <!-- Stessi asset di index.html -->
+    </head>
+    <body class="flex items-center justify-center min-h-screen">
+        <div class="auth-form animate-fade-in">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-accent-yellow mb-2">
+                    TechFAQ
+                </h1>
+                <p class="text-gray-400">Gestione problemi tecnici</p>
+            </div>
+
+            <div class="tabs flex gap-4 justify-center mb-8">
+                <button
+                    data-tab="signup"
+                    class="tab-btn active px-4 py-2 rounded-full bg-accent-yellow text-primary-black"
+                >
+                    Registrati
+                </button>
+                <button
+                    data-tab="signin"
+                    class="tab-btn px-4 py-2 rounded-full border border-gray-700 hover:border-accent-yellow"
+                >
+                    Accedi
+                </button>
+            </div>
+
+            <form id="signup-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Email</label>
+                    <input
+                        type="email"
+                        required
+                        class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1"
+                        >Password</label
+                    >
+                    <input
+                        type="password"
+                        required
+                        class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                    />
+                </div>
+                <button type="submit" class="w-full toggle-btn justify-center">
+                    <icon name="user-plus" class="w-5 h-5"></icon>
+                    Crea Account
+                </button>
+            </form>
+
+            <form id="signin-form" class="space-y-4 hidden">
+                <!-- Struttura simile al signup form -->
+            </form>
+
+            <div class="text-center mt-6">
+                <a
+                    href="/"
+                    class="text-accent-yellow hover:text-yellow-300 flex items-center justify-center gap-2"
+                >
+                    <icon name="arrow-left" class="w-4 h-4"></icon>
+                    Torna alla Home
+                </a>
+            </div>
+        </div>
+    </body>
+</html>
+<script type="module" src="/js/app.js"></script>
