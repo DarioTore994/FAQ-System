@@ -84,14 +84,14 @@
                 </div>
 
                 <!-- Menu solo per admin -->
-                <div id="adminMenu" class="hidden flex items-center gap-4">
+                <div id="adminMenu" class="hidden flex items-center gap-4 admin-content">
                     <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow border-b-2 border-accent-yellow pb-1">Admin</a>
                     <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow">Utenti</a>
                     <a href="/categories" id="categoriesLink" class="text-gray-300 hover:text-accent-yellow">Categorie</a>
                 </div>
 
                 <!-- Solo bottone logout per utenti autenticati -->
-                <button id="logoutBtn" class="hidden btn btn-secondary">
+                <button id="logoutBtn" class="hidden btn btn-secondary admin-content">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
@@ -104,9 +104,9 @@
     <main class="container mx-auto px-6 py-8">
         <h1 class="text-3xl font-bold mb-8 text-center text-accent-yellow">Pannello di Amministrazione</h1>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 admin-content">
 
-            <div class="bg-dark-gray p-6 rounded-lg shadow-md">
+            <div class="bg-dark-gray p-6 rounded-lg shadow-md admin-content">
                 <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Gestione FAQ</h2>
                 <p class="text-gray-300 mb-4">Aggiungi, modifica o elimina le FAQ del portale.</p>
                 <a href="/create" class="inline-block bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">
@@ -114,7 +114,7 @@
                 </a>
             </div>
 
-            <div class="bg-dark-gray p-6 rounded-lg shadow-md">
+            <div class="bg-dark-gray p-6 rounded-lg shadow-md admin-content">
                 <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Gestione Utenti</h2>
                 <p class="text-gray-300 mb-4">Visualizza e gestisci gli utenti registrati nel portale.</p>
                 <a href="/users" class="inline-block bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">
@@ -122,7 +122,7 @@
                 </a>
             </div>
 
-            <div class="bg-dark-gray p-6 rounded-lg shadow-md">
+            <div class="bg-dark-gray p-6 rounded-lg shadow-md admin-content">
                 <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Gestione Categorie</h2>
                 <p class="text-gray-300 mb-4">Aggiungi e gestisci le categorie delle FAQ.</p>
                 <a href="/categories" class="inline-block bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">
@@ -131,7 +131,7 @@
             </div>
         </div>
 
-        <div class="bg-dark-gray p-6 rounded-lg shadow-md mb-6">
+        <div class="bg-dark-gray p-6 rounded-lg shadow-md mb-6 admin-content">
             <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Crea nuovo utente</h2>
             <form id="createUserForm" class="space-y-4">
                 <div>
@@ -194,33 +194,43 @@
         // La gestione delle categorie è stata spostata nella pagina dedicata
 
         // Verifica che l'utente sia autenticato e sia admin
-        window.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', async function() {
             try {
+                // Verifica che l'utente sia admin
                 const response = await fetch('/api/auth/check');
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMessage = errorData.error || 'Errore nella verifica dell\'autenticazione';
+
+                    // Mostra l'errore
+                    showErrorAlert(errorMessage);
+
+                    // Nascondi i contenuti sensibili in caso di errore di autorizzazione
+                    if (errorMessage.includes('Accesso non autorizzato')) {
+                        document.querySelectorAll('.admin-content').forEach(el => {
+                            el.classList.add('hidden');
+                        });
+                    }
+                    return;
+                }
+
                 const data = await response.json();
 
-                // Riferimenti ai menu
-                const authUserMenu = document.getElementById('authUserMenu');
-                const adminMenu = document.getElementById('adminMenu');
-
-                // Nascondi di default i menu per utenti autenticati e admin
-                if (authUserMenu) authUserMenu.classList.add('hidden');
-                if (adminMenu) adminMenu.classList.add('hidden');
-
-                if (!data.authenticated) {
-                    window.location.href = '/auth';
+                if (!data.authenticated || data.user.role !== 'admin') {
+                    showErrorAlert('Accesso non autorizzato. Solo gli admin possono accedere a questa pagina.');
+                    document.querySelectorAll('.admin-content').forEach(el => {
+                        el.classList.add('hidden');
+                    });
                     return;
                 }
 
                 // Utente autenticato
+                const authUserMenu = document.getElementById('authUserMenu');
                 if (authUserMenu) authUserMenu.classList.remove('hidden');
 
-                if (data.user.role !== 'admin') {
-                    window.location.href = '/dashboard';
-                    return;
-                }
-
                 // Menu admin visibile solo per amministratori
+                const adminMenu = document.getElementById('adminMenu');
                 if (adminMenu) adminMenu.classList.remove('hidden');
 
                 // La gestione delle categorie è stata spostata nella pagina dedicata

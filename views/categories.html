@@ -74,21 +74,21 @@
                     <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
                     <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
                 </div>
-                
+
                 <!-- Menu per utenti autenticati -->
                 <div id="authUserMenu" class="hidden flex items-center gap-4">
                     <a href="/create" id="createFaqBtn" class="text-gray-300 hover:text-accent-yellow">
                         <span>Crea FAQ</span>
                     </a>
                 </div>
-                
+
                 <!-- Menu solo per admin -->
-                <div id="adminMenu" class="hidden flex items-center gap-4">
+                <div id="adminMenu" class="hidden flex items-center gap-4 admin-content">
                     <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow">Admin</a>
                     <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow">Utenti</a>
                     <a href="/categories" id="categoriesLink" class="text-gray-300 hover:text-accent-yellow border-b-2 border-accent-yellow pb-1">Categorie</a>
                 </div>
-                
+
                 <!-- Solo bottone logout per utenti autenticati -->
                 <button id="logoutBtn" class="hidden btn btn-secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,7 +103,7 @@
     <main class="container mx-auto px-6 py-8">
         <h1 class="text-3xl font-bold mb-8 text-center text-accent-yellow">Gestione Categorie</h1>
 
-        <div class="bg-dark-gray p-6 rounded-lg shadow-md mb-8">
+        <div class="bg-dark-gray p-6 rounded-lg shadow-md mb-8 admin-content">
             <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Lista Categorie</h2>
 
             <div class="overflow-x-auto">
@@ -126,7 +126,7 @@
             </div>
         </div>
 
-        <div class="bg-dark-gray p-6 rounded-lg shadow-md mb-8">
+        <div class="bg-dark-gray p-6 rounded-lg shadow-md mb-8 admin-content">
             <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Aggiungi Categoria</h2>
             <form id="addCategoryForm" class="space-y-4">
                 <div>
@@ -149,7 +149,7 @@
         </div>
 
         <!-- Modal per modifica categoria -->
-        <div id="editCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" style="display: none;">
+        <div id="editCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden admin-content" style="display: none;">
             <div class="bg-dark-gray p-6 rounded-lg shadow-lg w-full max-w-md">
                 <h3 class="text-xl font-semibold mb-4 text-accent-yellow">Modifica Categoria</h3>
 
@@ -218,18 +218,34 @@
         });
 
         // Funzione per caricare le categorie
-        window.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             try {
+                // Verifica che l'utente sia admin
                 const response = await fetch('/api/auth/check');
-                const data = await response.json();
 
-                if (!data.authenticated) {
-                    window.location.href = '/auth';
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMessage = errorData.error || 'Errore nella verifica dell\'autenticazione';
+
+                    // Mostra l'errore
+                    showErrorAlert(errorMessage);
+
+                    // Nascondi i contenuti sensibili in caso di errore di autorizzazione
+                    if (errorMessage.includes('Accesso non autorizzato')) {
+                        document.querySelectorAll('.admin-content').forEach(el => {
+                            el.classList.add('hidden');
+                        });
+                    }
                     return;
                 }
 
-                if (data.user.role !== 'admin') {
-                    window.location.href = '/dashboard';
+                const data = await response.json();
+
+                if (!data.authenticated || data.user.role !== 'admin') {
+                    showErrorAlert('Accesso non autorizzato. Solo gli admin possono accedere a questa pagina.');
+                    document.querySelectorAll('.admin-content').forEach(el => {
+                        el.classList.add('hidden');
+                    });
                     return;
                 }
 
@@ -374,7 +390,7 @@
                 });
 
                 let errorMessage = 'Errore durante l\'aggiornamento della categoria';
-                
+
                 if (!response.ok) {
                     try {
                         const errorData = await response.json();

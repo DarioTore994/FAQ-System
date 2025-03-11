@@ -212,9 +212,19 @@
 
                 // Controlla se la risposta è valida
                 if (!response.ok) {
-                    console.error('Errore nella risposta API:', response.status, response.statusText);
-                    window.location.href = '/auth';
-                    return;
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMessage = errorData.error || 'Errore nella risposta API';
+                    
+                    // Verifica se è un errore di autorizzazione
+                    if (errorMessage.includes('Accesso non autorizzato')) {
+                        // Mostra l'errore ma non reindirizza
+                        showErrorAlert(errorMessage);
+                        return;
+                    } else {
+                        console.error('Errore nella risposta API:', response.status, response.statusText);
+                        window.location.href = '/auth';
+                        return;
+                    }
                 }
 
                 // Gestione sicura del parsing JSON
@@ -231,15 +241,18 @@
                 const authUserMenu = document.getElementById('authUserMenu');
                 const adminMenu = document.getElementById('adminMenu');
                 const adminCategorySection = document.getElementById('adminCategorySection');
+                const logoutBtn = document.getElementById('logoutBtn');
 
                 // Nascondi di default i menu per utenti autenticati e admin
                 if (authUserMenu) authUserMenu.classList.add('hidden');
                 if (adminMenu) adminMenu.classList.add('hidden');
                 if (adminCategorySection) adminCategorySection.classList.add('hidden');
+                if (logoutBtn) logoutBtn.classList.add('hidden');
 
                 if (data.authenticated) {
                     // Utente autenticato
                     if (authUserMenu) authUserMenu.classList.remove('hidden');
+                    if (logoutBtn) logoutBtn.classList.remove('hidden');
 
                     // Controllo ruolo admin
                     if (data.user.role === 'admin') {
@@ -259,7 +272,7 @@
                 }
             } catch (error) {
                 console.error('Errore controllo autenticazione:', error);
-                window.location.href = '/auth';
+                showErrorAlert('Errore di autenticazione. Accedi per visualizzare questa pagina.');
             }
         });
         

@@ -85,7 +85,7 @@
                 </div>
 
                 <!-- Menu solo per admin -->
-                <div id="adminMenu" class="hidden flex items-center gap-4">
+                <div id="adminMenu" class="hidden flex items-center gap-4 admin-content">
                     <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow">Admin</a>
                     <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow border-b-2 border-accent-yellow pb-1">Utenti</a>
                     <a href="/categories" id="categoriesLink" class="text-gray-300 hover:text-accent-yellow">Categorie</a>
@@ -105,7 +105,7 @@
     <main class="container mx-auto px-6 py-8">
         <h1 class="text-3xl font-bold mb-8 text-center text-accent-yellow">Gestione Utenti</h1>
 
-        <div class="bg-dark-gray p-6 rounded-lg shadow-md mb-8">
+        <div class="bg-dark-gray p-6 rounded-lg shadow-md mb-8 admin-content">
             <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Lista Utenti</h2>
 
             <div class="overflow-x-auto">
@@ -131,7 +131,7 @@
 
         <!-- Modal per modifica ruolo -->
         <div id="editRoleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" style="display: none;">
-            <div class="bg-dark-gray p-6 rounded-lg shadow-lg w-full max-w-md">
+            <div class="bg-dark-gray p-6 rounded-lg shadow-lg w-full max-w-md admin-content">
                 <h3 class="text-xl font-semibold mb-4 text-accent-yellow">Modifica Ruolo Utente</h3>
                 <p id="modalUserEmail" class="mb-4 text-gray-300"></p>
 
@@ -179,39 +179,39 @@
     <script src="/js/header.js"></script>
     <script>
         // Verifica che l'utente sia autenticato e sia admin
-        window.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', async function() {
             try {
-                console.log('Verifica autenticazione...');
+                // Verifica che l'utente sia admin
                 const response = await fetch('/api/auth/check');
-                const data = await response.json();
-                console.log('Risultato autenticazione:', data);
 
-                // Riferimenti ai menu
-                const authUserMenu = document.getElementById('authUserMenu');
-                const adminMenu = document.getElementById('adminMenu');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMessage = errorData.error || 'Errore nella verifica dell\'autenticazione';
 
-                // Nascondi di default i menu per utenti autenticati e admin
-                if (authUserMenu) authUserMenu.classList.add('hidden');
-                if (adminMenu) adminMenu.classList.add('hidden');
+                    // Mostra l'errore
+                    showErrorAlert(errorMessage);
 
-                if (!data.authenticated) {
-                    console.log('Utente non autenticato, redirezione a /auth');
-                    window.location.href = '/auth';
+                    // Nascondi i contenuti sensibili in caso di errore di autorizzazione
+                    if (errorMessage.includes('Accesso non autorizzato')) {
+                        document.querySelectorAll('.admin-content').forEach(el => {
+                            el.classList.add('hidden');
+                        });
+                    }
                     return;
                 }
 
-                // Utente autenticato
-                if (authUserMenu) authUserMenu.classList.remove('hidden');
+                const data = await response.json();
 
-                if (data.user.role !== 'admin') {
-                    console.log('Utente non admin, redirezione a /dashboard');
-                    window.location.href = '/dashboard';
+                if (!data.authenticated || data.user.role !== 'admin') {
+                    showErrorAlert('Accesso non autorizzato. Solo gli admin possono accedere a questa pagina.');
+                    document.querySelectorAll('.admin-content').forEach(el => {
+                        el.classList.add('hidden');
+                    });
                     return;
                 }
 
                 // Menu admin visibile solo per amministratori
-                if (adminMenu) adminMenu.classList.remove('hidden');
-
+                if (document.getElementById('adminMenu')) document.getElementById('adminMenu').classList.remove('hidden');
                 console.log('Utente autenticato come admin, caricamento utenti...');
                 // Carica la lista utenti
                 loadUsers();

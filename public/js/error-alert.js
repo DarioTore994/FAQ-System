@@ -90,3 +90,83 @@ function showErrorAlert(message, type = 'error') {
         }
     }, timeout);
 }
+// Funzione per nascondere tutti i pulsanti quando si verifica un errore di autorizzazione
+function hideButtonsOnAuthError(errorMessage) {
+  if (errorMessage && errorMessage.includes('Accesso non autorizzato')) {
+    // Nasconde tutti i contenuti sensibili
+    const menuElements = [
+      'authUserMenu',
+      'adminMenu',
+      'createFaqBtn',
+      'logoutBtn',
+      'adminCategorySection'
+    ];
+    
+    menuElements.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.classList.add('hidden');
+      }
+    });
+    
+    // Se siamo nella dashboard, nascondi anche i contenuti principali
+    const faqContainer = document.getElementById('faqContainer');
+    if (faqContainer) {
+      faqContainer.classList.add('hidden');
+    }
+  }
+}
+
+// Estende la funzione showErrorAlert esistente
+function showErrorAlert(message, duration = 5000) {
+  // Nascondi i pulsanti in caso di errore di autorizzazione
+  hideButtonsOnAuthError(message);
+  
+  const alertContainer = document.getElementById('alertContainer');
+  if (!alertContainer) {
+    // Crea il container degli alert se non esiste
+    const container = document.createElement('div');
+    container.id = 'alertContainer';
+    container.className = 'fixed top-4 right-4 z-50 flex flex-col items-end space-y-2';
+    document.body.appendChild(container);
+  }
+  
+  const alert = document.createElement('div');
+  alert.className = 'bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 transform transition-all duration-300 ease-in-out opacity-0 translate-y-2';
+  alert.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+    </svg>
+    <span>${message}</span>
+    <button class="ml-2 focus:outline-none">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+      </svg>
+    </button>
+  `;
+  
+  document.getElementById('alertContainer').appendChild(alert);
+  
+  // Animazione di entrata
+  setTimeout(() => {
+    alert.classList.remove('opacity-0', 'translate-y-2');
+  }, 10);
+  
+  // Chiusura automatica
+  const timeout = setTimeout(() => {
+    closeAlert(alert);
+  }, duration);
+  
+  // Chiusura manuale
+  alert.querySelector('button').addEventListener('click', () => {
+    clearTimeout(timeout);
+    closeAlert(alert);
+  });
+}
+
+function closeAlert(alert) {
+  alert.classList.add('opacity-0', 'translate-y-2');
+  setTimeout(() => {
+    alert.remove();
+  }, 300);
+}

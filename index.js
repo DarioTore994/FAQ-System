@@ -5,6 +5,7 @@ const path = require("path");
 const { Pool } = require("pg");
 const cookieParser = require('cookie-parser');
 const { execSync } = require('child_process');
+const flash = require('express-flash');
 
 // Build Tailwind CSS
 try {
@@ -58,7 +59,7 @@ async function initDatabase() {
         AND table_name = 'faqs'
       );
     `);
-    
+
     // Crea la tabella faqs solo se non esiste
     if (!faqsTableCheck.rows[0].exists) {
       await client.query(`
@@ -153,10 +154,18 @@ app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(flash());
 
 // Middleware per controllo autenticazione
 const requireAuth = (req, res, next) => {
-  if (!req.cookies.authToken) {
+  const authToken = req.cookies.authToken;
+  if (!authToken) {
+    // Se è una richiesta API, restituisci un errore JSON
+    if (req.path.startsWith('/api/')) {
+      return res.status(401).json({ 
+        error: 'Accesso non autorizzato. Effettua il login per continuare.'
+      });
+    }
     return res.redirect('/auth');
   }
   next();
@@ -164,13 +173,27 @@ const requireAuth = (req, res, next) => {
 
 // Middleware per controllo ruolo admin
 const requireAdmin = async (req, res, next) => {
-  if (!req.cookies.authToken) {
+  const authToken = req.cookies.authToken;
+  if (!authToken) {
+    // Se è una richiesta API, restituisci un errore JSON
+    if (req.path.startsWith('/api/')) {
+      return res.status(401).json({ 
+        error: 'Accesso non autorizzato. Effettua il login per continuare.'
+      });
+    }
     return res.redirect('/auth');
   }
 
+  // Verifica se il token corrisponde a un utente con ruolo admin
   try {
-    const userId = parseInt(req.cookies.authToken, 10);
+    const userId = parseInt(authToken, 10);
     if (isNaN(userId)) {
+      // Se è una richiesta API, restituisci un errore JSON
+      if (req.path.startsWith('/api/')) {
+        return res.status(401).json({ 
+          error: 'Accesso non autorizzato. Token di autenticazione non valido.'
+        });
+      }
       return res.redirect('/auth');
     }
 
@@ -178,7 +201,15 @@ const requireAdmin = async (req, res, next) => {
     try {
       const result = await client.query('SELECT role FROM users WHERE id = $1', [userId]);
       if (result.rows.length === 0 || result.rows[0].role !== 'admin') {
-        return res.status(403).send('Accesso non autorizzato. Solo gli admin possono accedere a questa pagina.');
+        // Se è una richiesta API, restituisci un errore JSON
+        if (req.path.startsWith('/api/')) {
+          return res.status(403).json({ 
+            error: 'Accesso non autorizzato. Solo gli admin possono accedere a questa pagina.'
+          });
+        }
+        // Altrimenti renderizza la pagina ma con messaggio di errore
+        req.flash('error', 'Accesso non autorizzato. Solo gli admin possono accedere a questa pagina.');
+        return res.redirect('/');
       }
       next();
     } finally {
@@ -186,7 +217,12 @@ const requireAdmin = async (req, res, next) => {
     }
   } catch (error) {
     console.error('Errore verifica ruolo admin:', error);
-    return res.status(500).send('Errore interno del server');
+    if (req.path.startsWith('/api/')) {
+      return res.status(500).json({ 
+        error: 'Errore del server durante la verifica delle autorizzazioni.'
+      });
+    }
+    res.redirect('/auth');
   }
 };
 
@@ -390,10 +426,10 @@ app.post("/api/auth/logout", (req, res) => {
     sameSite: 'lax',
     path: '/'
   });
-  
+
   // Scrivo sul console per debug
   console.log('Utente disconnesso');
-  
+
   // Risposta standard
   res.json({ success: true, message: 'Utente disconnesso con successo' });
 });
@@ -613,7 +649,7 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
     } catch (error) {
       return res.status(401).json({ error: { message: 'Token non valido' } });
     }
-    
+
     console.log('Ricevuta richiesta di salvataggio FAQ:', {
       userId,
       category, 
@@ -656,7 +692,7 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
         AND table_name = 'faqs'
       );
     `);
-    
+
     if (!tableCheck.rows[0].exists) {
       // Crea la tabella con la struttura corretta
       await client.query(`
@@ -685,7 +721,7 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
     return res.status(201).json({ success: true, data: result.rows[0] });
   } catch (err) {
     console.error('Errore imprevisto durante inserimento FAQ:', err);
-    
+
     // Controlla se è un errore di colonna mancante
     if (err.message && err.message.includes("column \"user_id\" of relation \"faqs\" does not exist")) {
       return res.status(500).json({ 
@@ -696,7 +732,7 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
         } 
       });
     }
-    
+
     return res.status(500).json({ 
       error: { 
         message: 'Errore interno del server', 
@@ -746,7 +782,7 @@ app.post("/api/init-db", async (req, res) => {
         AND table_name = 'faqs'
       );
     `);
-    
+
     if (!tableCheck.rows[0].exists) {
       // Crea la tabella solo se non esiste
       await client.query(`
@@ -768,7 +804,7 @@ app.post("/api/init-db", async (req, res) => {
         FROM information_schema.columns 
         WHERE table_name = 'faqs' AND column_name = 'user_id'
       `);
-      
+
       if (columnCheck.rows.length === 0) {
         console.log('Tabella faqs esiste ma manca la colonna user_id, riparazione necessaria');
         // ALTER TABLE per aggiungere la colonna mancante se necessario
@@ -776,19 +812,19 @@ app.post("/api/init-db", async (req, res) => {
           ALTER TABLE faqs 
           ADD COLUMN IF NOT EXISTS user_id INTEGER;
         `);
-        
+
         // Ottieni l'ID dell'admin per riparare i record esistenti
         const adminUser = await client.query(`
           SELECT id FROM users WHERE role = 'admin' LIMIT 1
         `);
-        
+
         if (adminUser.rows.length > 0) {
           const adminId = adminUser.rows[0].id;
           // Aggiorna i record esistenti con l'ID admin
           await client.query(`
             UPDATE faqs SET user_id = $1 WHERE user_id IS NULL
           `, [adminId]);
-          
+
           // Aggiungi il vincolo NOT NULL e la referenza
           await client.query(`
             ALTER TABLE faqs 
@@ -828,7 +864,7 @@ app.post("/api/init-db", async (req, res) => {
     return res.json({ success: true, message: 'Tabella creata con successo' });
   } catch (error) {
     console.error('Errore durante la verifica/creazione del database:', error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: error.message, 
       message: 'Errore durante la verifica/creazione del database'
     });
