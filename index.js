@@ -4,6 +4,16 @@ const express = require("express");
 const path = require("path");
 const { Pool } = require("pg");
 const cookieParser = require('cookie-parser');
+const { execSync } = require('child_process');
+
+// Build Tailwind CSS
+try {
+  console.log('Building Tailwind CSS...');
+  execSync('npm run build:css');
+  console.log('Tailwind CSS built successfully');
+} catch (error) {
+  console.error('Error building Tailwind CSS:', error.message);
+}
 
 const app = express();
 const port = 3000;

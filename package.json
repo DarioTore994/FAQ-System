@@ -180,6 +180,8 @@
     "yaml": "^2.7.0"
   },
   "scripts": {
+    "build:css": "tailwindcss -i ./src/input.css -o ./public/css/main.css",
+    "watch:css": "tailwindcss -i ./src/input.css -o ./public/css/main.css --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
