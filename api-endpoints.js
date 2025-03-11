@@ -72,31 +72,41 @@ router.post('/auth/login', async (req, res) => {
       // Verifica la password con bcrypt
       const user = result.rows[0];
       const bcrypt = require('bcrypt');
-      const passwordMatch = await bcrypt.compare(password, user.password);
-      
-      if (!passwordMatch) {
-        return res.status(401).json({ error: 'Credenziali non valide' });
-      }
 
-      // Usa l'ID utente come token (semplificato, in produzione usa JWT)
-      const token = user.id.toString();
+      try {
+        const passwordMatch = await bcrypt.compare(password, user.password);
 
-      // Imposta il cookie per l'autenticazione
-      res.cookie('token', token, {
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 24 ore
-      });
-
-      return res.status(200).json({ 
-        session: {
-          access_token: token,
-          user: {
-            id: user.id,
-            email: user.email,
-            role: user.role
-          }
+        if (!passwordMatch) {
+          console.log('Password non corrispondente per', email);
+          return res.status(401).json({ error: 'Credenziali non valide' });
         }
-      });
+
+        // Se arriviamo qui, le credenziali sono valide
+        console.log('Login riuscito per', email);
+
+        // Usa l'ID utente come token (semplificato, in produzione usa JWT)
+        const token = user.id.toString();
+
+        // Imposta il cookie per l'autenticazione
+        res.cookie('token', token, {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 1000 // 24 ore
+        });
+
+        return res.status(200).json({ 
+          session: {
+            access_token: token,
+            user: {
+              id: user.id,
+              email: user.email,
+              role: user.role
+            }
+          }
+        });
+      } catch (bcryptError) {
+        console.error('Errore nella verifica della password:', bcryptError);
+        return res.status(500).json({ error: 'Errore di autenticazione' });
+      }
     } finally {
       client.release();
     }
