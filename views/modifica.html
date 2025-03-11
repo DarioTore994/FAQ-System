@@ -526,8 +526,20 @@
             }
         });
 
-        // Funzione per mostrare notifiche all'utente
+        // Variabile globale per tenere traccia della notifica attiva
+        let activeNotification = null;
+        let notificationTimeout = null;
+
+        // Funzione per mostrare notifiche all'utente senza sovrapposizioni
         function showErrorAlert(message, type = 'info') {
+            // Se c'è già una notifica attiva, rimuovila prima di mostrarne una nuova
+            if (activeNotification) {
+                document.body.removeChild(activeNotification);
+                clearTimeout(notificationTimeout);
+                activeNotification = null;
+            }
+
+            // Crea la nuova notifica
             const notification = document.createElement('div');
             notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 transform transition-all duration-300 ease-in-out ${
                 type === 'error' ? 'bg-red-600 text-white' : 
@@ -536,18 +548,27 @@
             }`;
             notification.innerHTML = message;
             document.body.appendChild(notification);
+            
+            // Conserva riferimento alla notifica attiva
+            activeNotification = notification;
 
             // Animazione di entrata
             setTimeout(() => {
                 notification.style.transform = 'translateY(0)';
             }, 10);
 
-            // Rimuovi dopo 8 secondi (aumentato da 3 a 8 secondi)
-            setTimeout(() => {
+            // Rimuovi dopo 8 secondi con timeout che possiamo cancellare
+            notificationTimeout = setTimeout(() => {
                 notification.style.transform = 'translateY(-100%)';
                 notification.style.opacity = '0';
                 setTimeout(() => {
-                    document.body.removeChild(notification);
+                    if (notification.parentNode) {
+                        document.body.removeChild(notification);
+                    }
+                    // Pulisci il riferimento alla notifica attiva
+                    if (activeNotification === notification) {
+                        activeNotification = null;
+                    }
                 }, 300);
             }, 8000);
         }
