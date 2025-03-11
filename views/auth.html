@@ -292,100 +292,121 @@
     <script src="/js/error-alert.js"></script>
 
     <script>
-        // Tab switching functionality
-        document.querySelectorAll('.tab-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                // Update button styles
-                document.querySelectorAll('.tab-btn').forEach(btn => {
-                    btn.classList.remove('bg-accent-yellow', 'text-primary-black');
-                    btn.classList.add('border', 'border-gray-700');
-                });
-
-                button.classList.add('bg-accent-yellow', 'text-primary-black');
-                button.classList.remove('border', 'border-gray-700');
-
-                // Show corresponding form
-                const tabId = button.getAttribute('data-tab');
-                document.querySelectorAll('form').forEach(form => form.classList.add('hidden'));
-                document.getElementById(tabId + '-form').classList.remove('hidden');
-            });
-        });
-
-        // Gestione login
-        document.getElementById('signin-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
+        // Verifica autenticazione e reindirizza se già autenticato
+        window.addEventListener('DOMContentLoaded', async () => {
             try {
-                const formData = new FormData(e.target);
-                const email = formData.get('email');
-                const password = formData.get('password');
-
-                if (!email || !password) {
-                    showErrorAlert('Inserisci email e password');
-                    return;
-                }
-
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, password }),
-                });
-
+                const response = await fetch('/api/auth/check');
                 const data = await response.json();
 
-                if (!response.ok) {
-                    showErrorAlert(data.error || 'Errore di accesso');
-                    return;
-                }
-
-                // Reindirizza alla dashboard in caso di successo
-                window.location.href = '/dashboard';
-            } catch (error) {
-                console.error('Errore durante l\'accesso:', error);
-                showErrorAlert('Errore durante l\'accesso: ' + error.message);
-            }
-        });
-
-        // Gestione registrazione
-        document.getElementById('signup-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            try {
-                const formData = new FormData(e.target);
-                const email = formData.get('email');
-                const password = formData.get('password');
-
-                if (!email || !password) {
-                    showErrorAlert('Inserisci email e password');
-                    return;
-                }
-
-                const response = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, password, role: 'user' }),
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    showErrorAlert(data.error || 'Errore di registrazione');
-                    return;
-                }
-
-                // Mostra messaggio di successo e reindirizza
-                showErrorAlert('Registrazione completata con successo!');
-                setTimeout(() => {
+                if (data.authenticated) {
+                    // Se già autenticato, reindirizza alla dashboard
                     window.location.href = '/dashboard';
-                }, 1500);
+                }
             } catch (error) {
-                console.error('Errore durante la registrazione:', error);
-                showErrorAlert('Errore durante la registrazione: ' + error.message);
+                console.error('Errore controllo autenticazione:', error);
             }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const signinForm = document.getElementById('signin-form');
+            const signupForm = document.getElementById('signup-form');
+            const tabBtns = document.querySelectorAll('.tab-btn');
+
+            // Tab switching functionality
+            tabBtns.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Update button styles
+                    tabBtns.forEach(btn => {
+                        btn.classList.remove('bg-accent-yellow', 'text-primary-black');
+                        btn.classList.add('border', 'border-gray-700');
+                    });
+
+                    button.classList.add('bg-accent-yellow', 'text-primary-black');
+                    button.classList.remove('border', 'border-gray-700');
+
+                    // Show corresponding form
+                    const tabId = button.getAttribute('data-tab');
+                    document.querySelectorAll('form').forEach(form => form.classList.add('hidden'));
+                    document.getElementById(tabId + '-form').classList.remove('hidden');
+                });
+            });
+
+            // Gestione login
+            signinForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                try {
+                    const formData = new FormData(e.target);
+                    const email = formData.get('email');
+                    const password = formData.get('password');
+
+                    if (!email || !password) {
+                        showErrorAlert('Inserisci email e password');
+                        return;
+                    }
+
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, password }),
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        showErrorAlert(data.error || 'Errore di accesso');
+                        return;
+                    }
+
+                    // Reindirizza alla dashboard in caso di successo
+                    window.location.href = '/dashboard';
+                } catch (error) {
+                    console.error('Errore durante l\'accesso:', error);
+                    showErrorAlert('Errore durante l\'accesso: ' + error.message);
+                }
+            });
+
+            // Gestione registrazione
+            signupForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                try {
+                    const formData = new FormData(e.target);
+                    const email = formData.get('email');
+                    const password = formData.get('password');
+
+                    if (!email || !password) {
+                        showErrorAlert('Inserisci email e password');
+                        return;
+                    }
+
+                    const response = await fetch('/api/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, password, role: 'user' }),
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        showErrorAlert(data.error || 'Errore di registrazione');
+                        return;
+                    }
+
+                    // Mostra messaggio di successo e reindirizza
+                    showErrorAlert('Registrazione completata con successo!');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 1500);
+                } catch (error) {
+                    console.error('Errore durante la registrazione:', error);
+                    showErrorAlert('Errore durante la registrazione: ' + error.message);
+                }
+            });
         });
     </script>
 </body>

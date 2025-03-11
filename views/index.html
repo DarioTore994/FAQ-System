@@ -205,34 +205,5 @@
             }
         });
     </script>
-
-    <!-- Load Supabase client first -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/js/error-alert.js"></script>
-    
-    <script>
-        document.addEventListener("DOMContentLoaded", async () => {
-            // Gestione stato login dal backend
-            const checkLoginStatus = async () => {
-                try {
-                    const response = await fetch('/api/auth/check');
-                    const data = await response.json();
-
-                    if (data.authenticated) {
-                        document.getElementById('loginContainer').classList.add('hidden');
-                        document.getElementById('loggedInContainer').classList.remove('hidden');
-                    } else {
-                        document.getElementById('loginContainer').classList.remove('hidden');
-                        document.getElementById('loggedInContainer').classList.add('hidden');
-                    }
-                } catch (error) {
-                    console.error('Errore controllo autenticazione:', error);
-                }
-            };
-
-            // Esegui controllo login
-            checkLoginStatus();
-        });
-    </script>
 </body>
 </html>
