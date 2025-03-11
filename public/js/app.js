@@ -1,10 +1,3 @@
-// Gestione logout alla chiusura della pagina
-window.addEventListener('beforeunload', function(e) {
-    // Evita di mostrare la conferma standard del browser (la fetch sarà asincrona)
-    // ma invia comunque la richiesta di logout
-    navigator.sendBeacon('/api/auth/logout');
-});
-
 // Funzione globale per gestire il logout manuale
 window.performLogout = async function() {
     try {
@@ -12,7 +5,8 @@ window.performLogout = async function() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            credentials: 'same-origin' // Assicura che i cookie siano inviati con la richiesta
         });
 
         if (response.ok) {
@@ -656,11 +650,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     logoutBtn.addEventListener('click', async () => {
       try {
         const response = await fetch('/api/auth/logout', {
-          method: 'POST'
+          method: 'POST',
+          credentials: 'same-origin' // aggiunto per inviare i cookie
         });
 
         if (response.ok) {
           window.location.href = '/';
+        } else {
+          console.error('Errore durante il logout:', response.status);
+          showErrorAlert('Errore durante il logout');
         }
       } catch (error) {
         console.error('Errore durante il logout:', error);

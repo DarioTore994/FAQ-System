@@ -230,23 +230,8 @@
             }
         });
 
-        // Gestione logout
-        async function performLogout() {
-            try {
-                const response = await fetch('/api/auth/logout', {
-                    method: 'POST'
-                });
-
-                if (response.ok) {
-                    window.location.href = '/';
-                } else {
-                    showErrorAlert('Errore durante il logout');
-                }
-            } catch (error) {
-                console.error('Errore durante il logout:', error);
-                showErrorAlert('Errore durante il logout');
-            }
-        }
+        // Utilizziamo la funzione di logout globale definita in app.js
+        // Questo elimina duplicazioni e problemi di sincronizzazione
 
     </script>
 </body>

@@ -207,6 +207,7 @@ app.get("/categories", requireAdmin, (req, res) =>
 app.get("/api/auth/check", async (req, res) => {
   const authToken = req.cookies.authToken;
   if (!authToken) {
+    console.log('Nessun token trovato nei cookie');
     return res.json({ authenticated: false });
   }
 
@@ -214,6 +215,7 @@ app.get("/api/auth/check", async (req, res) => {
     // Decodifica il token per ottenere l'id utente
     const userId = parseInt(authToken, 10);
     if (isNaN(userId)) {
+      console.log('Token non valido (non è un numero)');
       return res.json({ authenticated: false });
     }
 
@@ -221,10 +223,19 @@ app.get("/api/auth/check", async (req, res) => {
     try {
       const result = await client.query('SELECT id, email, role FROM users WHERE id = $1', [userId]);
       if (result.rows.length === 0) {
+        console.log('Utente non trovato nel database');
+        // Puliamo il cookie se l'utente non esiste
+        res.clearCookie('authToken', {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/'
+        });
         return res.json({ authenticated: false });
       }
 
       const user = result.rows[0];
+      console.log('Utente autenticato:', user.email);
       return res.json({ 
         authenticated: true, 
         user: {
@@ -359,17 +370,16 @@ app.post("/api/auth/register", async (req, res) => {
 });
 
 app.post("/api/auth/logout", (req, res) => {
-  res.clearCookie('authToken');
+  // Imposta le stesse opzioni usate durante la creazione del cookie
+  res.clearCookie('authToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/'
+  });
   
-  // Supporto per risposte sia alle richieste fetch che beacon
-  if (req.headers['content-type'] === 'text/plain;charset=UTF-8' || 
-      req.headers['content-type'] === 'application/x-www-form-urlencoded') {
-    // Richiesta inviata tramite sendBeacon
-    res.status(204).end();
-  } else {
-    // Richiesta standard
-    res.json({ success: true });
-  }
+  // Risposta standard
+  res.json({ success: true });
 });
 
 // API per ottenere tutti gli utenti (solo per admin)
