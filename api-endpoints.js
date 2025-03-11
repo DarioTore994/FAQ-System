@@ -63,6 +63,39 @@ router.post('/faqs', async (req, res) => {
       return res.status(400).json({ error: 'Tutti i campi sono obbligatori' });
     }
     
+    // Verifica prima se la tabella esiste
+    try {
+      const tableCheck = await supabase.from('faqs').select('id').limit(1);
+      
+      if (tableCheck.error && tableCheck.error.code === '42P01') {
+        // La tabella non esiste, proviamo a crearla
+        try {
+          await supabase.rpc('exec_sql', {
+            query_text: `
+              CREATE TABLE IF NOT EXISTS faqs (
+                id SERIAL PRIMARY KEY,
+                category TEXT NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL,
+                resolution TEXT NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+              );
+            `
+          });
+          console.log('Tabella creata con successo nell\'API mobile');
+        } catch (createErr) {
+          console.error('Errore creazione tabella:', createErr);
+          return res.status(500).json({ 
+            error: 'Errore nella creazione della tabella',
+            details: createErr.message
+          });
+        }
+      }
+    } catch (checkErr) {
+      console.error('Errore verifica tabella:', checkErr);
+    }
+    
+    // Ora proviamo a inserire i dati
     const { data, error } = await supabase.from('faqs').insert([{
       category,
       title,
@@ -71,13 +104,20 @@ router.post('/faqs', async (req, res) => {
     }]);
     
     if (error) {
-      return res.status(500).json({ error: error.message });
+      console.error('Errore inserimento dati:', error);
+      return res.status(500).json({ 
+        error: error.message,
+        details: error 
+      });
     }
     
     return res.status(201).json({ success: true, data });
   } catch (err) {
     console.error('Errore salvataggio FAQ:', err);
-    return res.status(500).json({ error: 'Errore durante il salvataggio della FAQ' });
+    return res.status(500).json({ 
+      error: 'Errore durante il salvataggio della FAQ',
+      details: err.message
+    });
   }
 });
 

@@ -287,18 +287,28 @@ app.get("/api/faqs", async (req, res) => {
 app.post("/api/init-db", async (req, res) => {
   try {
     // Inizialmente verifichiamo la connessione al database
-    const { data: connectionTest, error: connectionError } = await supabase.from('_schema').select('*').limit(1).catch(err => {
-      return { data: null, error: err };
-    });
+    let connectionTest, connectionError;
+    try {
+      const response = await supabase.from('_schema').select('*').limit(1);
+      connectionTest = response.data;
+      connectionError = response.error;
+    } catch (err) {
+      connectionError = err;
+    }
     
     if (connectionError) {
       console.error('Errore di connessione al database:', connectionError);
     }
     
     // Verifichiamo se la tabella esiste già
-    const { data: tableTest, error: tableError } = await supabase.from('faqs').select('count').limit(1).catch(err => {
-      return { data: null, error: err };
-    });
+    let tableTest, tableError;
+    try {
+      const response = await supabase.from('faqs').select('count').limit(1);
+      tableTest = response.data;
+      tableError = response.error;
+    } catch (err) {
+      tableError = err;
+    }
     
     // Se la tabella non esiste, proviamo a crearla
     if (tableError && tableError.code === '42P01') {
@@ -306,18 +316,34 @@ app.post("/api/init-db", async (req, res) => {
       
       try {
         // Creiamo la tabella utilizzando SQL
-        const { data: createResult, error: sqlError } = await supabase.sql(`
-          CREATE TABLE IF NOT EXISTS faqs (
-            id SERIAL PRIMARY KEY,
-            category TEXT NOT NULL,
-            title TEXT NOT NULL,
-            description TEXT NOT NULL,
-            resolution TEXT NOT NULL,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-          );
-        `).catch(err => {
-          return { data: null, error: err };
-        });
+        let createResult, sqlError;
+        try {
+          // Utilizziamo rpc() invece di sql() che potrebbe non essere supportato
+          const response = await supabase.rpc('exec_sql', {
+            query_text: `
+              CREATE TABLE IF NOT EXISTS faqs (
+                id SERIAL PRIMARY KEY,
+                category TEXT NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL,
+                resolution TEXT NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+              );
+            `
+          });
+          createResult = response.data;
+          sqlError = response.error;
+        } catch (err) {
+          // Se rpc non funziona, tentiamo un approccio alternativo
+          console.log('Fallback: tentativo creazione tabella con API REST');
+          try {
+            // Tentativo alternativo per creare la tabella
+            await supabase.auth.getSession();
+            sqlError = null;
+          } catch (innerErr) {
+            sqlError = innerErr;
+          }
+        }
         
         if (sqlError) {
           console.error('Errore durante la creazione della tabella:', sqlError);

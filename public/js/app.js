@@ -206,10 +206,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Verifica e inizializza il database all'avvio
-  window.addEventListener('DOMContentLoaded', async () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     try {
       showErrorAlert('Verifica del database in corso...');
 
+      // Creazione diretta della tabella
       const response = await fetch('/api/init-db', {
         method: 'POST',
         credentials: 'include',
@@ -218,10 +219,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       });
 
-      const result = await response.json().catch(err => ({ 
-        error: err, 
-        message: 'Errore nel parsing della risposta' 
-      }));
+      let result;
+      try {
+        result = await response.json();
+      } catch (parseErr) {
+        console.error('Errore parsing JSON:', parseErr);
+        result = { 
+          error: 'Errore di parsing', 
+          message: 'Errore nel parsing della risposta del server' 
+        };
+      }
 
       if (!response.ok) {
         console.warn('Verifica database fallita:', result);
@@ -246,7 +253,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } catch (error) {
       console.error('Errore critico verifica database:', error);
-      showErrorAlert('Errore critico nella verifica del database');
+      showErrorAlert('Errore critico nella verifica del database: ' + error.message);
     }
   });
 });
