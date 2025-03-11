@@ -456,18 +456,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Se è un admin, mostra pulsante admin nella navbar
       const headerNav = document.getElementById('headerNav');
       const createFaqBtn = document.getElementById('createFaqBtn');
-      
+
       // Nascondi sempre il pulsante "Crea FAQ" come impostazione predefinita
       if (createFaqBtn) {
         createFaqBtn.classList.add('hidden');
       }
-      
+
       if (headerNav && userRole === 'admin') {
         // Mostra il pulsante "Crea FAQ" solo per gli admin
         if (createFaqBtn) {
           createFaqBtn.classList.remove('hidden');
         }
-        
+
         // Mostra pulsante admin
         if (!document.getElementById('adminLink')) {
           const createBtn = document.createElement('a');
@@ -495,7 +495,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         throw new Error('Errore nel recupero delle FAQ');
       }
       const data = await response.json();
-      
+
       // Ordina per data decrescente
       return data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     } catch (error) {
@@ -512,7 +512,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Prendere solo le prime 10 FAQ
     const faqsToShow = faqs.slice(0, 10);
-    
+
     if (faqsToShow.length === 0) {
       tableBody.innerHTML = `
         <tr>
@@ -553,7 +553,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     searchInput.addEventListener('input', () => {
       const searchTerm = searchInput.value.toLowerCase().trim();
-      
+
       if (searchTerm === '') {
         // Se il campo di ricerca è vuoto, mostra tutte le FAQ
         filteredFaqs = allFaqs;
@@ -566,7 +566,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           faq.category.toLowerCase().includes(searchTerm)
         );
       }
-      
+
       renderFAQTable(filteredFaqs);
     });
   };
@@ -576,10 +576,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Carica le FAQ
     allFaqs = await fetchFAQs();
     filteredFaqs = allFaqs;
-    
+
     // Visualizza le FAQ
     renderFAQTable(filteredFaqs);
-    
+
     // Imposta la funzionalità di ricerca
     setupSearch();
   };
@@ -606,3 +606,73 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Inizializzazione della pagina
   initPage();
 });
+
+// Carica le FAQ
+async function loadFAQs() {
+    try {
+        const limit = 10; // Mostra solo le ultime 10 FAQ
+        const response = await fetch(`/api/faqs?limit=${limit}`);
+        if (!response.ok) throw new Error('Errore nel recupero delle FAQ');
+
+        const faqs = await response.json();
+
+        // Visualizza le FAQ nella tabella
+        const tableBody = document.getElementById('faqTableBody');
+        if (!tableBody) return;
+
+        tableBody.innerHTML = '';
+
+        if (faqs.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="py-4 text-center text-gray-400">Nessuna FAQ disponibile</td>
+                </tr>
+            `;
+            return;
+        }
+
+        faqs.forEach(faq => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-800/50';
+
+            const date = new Date(faq.created_at);
+            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+
+            row.innerHTML = `
+                <td class="py-4 px-6 border-b border-gray-700">${faq.title}</td>
+                <td class="py-4 px-6 border-b border-gray-700">${faq.resolution}</td>
+                <td class="py-4 px-6 border-b border-gray-700">
+                    <span class="category-badge">${faq.category}</span>
+                </td>
+                <td class="py-4 px-6 border-b border-gray-700">${formattedDate}</td>
+            `;
+
+            tableBody.appendChild(row);
+        });
+    } catch (error) {
+        console.error('Errore durante il caricamento delle FAQ:', error);
+        showErrorAlert('Errore durante il caricamento delle FAQ');
+    }
+}
+
+// Implementazione ricerca semplificata
+if (document.getElementById('searchInput')) {
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#faqTableBody tr');
+
+        rows.forEach(row => {
+            // Ottieni il testo di tutte le celle
+            const rowText = Array.from(row.children)
+                .map(cell => cell.textContent.toLowerCase())
+                .join(' ');
+
+            // Mostra la riga se contiene il termine di ricerca in qualsiasi campo
+            if (rowText.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+}

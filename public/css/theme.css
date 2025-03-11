@@ -2,20 +2,20 @@
 :root {
   --bg-primary: #0a0a0a;
   --bg-secondary: #1a1a1a;
-  --card-bg: #1f2937;
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --accent-color: #FFD700;
-  --btn-hover: #e6c200;
-  --border-color: #374151;
-  --input-bg: #111827;
-  --shadow-color: rgba(0, 0, 0, 0.5);
-  --header-shadow: rgba(0, 0, 0, 0.1);
-  --table-stripe: rgba(30, 41, 59, 0.7);
-  --table-header: #334155;
-  --table-border: #334155;
-  --success-color: #10b981;
-  --error-color: #ef4444;
+  --card-bg: #1f2937; /* Changed to a darker shade for contrast */
+  --text-primary: #FFD700; /* Yellow text */
+  --text-secondary: #FFFF00; /* Lighter Yellow */
+  --accent-color: #000000; /* Black accent */
+  --btn-hover: #000000; /* Darker black on hover */
+  --border-color: #FFD700; /* Yellow border */
+  --input-bg: #000000; /* Black input background */
+  --shadow-color: rgba(255, 215, 0, 0.5); /* Yellow shadow */
+  --header-shadow: rgba(255, 215, 0, 0.1); /* Lighter yellow header shadow */
+  --table-stripe: rgba(0, 0, 0, 0.7); /* Dark gray stripe */
+  --table-header: #000000; /* Black table header */
+  --table-border: #000000; /* Black table border */
+  --success-color: #FFFF00; /* Yellow success */
+  --error-color: #000000; /* Black error */
 }
 
 body {
@@ -67,7 +67,7 @@ input, textarea, select {
 
 input:focus, textarea:focus, select:focus {
   border-color: var(--accent-color) !important;
-  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.25) !important;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25) !important;
   outline: none;
 }
 
@@ -114,7 +114,7 @@ tbody tr:nth-child(even) {
 
 .btn-primary {
   background-color: var(--accent-color);
-  color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .btn-primary:hover {
