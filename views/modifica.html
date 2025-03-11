@@ -552,12 +552,12 @@
             // Conserva riferimento alla notifica attiva
             activeNotification = notification;
 
-            // Animazione di entrata
+            // Animazione di entrata più rapida
             setTimeout(() => {
                 notification.style.transform = 'translateY(0)';
-            }, 10);
+            }, 5); // Ridotto il ritardo da 10ms a 5ms
 
-            // Rimuovi dopo 8 secondi con timeout che possiamo cancellare
+            // Rimuovi dopo 4 secondi con timeout che possiamo cancellare (tempo ridotto)
             notificationTimeout = setTimeout(() => {
                 notification.style.transform = 'translateY(-100%)';
                 notification.style.opacity = '0';
@@ -569,8 +569,8 @@
                     if (activeNotification === notification) {
                         activeNotification = null;
                     }
-                }, 300);
-            }, 8000);
+                }, 200); // Transizione più veloce (ridotta da 300ms a 200ms)
+            }, 4000); // Tempo di visualizzazione dimezzato (da 8000ms a 4000ms)
         }
     </script>
 </body>
