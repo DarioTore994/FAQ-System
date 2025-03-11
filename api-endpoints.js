@@ -54,8 +54,10 @@ const verificaAutenticazione = async (req, res, next) => {
 router.post('/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('Tentativo di login per:', email);
 
     if (!email || !password) {
+      console.log('Login fallito: Email o password mancanti');
       return res.status(400).json({ error: 'Email e password sono obbligatori' });
     }
 
@@ -66,15 +68,22 @@ router.post('/auth/login', async (req, res) => {
       const result = await client.query('SELECT id, email, role, password FROM users WHERE email = $1', [email]);
 
       if (result.rows.length === 0) {
+        console.log('Login fallito: Utente non trovato per email', email);
         return res.status(401).json({ error: 'Credenziali non valide' });
       }
 
       // Verifica la password con bcrypt
       const user = result.rows[0];
       const bcrypt = require('bcrypt');
+      
+      // Stampa info di debug (rimuovi queste righe in produzione)
+      console.log('Password fornita:', password);
+      console.log('Password nel DB (hashed):', user.password);
 
       try {
+        // Verifica la password
         const passwordMatch = await bcrypt.compare(password, user.password);
+        console.log('Risultato bcrypt.compare:', passwordMatch);
 
         if (!passwordMatch) {
           console.log('Password non corrispondente per', email);
@@ -105,6 +114,7 @@ router.post('/auth/login', async (req, res) => {
         });
       } catch (bcryptError) {
         console.error('Errore nella verifica della password:', bcryptError);
+        console.error('Dettagli errore:', bcryptError.message);
         return res.status(500).json({ error: 'Errore di autenticazione' });
       }
     } finally {

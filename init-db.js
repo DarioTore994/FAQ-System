@@ -2,11 +2,12 @@ const pool = require('./db');
 
 async function initDatabase() {
   try {
-    // Drop existing tables to reset everything
+    // Drop existing tables to reset everything with CASCADE
     await pool.query(`
-      DROP TABLE IF EXISTS faqs;
-      DROP TABLE IF EXISTS categories;
-      DROP TABLE IF EXISTS users;
+      DROP TABLE IF EXISTS faqs CASCADE;
+      DROP TABLE IF EXISTS categories CASCADE;
+      DROP TABLE IF EXISTS password_reset_tokens CASCADE;
+      DROP TABLE IF EXISTS users CASCADE;
     `);
 
     // Create tables
@@ -52,12 +53,21 @@ async function initDatabase() {
       ON CONFLICT (name) DO NOTHING;
     `);
 
-    // Inserisci un utente admin di default
+    // Inserisci utenti di default con password note
+    const bcrypt = require('bcrypt');
+    const adminPassword = await bcrypt.hash('admin123', 10);
+    const testPassword = await bcrypt.hash('test123', 10);
+    
     await pool.query(`
       INSERT INTO users (email, password, role)
-      VALUES ('admin@example.com', '$2b$10$mLTY0eIwGQeudBA4jKkVk.S0T7JFttKVw0jECkqW5yBhY.LdH0tSi', 'admin')
-      ON CONFLICT (email) DO NOTHING;
-    `);
+      VALUES 
+        ('admin@example.com', $1, 'admin'),
+        ('test@example.com', $2, 'user')
+      ON CONFLICT (email) DO UPDATE 
+      SET password = EXCLUDED.password;
+    `, [adminPassword, testPassword]);
+    
+    console.log('Utenti di default creati/aggiornati con successo');
 
     console.log('Database inizializzato con successo!');
   } catch (error) {
