@@ -52,7 +52,7 @@
   --tw-contain-style:  ;
 }
 
-:::backdrop {
+::backdrop {
   --tw-border-spacing-x: 0;
   --tw-border-spacing-y: 0;
   --tw-translate-x: 0;
@@ -144,7 +144,7 @@
 */
 
 html,
-::host {
+:host {
   line-height: 1.5;
   /* 1 */
   -webkit-text-size-adjust: 100%;
@@ -359,7 +359,7 @@ input:where([type='submit']) {
 Use the modern Firefox focus style for all focusable elements.
 */
 
-::-moz-focusring {
+:-moz-focusring {
   outline: auto;
 }
 
@@ -367,7 +367,7 @@ Use the modern Firefox focus style for all focusable elements.
 Remove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)
 */
 
-::-moz-ui-invalid {
+:-moz-ui-invalid {
   box-shadow: none;
 }
 
@@ -514,7 +514,7 @@ button,
 Make sure disabled buttons don't get the pointer cursor.
 */
 
-::disabled {
+:disabled {
   cursor: default;
 }
 
@@ -900,6 +900,12 @@ video {
   gap: 1.5rem;
 }
 
+.space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(0.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
+}
+
 .space-x-4 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
   margin-right: calc(1rem * var(--tw-space-x-reverse));
@@ -1191,7 +1197,7 @@ video {
 }
 
 .text-sm {
-  font-size:0.875rem;
+  font-size: 0.875rem;
   line-height: 1.25rem;
 }
 
@@ -1249,6 +1255,11 @@ video {
 .text-primary-black {
   --tw-text-opacity: 1;
   color: rgb(10 10 10 / var(--tw-text-opacity, 1));
+}
+
+.text-red-500 {
+  --tw-text-opacity: 1;
+  color: rgb(239 68 68 / var(--tw-text-opacity, 1));
 }
 
 .text-white {
@@ -1468,99 +1479,4 @@ video {
   .md\:gap-4 {
     gap: 1rem;
   }
-}
-
-/* Stili principali */
-:root {
-  --primary-black: #0a0a0a;
-  --accent-yellow: #FFD700;
-  --dark-gray: #1a1a1a;
-}
-
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background-color: var(--primary-black);
-  color: #f3f4f6;
-}
-
-.bg-primary-black {
-  background-color: var(--primary-black);
-}
-
-.bg-dark-gray {
-  background-color: var(--dark-gray);
-}
-
-.text-accent-yellow {
-  color: var(--accent-yellow);
-}
-
-.bg-accent-yellow {
-  background-color: var(--accent-yellow);
-}
-
-.border-accent-yellow {
-  border-color: var(--accent-yellow);
-}
-
-/* Animazioni */
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Utility classes */
-.container {
-  width: 100%;
-  max-width: 1280px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.btn-primary {
-  background-color: var(--accent-yellow);
-  color: var(--primary-black);
-}
-
-.btn-primary:hover {
-  background-color: #ffc700;
-}
-
-.btn-secondary {
-  background-color: transparent;
-  border: 1px solid #2a2a2a;
-  color: #f3f4f6;
-}
-
-.btn-secondary:hover {
-  border-color: var(--accent-yellow);
-  color: var(--accent-yellow);
-}
-
-/* Card */
-.card {
-  background-color: var(--dark-gray);
-  border-radius: 0.5rem;
-  border: 1px solid #2a2a2a;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
