@@ -1,17 +1,6 @@
 // Client-side JavaScript
 document.addEventListener("DOMContentLoaded", async () => {
-  // Initialize Supabase client
-  const supabaseUrl = 'https://ejlyrwotgkrjeunosrzo.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqbHlyd290Z2tyamV1bm9zcnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE2ODQxOTYsImV4cCI6MjA1NzI2MDE5Nn0.xmfOVAMsH5QqzjKmkLriEshZalP0Xj8xf_N_wpWE_40';
-
-  // Check if supabase is available in the window object
-  let supabase;
-  if (window.supabase) {
-    supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-  } else {
-    console.error("Supabase library not loaded properly");
-    showErrorAlert("Errore di connessione al database");
-  }
+  // Non è più necessario inizializzare Supabase client poiché ora usiamo PostgreSQL
 
   // Initialize with appropriate API endpoints
   const loadFAQs = async (selectedCategory = "all") => {
