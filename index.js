@@ -189,18 +189,47 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
       });
     }
     
+    // Verifica se la tabella esiste prima del salvataggio
+    try {
+      await supabase.from('faqs').select('count').limit(1);
+    } catch (tableError) {
+      console.log('Verifica tabella fallita, creazione tabella...');
+      try {
+        await supabase.sql(`
+          CREATE TABLE IF NOT EXISTS faqs (
+            id SERIAL PRIMARY KEY,
+            category TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            resolution TEXT NOT NULL,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+          );
+        `);
+        console.log('Tabella faqs creata con successo');
+      } catch (createErr) {
+        console.error('Errore durante la creazione della tabella:', createErr);
+        return res.status(500).json({ 
+          error: { message: 'Impossibile creare la tabella FAQ', details: createErr } 
+        });
+      }
+    }
+    
     const { data, error } = await supabase.from("faqs").insert([req.body]);
     
     if (error) {
       console.error('Errore Supabase durante inserimento FAQ:', error);
-      return res.status(500).json({ error });
+      return res.status(500).json({ 
+        error: { message: 'Errore durante il salvataggio nel database', details: error } 
+      });
     }
     
     console.log('FAQ inserita con successo:', data);
-    return res.status(201).json(data);
+    return res.status(201).json({ success: true, data });
   } catch (err) {
     console.error('Errore imprevisto durante inserimento FAQ:', err);
-    return res.status(500).json({ error: { message: 'Errore interno del server' } });
+    return res.status(500).json({ 
+      error: { message: 'Errore interno del server', details: err.toString() } 
+    });
   }
 });
 

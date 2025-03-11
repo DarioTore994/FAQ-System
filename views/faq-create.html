@@ -98,6 +98,23 @@
     <script src="/js/error-alert.js"></script>
     <script src="/js/app.js"></script>
     <script>
+        // Verifica e inizializza il database all'avvio
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/init-db', {
+                    method: 'POST'
+                });
+                if (!response.ok) {
+                    console.warn('Verifica database fallita:', await response.json());
+                    showErrorAlert('Avviso: Verifica iniziale database fallita');
+                } else {
+                    console.log('Database verificato correttamente');
+                }
+            } catch (error) {
+                console.error('Errore verifica database:', error);
+            }
+        });
+        
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             try {
                 const response = await fetch('/api/auth/logout', {
@@ -111,6 +128,12 @@
                 console.error('Errore durante il logout:', error);
                 showErrorAlert('Errore durante il logout');
             }
+        });
+        
+        // Aggiunto listener di errore per debugging
+        window.addEventListener('error', function(event) {
+            console.error('Errore JavaScript:', event.error);
+            showErrorAlert('Errore JavaScript: ' + (event.error?.message || 'Errore sconosciuto'));
         });
     </script>
 </body>

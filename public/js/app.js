@@ -168,10 +168,29 @@ document.addEventListener("DOMContentLoaded", async () => {
           credentials: 'include'
         });
         
-        const responseData = await response.json().catch(() => ({}));
+        // Prima verifica se la tabella esiste
+        const tableCheck = await fetch('/api/init-db', {
+          method: 'POST',
+          credentials: 'include'
+        });
         
-        if (!response.ok) {
-          throw new Error(responseData.error?.message || 'Errore durante il salvataggio');
+        // Riprova a salvare dopo aver verificato la tabella
+        const retryResponse = !response.ok ? await fetch('/api/faqs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(faqData),
+          credentials: 'include'
+        }) : response;
+        
+        const responseData = await retryResponse.json().catch((err) => {
+          console.error("Errore parsing JSON:", err);
+          return { error: { message: "Errore nella risposta del server" } };
+        });
+        
+        if (!retryResponse.ok) {
+          throw new Error(responseData.error?.message || 'Errore durante il salvataggio: ' + JSON.stringify(responseData));
         }
         
         showErrorAlert('FAQ salvata con successo!');
