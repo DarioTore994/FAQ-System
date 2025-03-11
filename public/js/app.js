@@ -455,9 +455,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Se è un admin, mostra pulsante admin nella navbar
       const headerNav = document.getElementById('headerNav');
+      const createFaqBtn = document.getElementById('createFaqBtn');
+      
+      // Nascondi sempre il pulsante "Crea FAQ" come impostazione predefinita
+      if (createFaqBtn) {
+        createFaqBtn.classList.add('hidden');
+      }
+      
       if (headerNav && userRole === 'admin') {
         // Mostra il pulsante "Crea FAQ" solo per gli admin
-        document.getElementById('createFaqBtn').classList.remove('hidden');
+        if (createFaqBtn) {
+          createFaqBtn.classList.remove('hidden');
+        }
         
         // Mostra pulsante admin
         if (!document.getElementById('adminLink')) {
@@ -467,11 +476,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           createBtn.className = 'bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors mr-2';
           createBtn.textContent = 'Admin';
           headerNav.prepend(createBtn);
-        }
-      } else {
-        // Nascondi il pulsante "Crea FAQ" per gli utenti normali
-        if (document.getElementById('createFaqBtn')) {
-          document.getElementById('createFaqBtn').classList.add('hidden');
         }
       }
     }

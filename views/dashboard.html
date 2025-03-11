@@ -146,18 +146,22 @@
                 const response = await fetch('/api/auth/check');
                 const data = await response.json();
 
+                // Di default, nascondi elementi admin
+                const createFaqBtn = document.getElementById('createFaqBtn');
+                const adminCategorySection = document.getElementById('adminCategorySection');
+                const adminLink = document.getElementById('adminLink');
+                
+                if (createFaqBtn) createFaqBtn.classList.add('hidden');
+                if (adminCategorySection) adminCategorySection.classList.add('hidden');
+                if (adminLink) adminLink.classList.add('hidden');
+
                 if (data.authenticated) {
                     // Gestione elementi basati sul ruolo utente
                     if (data.user.role === 'admin') {
                         // Mostra pulsante Crea FAQ e la sezione di gestione categorie solo agli admin
-                        document.getElementById('createFaqBtn').classList.remove('hidden');
-                        document.getElementById('adminCategorySection').classList.remove('hidden');
-                        document.getElementById('adminLink').classList.remove('hidden');
-                    } else {
-                        // Nascondi elementi di amministrazione agli utenti normali
-                        document.getElementById('createFaqBtn').classList.add('hidden');
-                        document.getElementById('adminCategorySection').classList.add('hidden');
-                        document.getElementById('adminLink').classList.add('hidden');
+                        if (createFaqBtn) createFaqBtn.classList.remove('hidden');
+                        if (adminCategorySection) adminCategorySection.classList.remove('hidden');
+                        if (adminLink) adminLink.classList.remove('hidden');
                     }
                 }
             } catch (error) {
