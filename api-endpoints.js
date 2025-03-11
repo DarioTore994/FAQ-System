@@ -62,10 +62,19 @@ router.post('/auth/login', async (req, res) => {
     // Verifica credenziali nel database
     const client = await pool.connect();
     try {
-      const result = await client.query('SELECT id, email, role FROM users WHERE email = $1 AND password = $2', 
-        [email, password]);
+      // Prima cerchiamo l'utente solo con l'email
+      const result = await client.query('SELECT id, email, role, password FROM users WHERE email = $1', [email]);
 
       if (result.rows.length === 0) {
+        return res.status(401).json({ error: 'Credenziali non valide' });
+      }
+
+      // Verifica la password con bcrypt
+      const user = result.rows[0];
+      const bcrypt = require('bcrypt');
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      
+      if (!passwordMatch) {
         return res.status(401).json({ error: 'Credenziali non valide' });
       }
 
@@ -73,6 +82,12 @@ router.post('/auth/login', async (req, res) => {
 
       // Usa l'ID utente come token (semplificato, in produzione usa JWT)
       const token = user.id.toString();
+
+      // Imposta il cookie per l'autenticazione
+      res.cookie('token', token, {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 24 ore
+      });
 
       return res.status(200).json({ 
         session: {

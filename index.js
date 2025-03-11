@@ -1,10 +1,12 @@
 const express = require('express');
 const pool = require('./db');
 const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
+app.use(cookieParser());
 
 // Serve the HTML files from the views directory
 app.get('/', (req, res) => {
