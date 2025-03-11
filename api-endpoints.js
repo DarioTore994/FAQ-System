@@ -79,28 +79,37 @@ router.get('/faqs', async (req, res) => {
 // Endpoint per salvare una nuova FAQ
 router.post('/faqs', async (req, res) => {
   try {
-    const { category, title, description, resolution, status } = req.body;
+    const { category, title, description, resolution, status, user_id } = req.body;
 
     if (!category || !title || !description || !resolution) {
       return res.status(400).json({ error: { message: 'Tutti i campi sono obbligatori' } });
     }
 
-    // Verifica che la tabella esista con la struttura corretta
+    console.log('Verifica tabella in corso...');
     try {
       await pool.query(`
         SELECT column_name FROM information_schema.columns 
         WHERE table_name = 'faqs' AND column_name = 'user_id'
       `);
+      console.log('Tabella verificata');
     } catch (error) {
-      console.log('Verifica struttura tabella faqs...');
+      console.log('Errore verifica tabella:', error.message);
     }
 
-    // Inserisci la nuova FAQ nel database 
-    const result = await pool.query(
-      'INSERT INTO faqs (category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [category, title, description, resolution, status || 'Nuovo']
-    );
-
+    console.log('Salvataggio FAQ in corso...');
+    // Inserisci la nuova FAQ nel database con user_id se disponibile
+    let query, params;
+    
+    if (user_id) {
+      query = 'INSERT INTO faqs (user_id, category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
+      params = [user_id, category, title, description, resolution, status || 'Nuovo'];
+    } else {
+      query = 'INSERT INTO faqs (category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5) RETURNING *';
+      params = [category, title, description, resolution, status || 'Nuovo'];
+    }
+    
+    const result = await pool.query(query, params);
+    
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('Errore salvataggio FAQ:', error);

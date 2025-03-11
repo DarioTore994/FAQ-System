@@ -34,7 +34,8 @@ app.get('/api/auth/check', async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1] || req.cookies?.token;
     
     if (!token) {
-      return res.status(401).json({ authenticated: false, error: 'Accesso non autorizzato' });
+      // Non ritornare 401 qui, ma solo un flag di autenticazione falso
+      return res.status(200).json({ authenticated: false, message: 'Nessun token fornito' });
     }
     
     // Verifica il token
@@ -42,7 +43,8 @@ app.get('/api/auth/check', async (req, res) => {
     const userResult = await pool.query(userQuery, [token]);
     
     if (userResult.rows.length === 0) {
-      return res.status(401).json({ authenticated: false, error: 'Utente non trovato' });
+      // Non ritornare 401 qui, ma solo un flag di autenticazione falso
+      return res.status(200).json({ authenticated: false, message: 'Utente non trovato' });
     }
     
     const user = userResult.rows[0];
