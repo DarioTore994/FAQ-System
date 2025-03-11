@@ -650,7 +650,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', performLogout);
-    });
   }
 
   // Inizializzazione della pagina
