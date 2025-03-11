@@ -163,10 +163,14 @@
                 if (error) throw error;
 
                 // Inviare il token al backend
-                const tokenToSend = data.session?.access_token || data?.access_token || '';
+                const session = data.session;
+                const tokenToSend = session?.access_token || '';
 
                 if (!tokenToSend) {
-                    throw new Error('Token non disponibile');
+                    // Se l'utente si è registrato correttamente ma non ha ancora confermato l'email
+                    // mostriamo un messaggio appropriato
+                    showErrorAlert('Registrazione effettuata! Controlla la tua email per confermare l\'account prima di accedere.');
+                    return;
                 }
 
                 await fetch('/api/auth/login', {
