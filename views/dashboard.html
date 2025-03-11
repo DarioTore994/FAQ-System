@@ -245,12 +245,25 @@
         // Funzione per caricare le FAQ
         async function loadFAQs() {
             try {
+                // Prima verifichiamo la struttura della tabella e la inizializziamo se necessario
+                try {
+                    await fetch('/api/init-db', { method: 'POST' });
+                    console.log('Database verificato correttamente');
+                } catch (initError) {
+                    console.error('Errore durante l\'inizializzazione:', initError);
+                }
+                
+                // Ora recuperiamo le FAQ
                 const response = await fetch('/api/faqs');
                 if (!response.ok) {
                     throw new Error('Errore nel recupero delle FAQ');
                 }
                 
                 const faqs = await response.json();
+                console.log('FAQ recuperate:', faqs);
+                
+                // Memorizza le FAQ per l'uso con la ricerca e i resize
+                window.currentFaqs = faqs;
                 renderFAQsTable(faqs);
                 
                 // Aggiunta listener per ricerca
@@ -258,11 +271,11 @@
                 if (searchInput) {
                     searchInput.addEventListener('input', (e) => {
                         const searchTerm = e.target.value.toLowerCase();
-                        const filteredFaqs = faqs.filter(faq => 
-                            faq.title.toLowerCase().includes(searchTerm) || 
-                            faq.description.toLowerCase().includes(searchTerm) ||
-                            faq.resolution.toLowerCase().includes(searchTerm) ||
-                            faq.category.toLowerCase().includes(searchTerm)
+                        const filteredFaqs = window.currentFaqs.filter(faq => 
+                            (faq.title && faq.title.toLowerCase().includes(searchTerm)) || 
+                            (faq.description && faq.description.toLowerCase().includes(searchTerm)) ||
+                            (faq.resolution && faq.resolution.toLowerCase().includes(searchTerm)) ||
+                            (faq.category && faq.category.toLowerCase().includes(searchTerm))
                         );
                         renderFAQsTable(filteredFaqs);
                     });
@@ -305,8 +318,11 @@
             // Cancella il contenuto attuale
             tableBody.innerHTML = '';
             
+            // Debug dei dati
+            console.log('Rendering FAQs:', faqs);
+            
             // Controlla se ci sono FAQ da mostrare
-            if (faqs.length === 0) {
+            if (!faqs || faqs.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
                         <td colspan="4" class="py-4 text-center text-gray-400">Nessuna FAQ disponibile</td>
@@ -324,30 +340,44 @@
                     const row = document.createElement('tr');
                     row.className = 'block mb-5 bg-gray-800/50 rounded-lg border border-gray-700 shadow-md overflow-hidden';
 
-                    const date = new Date(faq.created_at);
-                    const formattedDate = date.toLocaleDateString('it-IT', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
+                    // Gestione sicura della data
+                    let formattedDate = 'Data non disponibile';
+                    if (faq.created_at) {
+                        try {
+                            const date = new Date(faq.created_at);
+                            formattedDate = date.toLocaleDateString('it-IT', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                        } catch (e) {
+                            console.error('Errore nel parsing della data:', e);
+                        }
+                    }
+
+                    // Assicurati che tutti i campi esistano per evitare errori
+                    const title = faq.title || 'Titolo non disponibile';
+                    const category = faq.category || 'Categoria non specificata';
+                    const description = faq.description || 'Descrizione non disponibile';
+                    const resolution = faq.resolution || 'Risoluzione non disponibile';
 
                     row.innerHTML = `
                         <td class="block p-4 border-b border-gray-700/50">
                             <div class="flex justify-between items-start">
-                                <h4 class="font-medium text-accent-yellow text-base">${faq.title}</h4>
+                                <h4 class="font-medium text-accent-yellow text-base">${title}</h4>
                                 <span class="px-3 py-1 bg-accent-yellow/20 text-accent-yellow rounded-full text-xs font-medium ml-2">
-                                    ${faq.category}
+                                    ${category}
                                 </span>
                             </div>
                             <div class="text-xs text-gray-500 mt-2">${formattedDate}</div>
                         </td>
                         <td class="block p-4">
-                            <p class="text-sm text-gray-300 mb-4">${faq.description}</p>
+                            <p class="text-sm text-gray-300 mb-4">${description}</p>
                             <div class="p-4 bg-gray-800/70 rounded-md shadow-inner border border-gray-700/50">
                                 <h5 class="text-xs text-accent-yellow mb-2 font-medium uppercase tracking-wide">Soluzione:</h5>
-                                <p class="text-sm text-gray-200">${faq.resolution}</p>
+                                <p class="text-sm text-gray-200">${resolution}</p>
                             </div>
                         </td>
                     `;
@@ -360,26 +390,40 @@
                     const row = document.createElement('tr');
                     row.className = 'hover:bg-gray-800/50 transition-colors duration-150';
 
-                    const date = new Date(faq.created_at);
-                    const formattedDate = date.toLocaleDateString('it-IT', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
+                    // Gestione sicura della data
+                    let formattedDate = 'Data non disponibile';
+                    if (faq.created_at) {
+                        try {
+                            const date = new Date(faq.created_at);
+                            formattedDate = date.toLocaleDateString('it-IT', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                        } catch (e) {
+                            console.error('Errore nel parsing della data:', e);
+                        }
+                    }
+
+                    // Assicurati che tutti i campi esistano per evitare errori
+                    const title = faq.title || 'Titolo non disponibile';
+                    const category = faq.category || 'Categoria non specificata';
+                    const description = faq.description || 'Descrizione non disponibile';
+                    const resolution = faq.resolution || 'Risoluzione non disponibile';
 
                     row.innerHTML = `
-                        <td class="py-4 px-6 border-b border-gray-700">${faq.title}</td>
+                        <td class="py-4 px-6 border-b border-gray-700">${title}</td>
                         <td class="py-4 px-6 border-b border-gray-700">
-                            <p class="text-sm text-gray-300 mb-3">${faq.description}</p>
+                            <p class="text-sm text-gray-300 mb-3">${description}</p>
                             <div class="p-4 bg-gray-800/70 rounded-md shadow-inner border border-gray-700/50">
-                                <p class="text-sm text-gray-200">${faq.resolution}</p>
+                                <p class="text-sm text-gray-200">${resolution}</p>
                             </div>
                         </td>
                         <td class="py-4 px-6 border-b border-gray-700">
                             <span class="px-3 py-1.5 bg-accent-yellow/20 text-accent-yellow rounded-full text-xs font-medium">
-                                ${faq.category}
+                                ${category}
                             </span>
                         </td>
                         <td class="py-4 px-6 border-b border-gray-700 text-xs text-gray-400">
@@ -392,10 +436,12 @@
             }
             
             // Listener per il ridimensionamento della finestra
-            window.addEventListener('resize', () => {
+            window.removeEventListener('resize', window.resizeHandler);
+            window.resizeHandler = () => {
                 const faqs = window.currentFaqs || [];
                 renderFAQsTable(faqs);
-            });
+            };
+            window.addEventListener('resize', window.resizeHandler);
         }
     </script>
 </body>
