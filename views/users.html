@@ -141,7 +141,7 @@
             </form>
 
             <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Lista Utenti</h2>
-            
+
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
@@ -189,15 +189,42 @@
                 </div>
             </div>
         </div>
-        
+
+        <!-- Modal per inviare email di recupero password -->
+        <div id="recoverPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-dark-gray p-6 rounded-lg shadow-lg w-full max-w-md">
+                <h3 class="text-xl font-semibold mb-4 text-accent-yellow">Recupero Password</h3>
+                <p class="mb-4 text-gray-300">Invia una email di recupero password all'utente:</p>
+                <p id="recoverPasswordEmail" class="mb-6 font-semibold text-gray-300"></p>
+
+                <div class="flex justify-end space-x-4">
+                    <button
+                        type="button"
+                        id="cancelRecoverBtn"
+                        class="px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+                    >
+                        Annulla
+                    </button>
+                    <button
+                        type="button"
+                        id="confirmRecoverBtn"
+                        class="px-4 py-2 bg-accent-yellow text-primary-black rounded-lg hover:bg-yellow-300 transition-colors"
+                        data-email=""
+                    >
+                        Invia Email
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal per modifica completa dati utente -->
         <div id="editUserModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" style="display: none;">
             <div class="bg-dark-gray p-6 rounded-lg shadow-lg w-full max-w-md admin-content">
                 <h3 class="text-xl font-semibold mb-4 text-accent-yellow">Modifica Utente</h3>
-                
+
                 <form id="editUserForm" class="space-y-4">
                     <input type="hidden" id="editCompleteUserId" name="userId">
-                    
+
                     <div>
                         <label class="block mb-2 text-accent-yellow">Email</label>
                         <input
@@ -208,7 +235,7 @@
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
                         />
                     </div>
-                    
+
                     <div>
                         <label class="block mb-2 text-accent-yellow">Nuova Password (lasciare vuoto per non modificare)</label>
                         <input
@@ -218,7 +245,7 @@
                             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
                         />
                     </div>
-                    
+
                     <div>
                         <label class="block mb-2 text-accent-yellow">Ruolo</label>
                         <select
@@ -361,6 +388,12 @@
                             >
                                 Elimina
                             </button>
+                            <button
+                                class="recover-password-btn text-accent-yellow hover:underline"
+                                data-email="${user.email}"
+                            >
+                                Recupera Password
+                            </button>
                         </div>
                     </td>
                 `;
@@ -372,9 +405,13 @@
             document.querySelectorAll('.edit-user-btn').forEach(btn => {
                 btn.addEventListener('click', openEditUserModal);
             });
-            
+
             document.querySelectorAll('.delete-user-btn').forEach(btn => {
                 btn.addEventListener('click', openDeleteUserModal);
+            });
+
+            document.querySelectorAll('.recover-password-btn').forEach(btn => {
+                btn.addEventListener('click', openRecoverPasswordModal);
             });
         }
 
@@ -382,15 +419,15 @@
         function openDeleteUserModal() {
             const userId = this.getAttribute('data-id');
             const userEmail = this.getAttribute('data-email');
-            
+
             document.getElementById('deleteUserEmail').textContent = `${userEmail}`;
             document.getElementById('confirmDeleteBtn').setAttribute('data-id', userId);
-            
+
             const modal = document.getElementById('deleteUserModal');
             modal.classList.remove('hidden');
             modal.style.display = 'flex';
         }
-        
+
         // Gestione del modal di modifica completa utente
         function openEditUserModal() {
             const userId = this.getAttribute('data-id');
@@ -407,15 +444,31 @@
             modal.style.display = 'flex';
         }
 
+        // Gestione del modal di recupero password
+        function openRecoverPasswordModal() {
+            const userEmail = this.getAttribute('data-email');
+            document.getElementById('recoverPasswordEmail').textContent = `${userEmail}`;
+            document.getElementById('confirmRecoverBtn').setAttribute('data-email', userEmail);
+            const modal = document.getElementById('recoverPasswordModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+
         // Chiudi i modal
         document.getElementById('cancelEditCompleteBtn').addEventListener('click', () => {
             const modal = document.getElementById('editUserModal');
             modal.classList.add('hidden');
             modal.style.display = 'none';
         });
-        
+
         document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
             const modal = document.getElementById('deleteUserModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        });
+
+        document.getElementById('cancelRecoverBtn').addEventListener('click', () => {
+            const modal = document.getElementById('recoverPasswordModal');
             modal.classList.add('hidden');
             modal.style.display = 'none';
         });
@@ -423,13 +476,13 @@
         // Gestione dell'eliminazione utente
         document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
             const userId = this.getAttribute('data-id');
-            
+
             try {
                 const response = await fetch(`/api/users/${userId}`, {
                     method: 'DELETE',
                     credentials: 'include'
                 });
-                
+
                 if (!response.ok) {
                     // Verifica se la risposta è in formato JSON
                     const contentType = response.headers.get('content-type');
@@ -450,18 +503,18 @@
                         }
                     }
                 }
-                
+
                 // Chiudi modal e ricarica utenti
                 const modal = document.getElementById('deleteUserModal');
                 modal.classList.add('hidden');
                 modal.style.display = 'none';
-                
+
                 // Conferma l'azione all'utente
                 showErrorAlert('Utente eliminato con successo!');
                 loadUsers();
             } catch (error) {
                 console.error('Errore eliminazione utente:', error);
-                
+
                 if (error.message.includes('Sessione scaduta')) {
                     // Se è un errore di sessione, reindirizza alla pagina di login
                     showErrorAlert('Sessione scaduta. Reindirizzamento alla pagina di login...');
@@ -473,7 +526,7 @@
                 }
             }
         });
-        
+
         // Gestione del submit per la modifica completa dell'utente
         document.getElementById('editUserForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -482,7 +535,7 @@
             const email = document.getElementById('editUserEmail').value;
             const password = document.getElementById('editUserPassword').value;
             const role = document.getElementById('editCompleteUserRole').value;
-            
+
             // Preparazione dati da inviare (escludi password se vuota)
             const userData = { email, role };
             if (password.trim() !== '') {
@@ -570,16 +623,16 @@
         // Gestione creazione nuovo utente
         document.getElementById('createUserForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const email = this.elements.email.value;
             const password = this.elements.password.value;
             const role = this.elements.role.value;
-            
+
             if (!email || !password) {
                 showErrorAlert('Inserisci tutti i campi richiesti');
                 return;
             }
-            
+
             try {
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
@@ -589,7 +642,7 @@
                     body: JSON.stringify({ email, password, role }),
                     credentials: 'include'
                 });
-                
+
                 if (!response.ok) {
                     const contentType = response.headers.get('content-type');
                     if (contentType && contentType.includes('application/json')) {
@@ -599,12 +652,12 @@
                         throw new Error(`Errore server (${response.status}): ${response.statusText}`);
                     }
                 }
-                
+
                 const data = await response.json();
-                
+
                 showErrorAlert('Utente creato con successo!');
                 this.reset();
-                
+
                 // Ricarica lista utenti
                 loadUsers();
             } catch (error) {
@@ -612,6 +665,35 @@
                 showErrorAlert('Errore: ' + error.message);
             }
         });
+
+        //Gestione del recupero password
+        document.getElementById('confirmRecoverBtn').addEventListener('click', async function(){
+            const userEmail = this.getAttribute('data-email');
+            try{
+                const response = await fetch('/api/users/recover', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({email: userEmail}),
+                    credentials: 'include'
+                });
+
+                if(!response.ok){
+                    const errorData = await response.json();
+                    showErrorAlert(errorData.error || "Errore nell'invio dell'email di recupero");
+                    return;
+                }
+
+                showErrorAlert("Email di recupero inviata con successo!");
+                document.getElementById('recoverPasswordModal').classList.add('hidden');
+                document.getElementById('recoverPasswordModal').style.display = 'none';
+
+            } catch (error){
+                console.error("Errore durante il recupero password:", error);
+                showErrorAlert("Errore durante il recupero password");
+            }
+        })
     </script>
 </body>
 </html>
