@@ -20,17 +20,17 @@
             bottom: 0;
             z-index: -1;
         }
-        
+
         @keyframes float {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
             100% { transform: translateY(0px); }
         }
-        
+
         .float-animation {
             animation: float 4s ease-in-out infinite;
         }
-        
+
         .btn-accent {
             background-color: #FFD700;
             color: #0a0a0a;
@@ -42,13 +42,13 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
+
         .btn-accent:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
             background-color: #ffc700;
         }
-        
+
         .btn-outline {
             border: 2px solid #2a2a2a;
             color: #f3f4f6;
@@ -59,13 +59,13 @@
             align-items: center;
             transition: all 0.3s ease;
         }
-        
+
         .btn-outline:hover {
             border-color: #FFD700;
             color: #FFD700;
             transform: translateY(-2px);
         }
-        
+
         /* Altri elementi */
         .btn {
             display: inline-flex;
@@ -76,22 +76,22 @@
             transition: all 0.2s ease;
             padding: 0.5rem 1rem;
         }
-        
+
         .btn-primary {
             background-color: #FFD700;
             color: #0a0a0a !important;
         }
-        
+
         .btn-primary:hover {
             background-color: #ffc700;
         }
-        
+
         .btn-secondary {
             background-color: transparent;
             border: 1px solid #2a2a2a;
             color: #f3f4f6;
         }
-        
+
         .btn-secondary:hover {
             border-color: #FFD700;
             color: #FFD700;
@@ -114,7 +114,7 @@
                 <div class="flex items-center gap-4">
                     <a href="/" class="text-gray-300 hover:text-accent-yellow border-b-2 border-accent-yellow pb-1">Home</a>
                 </div>
-                
+
                 <!-- Menu per utenti autenticati -->
                 <div id="authUserMenu" class="hidden flex items-center gap-4">
                     <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
@@ -122,14 +122,14 @@
                         <span>Crea FAQ</span>
                     </a>
                 </div>
-                
+
                 <!-- Menu solo per admin -->
                 <div id="adminMenu" class="hidden flex items-center gap-4">
                     <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow">Admin</a>
                     <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow">Utenti</a>
                     <a href="/categories" id="categoriesLink" class="text-gray-300 hover:text-accent-yellow">Categorie</a>
                 </div>
-                
+
                 <!-- Bottone di accesso/logout -->
                 <div id="loginNavBtn" class="hidden">
                     <a href="/auth" class="btn btn-primary">
@@ -139,7 +139,7 @@
                         Accedi
                     </a>
                 </div>
-                
+
                 <button id="logoutBtn" class="hidden btn btn-secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -205,93 +205,12 @@
 
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="/js/error-alert.js"></script>
+    <script src="/js/app.js"></script>
     <script>
-        // Funzione per mostrare/nascondere elementi
-        function toggleAuthUI(isAuthenticated, isAdmin = false) {
-            // Riferimenti ai menu
-            const authUserMenu = document.getElementById('authUserMenu');
-            const adminMenu = document.getElementById('adminMenu');
-            const loginNavBtn = document.getElementById('loginNavBtn');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const loginContainer = document.getElementById('loginContainer');
-            const loggedInContainer = document.getElementById('loggedInContainer');
-            
-            if (isAuthenticated) {
-                // Utente autenticato: nascondi login, mostra logout e contenuti autenticati
-                if (loginContainer) loginContainer.classList.add('hidden');
-                if (loggedInContainer) loggedInContainer.classList.remove('hidden');
-                if (loginNavBtn) loginNavBtn.classList.add('hidden');
-                if (logoutBtn) logoutBtn.classList.remove('hidden');
-                if (authUserMenu) authUserMenu.classList.remove('hidden');
-                
-                // Mostra menu admin solo se l'utente è admin
-                if (adminMenu) {
-                    if (isAdmin) {
-                        adminMenu.classList.remove('hidden');
-                    } else {
-                        adminMenu.classList.add('hidden');
-                    }
-                }
-            } else {
-                // Utente non autenticato: mostra login, nascondi logout e contenuti autenticati
-                if (loginContainer) loginContainer.classList.remove('hidden');
-                if (loggedInContainer) loggedInContainer.classList.add('hidden');
-                if (loginNavBtn) loginNavBtn.classList.remove('hidden');
-                if (logoutBtn) logoutBtn.classList.add('hidden');
-                if (authUserMenu) authUserMenu.classList.add('hidden');
-                if (adminMenu) adminMenu.classList.add('hidden');
-            }
-        }
-        
-        // Verifica lo stato di autenticazione al caricamento della pagina
-        window.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const response = await fetch('/api/auth/check');
-                // Controlla se la risposta è valida
-                if (!response.ok) {
-                    console.error('Errore nella risposta API:', response.status, response.statusText);
-                    toggleAuthUI(false);
-                    return;
-                }
-                
-                // Gestione sicura del parsing JSON
-                let data;
-                try {
-                    data = await response.json();
-                } catch (jsonError) {
-                    console.error('Errore parsing JSON:', jsonError);
-                    toggleAuthUI(false);
-                    return;
-                }
-                
-                // Imposta l'interfaccia in base allo stato di autenticazione e ruolo
-                const isAdmin = data.authenticated && data.user && data.user.role === 'admin';
-                toggleAuthUI(data.authenticated, isAdmin);
-            } catch (error) {
-                console.error('Errore controllo autenticazione:', error);
-                // Fallback in caso di errore
-                toggleAuthUI(false);
-            }
+        window.addEventListener('error', function(event) {
+            console.error('Errore JavaScript:', event.error);
+            showErrorAlert('Errore JavaScript: ' + (event.error?.message || 'Errore sconosciuto'));
         });
-
-        // Gestione logout
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', async () => {
-                try {
-                    const response = await fetch('/api/auth/logout', {
-                        method: 'POST'
-                    });
-                    
-                    if (response.ok) {
-                        window.location.href = '/';
-                    }
-                } catch (error) {
-                    console.error('Errore durante il logout:', error);
-                    showErrorAlert('Errore durante il logout');
-                }
-            });
-        }
     </script>
 </body>
 </html>

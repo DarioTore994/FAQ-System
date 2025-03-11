@@ -172,6 +172,12 @@
     <script src="/js/error-alert.js"></script>
     <script src="/js/app.js"></script>
     <script>
+        window.addEventListener('error', function(event) {
+            console.error('Errore JavaScript:', event.error);
+            showErrorAlert('Errore JavaScript: ' + (event.error?.message || 'Errore sconosciuto'));
+        });
+    </script>
+    <script>
         // Verifica ruolo utente e mostra/nascondi pulsanti appropriati
         window.addEventListener('DOMContentLoaded', async () => {
             try {

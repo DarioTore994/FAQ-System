@@ -200,7 +200,12 @@
     </footer>
 
     <script src="/js/error-alert.js"></script>
-    <script>
+    <script src="/js/error-alert.js"></script>
+  <script>
+        window.addEventListener('error', function(event) {
+            console.error('Errore JavaScript:', event.error);
+            showErrorAlert('Errore JavaScript: ' + (event.error?.message || 'Errore sconosciuto'));
+        });
 
         // La gestione delle categorie è stata spostata nella pagina dedicata
 
