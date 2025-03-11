@@ -31,7 +31,8 @@ async function initDatabase() {
         resolution TEXT NOT NULL,
         status VARCHAR(50) DEFAULT 'Nuovo',
         created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMP
+        updated_at TIMESTAMP,
+        user_id INTEGER NULL
       );
     `);
 

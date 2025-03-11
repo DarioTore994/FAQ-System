@@ -79,16 +79,16 @@ router.get('/faqs', async (req, res) => {
 // Endpoint per salvare una nuova FAQ
 router.post('/faqs', async (req, res) => {
   try {
-    const { category, title, description, resolution, status } = req.body;
+    const { category, title, description, resolution, status, user_id } = req.body; // Added user_id
 
-    if (!category || !title || !description || !resolution) {
+    if (!category || !title || !description || !resolution || !user_id) { // Added user_id validation
       return res.status(400).json({ error: { message: 'Tutti i campi sono obbligatori' } });
     }
 
-    // Inserisci la nuova FAQ nel database senza user_id
+    // Inserisci la nuova FAQ nel database con user_id
     const result = await pool.query(
-      'INSERT INTO faqs (category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [category, title, description, resolution, status || 'Nuovo']
+      'INSERT INTO faqs (user_id, category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', // Added user_id to query
+      [user_id, category, title, description, resolution, status || 'Nuovo'] // Added user_id to values
     );
 
     res.json({ success: true, data: result.rows[0] });
@@ -126,6 +126,7 @@ router.post('/init-db', async (req, res) => {
 
       CREATE TABLE IF NOT EXISTS faqs (
         id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,  -- Added user_id column
         category VARCHAR(100) NOT NULL,
         title VARCHAR(255) NOT NULL,
         description TEXT NOT NULL,
