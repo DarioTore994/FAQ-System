@@ -286,12 +286,27 @@
                 document.getElementById('faqForm').addEventListener('submit', async (e) => {
                     e.preventDefault();
                     console.log('Salvataggio in corso...');
-                    let isSubmitting = true;
+                    
+                    // Gestione stato pulsante di invio
                     const submitButton = e.target.querySelector('.submit-btn');
                     const originalButtonText = submitButton.innerHTML;
-                    submitButton.innerHTML = 'Salvataggio...';
-                    submitButton.disabled = true;
-
+                    
+                    // Funzione per aggiornare lo stato del pulsante
+                    const updateButtonState = (isLoading, text) => {
+                        submitButton.disabled = isLoading;
+                        submitButton.innerHTML = text || originalButtonText;
+                        submitButton.classList.toggle('opacity-50', isLoading);
+                        submitButton.classList.toggle('cursor-not-allowed', isLoading);
+                    };
+                    
+                    // Imposta pulsante in stato di caricamento
+                    updateButtonState(true, `
+                        <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-primary-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Salvataggio...
+                    `);
 
                     try {
                         const formData = new FormData(e.target);
@@ -303,25 +318,24 @@
                         };
 
                         console.log('Sending FAQ data:', faqData);
+                        
+                        // Mostro messaggio di stato
+                        showErrorAlert('Verifica tabella in corso...', 'info');
 
-                        console.log('Verifica tabella in corso...');
-
-                        // Prima di inviare la FAQ, verifichiamo lo stato della tabella
-                        const initDbResponse = awaitit fetch('/api/init-db', {
+                        // Verifica struttura tabella prima di salvare
+                        const initDbResponse = await fetch('/api/init-db', {
                             method: 'POST'
                         });
 
                         if (!initDbResponse.ok) {
                             const errorData = await initDbResponse.json();
                             console.error('Errore inizializzazione database:', errorData);
-                            throw new Error('Errore inizializzazione database: ' + (errorData.message || 'Errore sconosciuto'));
+                            throw new Error('Errore database: ' + (errorData.message || 'Errore sconosciuto'));
                         }
 
-                        console.log('Database reinizializzato con successo');
-
-                        // Ora possiamo procedere con il salvataggio della FAQ
-                        console.log('Salvataggio FAQ in corso...');
-
+                        console.log('Tabella verificata');
+                        showErrorAlert('Salvataggio FAQ in corso...', 'info');
+                        
                         // Salvataggio della FAQ
                         const response = await fetch('/api/faqs', {
                             method: 'POST',
@@ -332,38 +346,54 @@
                             credentials: 'include'
                         });
 
-                        console.log('Salvataggio FAQ in corso...');
-
-                        // Verifica risposta
+                        // Gestione errori più specifica
                         if (!response.ok) {
-                            // Verifica se la risposta è in formato JSON
                             const contentType = response.headers.get('content-type');
+                            
                             if (contentType && contentType.includes('application/json')) {
                                 const errorData = await response.json();
                                 console.log('Risposta grezza del server:', JSON.stringify(errorData));
-
-                                // Controlla specificamente per errori di colonna user_id
-                                if (errorData.error?.details && errorData.error.details.includes('user_id')) {
-                                    throw new Error('Errore di autenticazione: sessione scaduta o utente non valido. Rieffettua il login.');
+                                
+                                // Controlli specifici per vari tipi di errori
+                                if (errorData.error?.details && (
+                                    errorData.error.details.includes('user_id') || 
+                                    errorData.error.details.includes('does not exist')
+                                )) {
+                                    // Resetto il pulsante e mostro un errore chiaro
+                                    updateButtonState(false);
+                                    showErrorAlert('Errore database strutturale. Riprova tra qualche istante.', 'error');
+                                    
+                                    // Attendi un po' e ricarica la pagina per forzare reinizializzazione
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 3000);
+                                    return;
                                 }
 
-                                const errorMsg = errorData.error?.message || 'Errore sconosciuto';
-                                throw new Error(errorMsg);
+                                throw new Error(errorData.error?.message || 'Errore sconosciuto');
                             } else {
-                                // Se non è JSON (probabilmente HTML di un errore), gestisci diversamente
+                                // Se non è JSON, gestisci errori HTTP
                                 if (response.status === 401 || response.status === 403) {
-                                    throw new Error('Errore di autenticazione: sessione scaduta o utente non valido. Rieffettua il login.');
+                                    throw new Error('Sessione scaduta. Effettua nuovamente il login.');
                                 } else {
-                                    throw new Error(`Errore del server (${response.status}): Impossibile elaborare la richiesta`);
+                                    throw new Error(`Errore del server (${response.status}): Riprova più tardi`);
                                 }
                             }
                         }
 
-                        // Analizza la risposta solo se il server ha risposto con successo
+                        // Successo!
                         const data = await response.json();
                         console.log('Risposta grezza del server:', JSON.stringify(data));
-
-                        showErrorAlert('FAQ salvata con successo!');
+                        
+                        // Aggiorna UI per successo
+                        updateButtonState(true, `
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Salvato!
+                        `);
+                        
+                        showErrorAlert('FAQ salvata con successo!', 'success');
                         e.target.reset();
 
                         // Redirigi alla dashboard dopo un breve ritardo
@@ -373,19 +403,29 @@
                     } catch (error) {
                         console.error('Errore nel salvataggio della FAQ:', error.message);
 
-                        // Se è un errore di sessione, reindirizza alla pagina di login
-                        if (error.message.includes('sessione scaduta') || error.message.includes('autenticazione')) {
-                            showErrorAlert('Sessione scaduta. Reindirizzamento alla pagina di login...');
+                        // Gestione specifici messaggi di errore
+                        if (error.message.includes('sessione scaduta') || 
+                            error.message.includes('login') || 
+                            error.message.includes('autenticazione')) {
+                            
+                            showErrorAlert('Sessione scaduta. Reindirizzamento alla pagina di login...', 'error');
+                            
+                            // Aggiorna pulsante per indicare reindirizzamento
+                            updateButtonState(true, `
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                Reindirizzamento...
+                            `);
+                            
                             setTimeout(() => {
                                 window.location.href = '/auth';
                             }, 2000);
                         } else {
-                            showErrorAlert('Errore nel salvataggio della FAQ: ' + error.message);
+                            // Errore generico
+                            showErrorAlert('Errore nel salvataggio della FAQ: ' + error.message, 'error');
+                            updateButtonState(false);
                         }
-
-                        isSubmitting = false;
-                        submitButton.innerHTML = originalButtonText;
-                        submitButton.disabled = false;
                     }
                 });
             } catch (error) {
