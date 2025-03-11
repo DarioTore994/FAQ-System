@@ -183,8 +183,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Form handling for FAQ creation
   const faqForm = document.getElementById('faqForm');
   if (faqForm) {
+    // Flag per prevenire invii multipli
+    window.isSavingFaq = false;
+    
     faqForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      // Prevengo l'invio multiplo
+      if (window.isSavingFaq) {
+        console.log('Prevenzione invio duplicato: richiesta già in corso');
+        return;
+      }
+      window.isSavingFaq = true;
 
       // Visualizza messaggio di caricamento
       showErrorAlert('Salvataggio in corso...');
@@ -291,9 +301,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Redirect to home after successful creation
         setTimeout(() => {
+          window.isSavingFaq = false; // Reset del flag dopo completamento
           window.location.href = '/dashboard';
         }, 1500);
       } catch (error) {
+        window.isSavingFaq = false; // Reset del flag in caso di errore
         console.error('Error saving FAQ:', error);
         showErrorAlert('Errore nel salvataggio della FAQ: ' + error.message);
       }

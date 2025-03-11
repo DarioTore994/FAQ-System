@@ -400,10 +400,12 @@
 
                         // Redirigi alla dashboard dopo un breve ritardo
                         setTimeout(() => {
+                            window.isSavingFaq = false; // Resetto il flag dopo il completamento
                             window.location.href = '/dashboard';
                         }, 1500);
                     } catch (error) {
                         console.error('Errore nel salvataggio della FAQ:', error.message);
+                        window.isSavingFaq = false; // Resetto il flag in caso di errore
 
                         // Gestione specifici messaggi di errore
                         if (error.message.includes('sessione scaduta') || 
