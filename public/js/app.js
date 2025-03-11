@@ -4,7 +4,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initialize Supabase client
   const supabaseUrl = 'https://ejlyrwotgkrjeunosrzo.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqbHlyd290Z2tyamV1bm9zcnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE2ODQxOTYsImV4cCI6MjA1NzI2MDE5Nn0.xmfOVAMsH5QqzjKmkLriEshZalP0Xj8xf_N_wpWE_40';
-  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  // Accediamo alla variabile globale resa disponibile dalla libreria Supabase
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
   // Initialize with appropriate API endpoints
   const loadFAQs = async (selectedCategory = "all") => {
@@ -112,4 +113,38 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Load FAQs
   loadFAQs();
+  
+  // Form handling for FAQ creation
+  const faqForm = document.getElementById('faqForm');
+  if (faqForm) {
+    faqForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(faqForm);
+      const faqData = {
+        category: formData.get('category'),
+        title: formData.get('title'),
+        description: formData.get('description'),
+        resolution: formData.get('resolution'),
+      };
+      
+      try {
+        const response = await fetch('/api/faqs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(faqData),
+        });
+        
+        if (!response.ok) throw new Error('Errore durante il salvataggio');
+        
+        // Redirect to home after successful creation
+        window.location.href = '/';
+      } catch (error) {
+        console.error('Error saving FAQ:', error);
+        showErrorAlert('Errore nel salvataggio della FAQ');
+      }
+    });
+  }
 });

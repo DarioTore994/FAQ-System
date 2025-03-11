@@ -1,14 +1,45 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="it">
-    <head>
-        <!-- Stessi asset di index.html -->
-    </head>
-    <body class="flex items-center justify-center min-h-screen">
-        <div class="auth-form animate-fade-in">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ Portal - Accesso</title>
+    <link href="/css/main.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-black': '#0a0a0a',
+                        'accent-yellow': '#FFD700',
+                        'dark-gray': '#1a1a1a',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-primary-black text-gray-100 min-h-screen">
+    <header class="bg-dark-gray py-4 px-6 border-b border-gray-800">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
+            <nav>
+                <a href="/" class="text-gray-300 hover:text-accent-yellow flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Torna alla Home
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto flex items-center justify-center py-16">
+        <div class="bg-dark-gray p-8 rounded-2xl border border-gray-800 max-w-md w-full mx-auto space-y-6 animate-fade-in">
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-accent-yellow mb-2">
-                    TechFAQ
-                </h1>
+                <h1 class="text-3xl font-bold text-accent-yellow mb-2">FAQ Portal</h1>
                 <p class="text-gray-400">Gestione problemi tecnici</p>
             </div>
 
@@ -29,43 +60,85 @@
 
             <form id="signup-form" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1">Email</label>
+                    <label class="block text-sm font-medium mb-1 text-accent-yellow">Email</label>
                     <input
                         type="email"
                         required
-                        class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                        class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
                     />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1"
-                        >Password</label
-                    >
+                    <label class="block text-sm font-medium mb-1 text-accent-yellow">Password</label>
                     <input
                         type="password"
                         required
-                        class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                        class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
                     />
                 </div>
-                <button type="submit" class="w-full toggle-btn justify-center">
-                    <icon name="user-plus" class="w-5 h-5"></icon>
+                <button type="submit" class="w-full bg-accent-yellow text-primary-black py-3 rounded-lg font-bold hover:bg-yellow-300 transition-colors flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
                     Crea Account
                 </button>
             </form>
 
             <form id="signin-form" class="space-y-4 hidden">
-                <!-- Struttura simile al signup form -->
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-accent-yellow">Email</label>
+                    <input
+                        type="email"
+                        required
+                        class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-accent-yellow">Password</label>
+                    <input
+                        type="password"
+                        required
+                        class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                    />
+                </div>
+                <button type="submit" class="w-full bg-accent-yellow text-primary-black py-3 rounded-lg font-bold hover:bg-yellow-300 transition-colors flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    Accedi
+                </button>
             </form>
-
-            <div class="text-center mt-6">
-                <a
-                    href="/"
-                    class="text-accent-yellow hover:text-yellow-300 flex items-center justify-center gap-2"
-                >
-                    <icon name="arrow-left" class="w-4 h-4"></icon>
-                    Torna alla Home
-                </a>
-            </div>
         </div>
-    </body>
+    </main>
+
+    <footer class="bg-dark-gray py-6 px-4 mt-12 border-t border-gray-800">
+        <div class="container mx-auto text-center text-gray-500">
+            <p>© 2024 FAQ Portal - Tutti i diritti riservati</p>
+        </div>
+    </footer>
+
+    <!-- Load Supabase client first -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/error-alert.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Update button styles
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('bg-accent-yellow', 'text-primary-black');
+                    btn.classList.add('border', 'border-gray-700');
+                });
+                
+                button.classList.add('bg-accent-yellow', 'text-primary-black');
+                button.classList.remove('border', 'border-gray-700');
+                
+                // Show corresponding form
+                const tabId = button.getAttribute('data-tab');
+                document.querySelectorAll('form').forEach(form => form.classList.add('hidden'));
+                document.getElementById(tabId + '-form').classList.remove('hidden');
+            });
+        });
+    </script>
+</body>
 </html>
-<script type="module" src="/js/app.js"></script>
