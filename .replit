@@ -25,10 +25,18 @@ localPort = 3001
 externalPort = 3001
 
 [workflows]
-runButton = "Run"
+runButton = "Start"
 
 [[workflows.workflow]]
 name = "Run"
+author = 40285853
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node index.js"
+
+[[workflows.workflow]]
+name = "Start"
 author = 40285853
 
 [[workflows.workflow.tasks]]
