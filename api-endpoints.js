@@ -332,7 +332,7 @@ router.post('/faqs', verificaAutenticazione, async (req, res) => {
 
     // Inserisci la nuova FAQ nel database con user_id se disponibile
     const query = 'INSERT INTO faqs (user_id, category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
-    const params = [userId || null, category, title, description, resolution, status || 'Nuovo'];
+    const params = [userId || null, category, title, description, resolution, status];
 
     const result = await pool.query(query, params);
 
