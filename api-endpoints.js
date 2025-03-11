@@ -335,6 +335,70 @@ router.post('/faqs', verificaAutenticazione, async (req, res) => {
   }
 });
 
+// Endpoint per aggiornare una FAQ esistente
+router.put('/faqs/:id', verificaAutenticazione, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { category, title, description, resolution, status } = req.body;
+    const userId = req.user ? req.user.id : null;
+
+    if (!category || !title || !description || !resolution) {
+      return res.status(400).json({ error: { message: 'Tutti i campi sono obbligatori' } });
+    }
+
+    // Verifica che la FAQ esista
+    const faqCheck = await pool.query('SELECT * FROM faqs WHERE id = $1', [id]);
+    if (faqCheck.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'FAQ non trovata' } });
+    }
+
+    // Verifica che la categoria esista
+    let categoryExists = false;
+    try {
+      const categoryCheck = await pool.query('SELECT id FROM categories WHERE name = $1', [category]);
+      categoryExists = categoryCheck.rows.length > 0;
+    } catch (categoryError) {
+      console.warn('Errore verifica categoria:', categoryError);
+    }
+
+    // Se la categoria non esiste, la crea automaticamente
+    if (!categoryExists) {
+      try {
+        await pool.query('INSERT INTO categories (name) VALUES ($1) ON CONFLICT DO NOTHING', [category]);
+        console.log('Categoria creata automaticamente:', category);
+      } catch (createCategoryError) {
+        console.warn('Errore creazione categoria:', createCategoryError);
+      }
+    }
+
+    // Aggiorna la FAQ nel database
+    const query = `
+      UPDATE faqs 
+      SET category = $1, 
+          title = $2, 
+          description = $3, 
+          resolution = $4, 
+          status = $5,
+          updated_at = NOW()
+      WHERE id = $6 
+      RETURNING *
+    `;
+    const params = [category, title, description, resolution, status || 'Nuovo', id];
+
+    const result = await pool.query(query, params);
+    
+    res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('Errore aggiornamento FAQ:', error);
+    return res.status(500).json({ 
+      error: { 
+        message: 'Errore interno del server',
+        details: error.message
+      } 
+    });
+  }
+});
+
 // Inizializzazione database (crea tabelle se non esistono)
 router.post('/init-db', async (req, res) => {
   try {
