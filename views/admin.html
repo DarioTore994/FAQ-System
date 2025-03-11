@@ -77,6 +77,24 @@
         <h1 class="text-3xl font-bold mb-8 text-center text-accent-yellow">Pannello di Amministrazione</h1>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        
+        <script>
+            // Gestione logout
+            document.getElementById('logoutBtn').addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/auth/logout', {
+                        method: 'POST'
+                    });
+                    
+                    if (response.ok) {
+                        window.location.href = '/';
+                    }
+                } catch (error) {
+                    console.error('Errore durante il logout:', error);
+                    alert('Errore durante il logout');
+                }
+            });
+        </script>
             <div class="bg-dark-gray p-6 rounded-lg shadow-md">
                 <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Gestione FAQ</h2>
                 <p class="text-gray-300 mb-4">Aggiungi, modifica o elimina le FAQ del portale.</p>

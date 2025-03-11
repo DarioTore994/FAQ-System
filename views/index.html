@@ -213,20 +213,23 @@
         });
 
         // Gestione logout
-        document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-            try {
-                const response = await fetch('/api/auth/logout', {
-                    method: 'POST'
-                });
-                
-                if (response.ok) {
-                    window.location.href = '/';
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/auth/logout', {
+                        method: 'POST'
+                    });
+                    
+                    if (response.ok) {
+                        window.location.href = '/';
+                    }
+                } catch (error) {
+                    console.error('Errore durante il logout:', error);
+                    showErrorAlert('Errore durante il logout');
                 }
-            } catch (error) {
-                console.error('Errore durante il logout:', error);
-                showErrorAlert('Errore durante il logout');
-            }
-        });
+            });
+        }
     </script>
 </body>
 </html>
