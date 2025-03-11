@@ -137,7 +137,7 @@
         </div>
 
         <!-- Modal per modifica ruolo -->
-        <div id="editRoleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div id="editRoleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" style="display: none;">
             <div class="bg-dark-gray p-6 rounded-lg shadow-lg w-full max-w-md">
                 <h3 class="text-xl font-semibold mb-4 text-accent-yellow">Modifica Ruolo Utente</h3>
                 <p id="modalUserEmail" class="mb-4 text-gray-300"></p>
@@ -300,12 +300,16 @@
             document.getElementById('modalUserEmail').textContent = `Utente: ${userEmail}`;
             document.getElementById('editUserRole').value = userRole;
 
-            document.getElementById('editRoleModal').classList.remove('hidden');
+            const modal = document.getElementById('editRoleModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
         }
 
         // Chiudi il modal
         document.getElementById('cancelEditBtn').addEventListener('click', () => {
-            document.getElementById('editRoleModal').classList.add('hidden');
+            const modal = document.getElementById('editRoleModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
         });
 
         // Gestione del submit per la modifica del ruolo
@@ -349,7 +353,9 @@
                 const data = await response.json();
 
                 // Chiudi modal e ricarica utenti
-                document.getElementById('editRoleModal').classList.add('hidden');
+                const modal = document.getElementById('editRoleModal');
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
 
                 // Conferma l'azione all'utente
                 showErrorAlert('Ruolo aggiornato con successo!');

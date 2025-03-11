@@ -156,7 +156,7 @@
         </div>
 
         <!-- Modal per modifica categoria -->
-        <div id="editCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div id="editCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" style="display: none;">
             <div class="bg-dark-gray p-6 rounded-lg shadow-lg w-full max-w-md">
                 <h3 class="text-xl font-semibold mb-4 text-accent-yellow">Modifica Categoria</h3>
 
@@ -321,12 +321,16 @@
             document.getElementById('editCategoryId').value = categoryId;
             document.getElementById('editCategoryName').value = categoryName;
 
-            document.getElementById('editCategoryModal').classList.remove('hidden');
+            const modal = document.getElementById('editCategoryModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
         }
 
         // Chiudi il modal
         document.getElementById('cancelEditBtn').addEventListener('click', () => {
-            document.getElementById('editCategoryModal').classList.add('hidden');
+            const modal = document.getElementById('editCategoryModal');
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
         });
 
         // Gestione del form per aggiungere categorie
@@ -391,7 +395,9 @@
                     throw new Error(errorMessage);
                 }
 
-                document.getElementById('editCategoryModal').classList.add('hidden');
+                const modal = document.getElementById('editCategoryModal');
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
                 showErrorAlert('Categoria aggiornata con successo!');
                 loadCategories();
             } catch (error) {
