@@ -83,15 +83,6 @@
                 </button>
             </nav>
         </div>
-        <!-- Pulsante Crea FAQ posizionato sotto il tasto Logout -->
-        <div class="flex justify-end mt-2 px-6">
-            <a href="/create" id="createFaqBtn" class="btn btn-primary flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                <span>Crea FAQ</span>
-            </a>
-        </div>
     </header>
 
     <main class="container mx-auto py-8 px-4 flex-grow">
@@ -101,7 +92,13 @@
                 <p class="text-gray-400 mt-1 md:mt-0 md:ml-2">Ultime FAQ disponibili</p>
             </div>
             <div>
-                <!-- Il bottone Crea FAQ è stato spostato nella nav bar a destra sotto il logout -->
+                <!-- Pulsante Crea FAQ spostato nel main con allineamento a destra -->
+                <a href="/create" id="createFaqBtn" class="btn btn-primary flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Crea FAQ</span>
+                </a>
             </div>
             <div class="relative flex items-center w-full md:w-auto">
                 <div class="relative w-full">
