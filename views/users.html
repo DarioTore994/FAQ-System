@@ -60,28 +60,42 @@
 </style>
 </head>
 <body class="bg-primary-black text-gray-100">
-    <header class="bg-dark-gray py-4 px-6 border-b border-gray-800">
+    <header class="py-4 px-6 border-b sticky top-0 z-10">
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-accent-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
+                <a href="/" class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-yellow mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
+                </a>
             </div>
-            <nav class="flex space-x-4 items-center">
-                <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
-                <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
+            <nav class="flex items-center gap-4">
+                <!-- Menu principale -->
+                <div class="flex items-center gap-4">
+                    <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
+                    <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
+                </div>
+                
+                <!-- Menu per utenti autenticati -->
+                <div id="authUserMenu" class="flex items-center gap-4">
+                    <a href="/create" id="createFaqBtn" class="text-gray-300 hover:text-accent-yellow">
+                        <span>Crea FAQ</span>
+                    </a>
+                </div>
+                
+                <!-- Menu solo per admin -->
                 <div id="adminMenu" class="flex items-center gap-4">
                     <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow">Admin</a>
-                    <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow">Utenti</a>
+                    <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow border-b-2 border-accent-yellow pb-1">Utenti</a>
                     <a href="/categories" id="categoriesLink" class="text-gray-300 hover:text-accent-yellow">Categorie</a>
-                    <a href="/create" id="createFaqLink" class="text-gray-300 hover:text-accent-yellow">Crea FAQ</a>
                 </div>
+                
                 <button id="logoutBtn" class="btn btn-secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
-                    Logout
+                    <span class="hidden sm:inline">Logout</span>
                 </button>
             </nav>
         </div>
@@ -170,17 +184,31 @@
                 const data = await response.json();
                 console.log('Risultato autenticazione:', data);
 
+                // Riferimenti ai menu
+                const authUserMenu = document.getElementById('authUserMenu');
+                const adminMenu = document.getElementById('adminMenu');
+
+                // Nascondi di default i menu per utenti autenticati e admin
+                if (authUserMenu) authUserMenu.classList.add('hidden');
+                if (adminMenu) adminMenu.classList.add('hidden');
+
                 if (!data.authenticated) {
                     console.log('Utente non autenticato, redirezione a /auth');
                     window.location.href = '/auth';
                     return;
                 }
 
+                // Utente autenticato
+                if (authUserMenu) authUserMenu.classList.remove('hidden');
+
                 if (data.user.role !== 'admin') {
                     console.log('Utente non admin, redirezione a /dashboard');
                     window.location.href = '/dashboard';
                     return;
                 }
+
+                // Menu admin visibile solo per amministratori
+                if (adminMenu) adminMenu.classList.remove('hidden');
 
                 console.log('Utente autenticato come admin, caricamento utenti...');
                 // Carica la lista utenti

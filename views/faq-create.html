@@ -136,11 +136,13 @@
                 <!-- Menu principale -->
                 <div class="flex items-center gap-4">
                     <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
-                    <a href="/dashboard" class="flex items-center text-gray-300 hover:text-accent-yellow">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7m-7-7v14" />
-                        </svg>
-                        Dashboard
+                    <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
+                </div>
+                
+                <!-- Menu per utenti autenticati -->
+                <div id="authUserMenu" class="flex items-center gap-4">
+                    <a href="/create" id="createFaqBtn" class="text-gray-300 hover:text-accent-yellow border-b-2 border-accent-yellow pb-1">
+                        <span>Crea FAQ</span>
                     </a>
                 </div>
                 
