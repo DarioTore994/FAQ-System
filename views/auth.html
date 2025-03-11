@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAQ Portal - Accesso</title>
+    <title>FAQ Portal - Autenticazione</title>
     <link href="/css/main.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -20,71 +21,64 @@
         }
     </script>
 </head>
-<body class="bg-primary-black text-gray-100 min-h-screen">
+<body class="bg-primary-black text-gray-100 min-h-screen flex flex-col">
     <header class="bg-dark-gray py-4 px-6 border-b border-gray-800">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
-            <nav>
-                <a href="/" class="text-gray-300 hover:text-accent-yellow flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    Torna alla Home
-                </a>
-            </nav>
+            <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
         </div>
     </header>
 
-    <main class="container mx-auto flex items-center justify-center py-16">
-        <div class="bg-dark-gray p-8 rounded-2xl border border-gray-800 max-w-md w-full mx-auto space-y-6 animate-fade-in">
+    <main class="container mx-auto py-12 px-4 flex-grow flex flex-col items-center justify-center">
+        <div class="bg-dark-gray border border-gray-700 rounded-lg p-8 w-full max-w-md">
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-accent-yellow mb-2">FAQ Portal</h1>
-                <p class="text-gray-400">Gestione problemi tecnici</p>
+                <h2 class="text-2xl font-bold text-accent-yellow">Accedi al portale</h2>
+                <p class="text-gray-400 mt-2">Gestisci la tua knowledge base</p>
             </div>
 
             <div class="tabs flex gap-4 justify-center mb-8">
                 <button
-                    data-tab="signup"
+                    data-tab="signin"
                     class="tab-btn active px-4 py-2 rounded-full bg-accent-yellow text-primary-black"
+                >
+                    Accedi
+                </button>
+                <button
+                    data-tab="signup"
+                    class="tab-btn px-4 py-2 rounded-full border border-gray-700 hover:border-accent-yellow"
                 >
                     Registrati
                 </button>
+            </div>
+
+            <form id="signin-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-accent-yellow">Email</label>
+                    <input
+                        type="email"
+                        name="email"
+                        required
+                        class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-accent-yellow">Password</label>
+                    <input
+                        type="password"
+                        name="password"
+                        required
+                        class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                    />
+                </div>
                 <button
-                    data-tab="signin"
-                    class="tab-btn px-4 py-2 rounded-full border border-gray-700 hover:border-accent-yellow"
+                    type="submit"
+                    class="w-full bg-accent-yellow text-primary-black py-3 rounded-lg font-bold hover:bg-yellow-300 transition-colors"
                 >
                     Accedi
                 </button>
-            </div>
-
-            <form id="signup-form" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1 text-accent-yellow">Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        required
-                        class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
-                    />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1 text-accent-yellow">Password</label>
-                    <input
-                        type="password"
-                        name="password"
-                        required
-                        class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
-                    />
-                </div>
-                <button type="submit" class="w-full bg-accent-yellow text-primary-black py-3 rounded-lg font-bold hover:bg-yellow-300 transition-colors flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                    </svg>
-                    Crea Account
-                </button>
             </form>
 
-            <form id="signin-form" class="space-y-4 hidden">
+            <form id="signup-form" class="space-y-4 hidden">
                 <div>
                     <label class="block text-sm font-medium mb-1 text-accent-yellow">Email</label>
                     <input
@@ -103,11 +97,11 @@
                         class="w-full bg-dark-gray border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
                     />
                 </div>
-                <button type="submit" class="w-full bg-accent-yellow text-primary-black py-3 rounded-lg font-bold hover:bg-yellow-300 transition-colors flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                    </svg>
-                    Accedi
+                <button
+                    type="submit"
+                    class="w-full bg-accent-yellow text-primary-black py-3 rounded-lg font-bold hover:bg-yellow-300 transition-colors"
+                >
+                    Registrati
                 </button>
             </form>
         </div>
@@ -119,8 +113,6 @@
         </div>
     </footer>
 
-    <!-- Load Supabase client first -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/error-alert.js"></script>
     <script>
         // Tab switching functionality
@@ -142,90 +134,80 @@
             });
         });
 
-        // Initialize Supabase client
-        const supabaseUrl = 'https://ejlyrwotgkrjeunosrzo.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqbHlyd290Z2tyamV1bm9zcnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE2ODQxOTYsImV4cCI6MjA1NzI2MDE5Nn0.xmfOVAMsH5QqzjKmkLriEshZalP0Xj8xf_N_wpWE_40';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-        // Gestione signup
-        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+        // Gestione login
+        document.getElementById('signin-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData(e.target);
-            const email = formData.get('email');
-            const password = formData.get('password');
-
+            
             try {
-                const { data, error } = await supabase.auth.signUp({
-                    email,
-                    password,
+                const formData = new FormData(e.target);
+                const email = formData.get('email');
+                const password = formData.get('password');
+                
+                if (!email || !password) {
+                    showErrorAlert('Inserisci email e password');
+                    return;
+                }
+                
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
                 });
 
-                if (error) throw error;
+                const data = await response.json();
 
-                // Inviare il token al backend
-                const session = data.session;
-                const tokenToSend = session?.access_token || '';
-
-                if (!tokenToSend) {
-                    // Se l'utente si è registrato correttamente ma non ha ancora confermato l'email
-                    // mostriamo un messaggio appropriato
-                    showErrorAlert('Registrazione effettuata! Controlla la tua email per confermare l\'account prima di accedere.');
+                if (!response.ok) {
+                    showErrorAlert(data.error || 'Errore di accesso');
                     return;
                 }
 
-                await fetch('/api/auth/login', {
+                // Reindirizza alla dashboard in caso di successo
+                window.location.href = '/dashboard';
+            } catch (error) {
+                console.error('Errore durante l\'accesso:', error);
+                showErrorAlert('Errore durante l\'accesso: ' + error.message);
+            }
+        });
+        
+        // Gestione registrazione
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const formData = new FormData(e.target);
+                const email = formData.get('email');
+                const password = formData.get('password');
+                
+                if (!email || !password) {
+                    showErrorAlert('Inserisci email e password');
+                    return;
+                }
+                
+                const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ token: tokenToSend }),
+                    body: JSON.stringify({ email, password, role: 'user' }),
                 });
 
-                // Redirect alla dashboard
-                window.location.href = '/dashboard';
+                const data = await response.json();
 
+                if (!response.ok) {
+                    showErrorAlert(data.error || 'Errore di registrazione');
+                    return;
+                }
+
+                // Mostra messaggio di successo e reindirizza
+                showErrorAlert('Registrazione completata con successo!');
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1500);
             } catch (error) {
                 console.error('Errore durante la registrazione:', error);
                 showErrorAlert('Errore durante la registrazione: ' + error.message);
-            }
-        });
-
-        // Gestione signin
-        document.getElementById('signin-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const email = formData.get('email');
-            const password = formData.get('password');
-
-            try {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email,
-                    password,
-                });
-
-                if (error) throw error;
-
-                // Inviare il token al backend
-                const tokenToSend = data.session?.access_token || data?.access_token || '';
-
-                if (!tokenToSend) {
-                    throw new Error('Token non disponibile');
-                }
-
-                await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ token: tokenToSend }),
-                });
-
-                // Redirect alla dashboard
-                window.location.href = '/dashboard';
-
-            } catch (error) {
-                console.error('Errore durante il login:', error);
-                showErrorAlert('Errore durante il login: ' + error.message);
             }
         });
     </script>

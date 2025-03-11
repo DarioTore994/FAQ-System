@@ -1,6 +1,28 @@
 // Client-side JavaScript
 document.addEventListener("DOMContentLoaded", async () => {
-  // Non è più necessario inizializzare Supabase client poiché ora usiamo PostgreSQL
+  // Verifica ruolo utente
+  let userRole = 'guest';
+  
+  try {
+    const authResponse = await fetch('/api/auth/check');
+    const authData = await authResponse.json();
+    
+    if (authData.authenticated) {
+      userRole = authData.user.role;
+      
+      // Se è un admin, mostra pulsante admin nella navbar
+      const headerNav = document.getElementById('headerNav');
+      if (headerNav && userRole === 'admin') {
+        const createBtn = document.createElement('a');
+        createBtn.href = '/admin';
+        createBtn.className = 'bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors mr-2';
+        createBtn.textContent = 'Admin';
+        headerNav.prepend(createBtn);
+      }
+    }
+  } catch (error) {
+    console.error('Errore verifica autenticazione:', error);
+  }
 
   // Initialize with appropriate API endpoints
   const loadFAQs = async (selectedCategory = "all") => {

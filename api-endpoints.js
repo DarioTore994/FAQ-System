@@ -14,20 +14,38 @@ router.post('/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Questa è una versione semplificata dell'autenticazione.
-    // In un'applicazione reale, dovresti verificare le credenziali nel database
-    // e utilizzare metodi sicuri come bcrypt per le password.
-    if (email && password) {
-      // Simula una sessione con un token semplice
-      const token = Buffer.from(email).toString('base64');
-      return res.status(200).json({ 
-        session: {
-          access_token: token
-        }
-      });
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email e password sono obbligatori' });
     }
 
-    return res.status(400).json({ error: 'Credenziali non valide' });
+    // Verifica credenziali nel database
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT id, email, role FROM users WHERE email = $1 AND password = $2', 
+        [email, password]);
+      
+      if (result.rows.length === 0) {
+        return res.status(401).json({ error: 'Credenziali non valide' });
+      }
+      
+      const user = result.rows[0];
+      
+      // Usa l'ID utente come token (semplificato, in produzione usa JWT)
+      const token = user.id.toString();
+      
+      return res.status(200).json({ 
+        session: {
+          access_token: token,
+          user: {
+            id: user.id,
+            email: user.email,
+            role: user.role
+          }
+        }
+      });
+    } finally {
+      client.release();
+    }
   } catch (err) {
     console.error('Errore API:', err);
     return res.status(500).json({ error: 'Errore del server' });

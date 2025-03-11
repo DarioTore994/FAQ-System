@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ Portal - Admin</title>
+    <link href="/css/main.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-black': '#0a0a0a',
+                        'accent-yellow': '#FFD700',
+                        'dark-gray': '#1a1a1a',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-primary-black text-gray-100">
+    <header class="bg-dark-gray py-4 px-6 border-b border-gray-800">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
+            <nav class="flex space-x-4 items-center">
+                <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
+                <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
+                <a href="/create" class="text-gray-300 hover:text-accent-yellow">Crea FAQ</a>
+                <a href="/users" class="text-gray-300 hover:text-accent-yellow">Utenti</a>
+                <button id="logoutBtn" class="text-gray-300 hover:text-accent-yellow">Logout</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <h1 class="text-3xl font-bold mb-8 text-center text-accent-yellow">Pannello di Amministrazione</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <div class="bg-dark-gray p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Gestione FAQ</h2>
+                <p class="text-gray-300 mb-4">Aggiungi, modifica o elimina le FAQ del portale.</p>
+                <a href="/create" class="inline-block bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">
+                    Crea nuova FAQ
+                </a>
+            </div>
+            
+            <div class="bg-dark-gray p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Gestione Utenti</h2>
+                <p class="text-gray-300 mb-4">Visualizza e gestisci gli utenti registrati nel portale.</p>
+                <a href="/users" class="inline-block bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">
+                    Gestisci utenti
+                </a>
+            </div>
+        </div>
+        
+        <div class="bg-dark-gray p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Crea nuovo utente</h2>
+            <form id="createUserForm" class="space-y-4">
+                <div>
+                    <label class="block mb-2 text-accent-yellow">Email</label>
+                    <input
+                        type="email"
+                        name="email"
+                        required
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                    />
+                </div>
+                <div>
+                    <label class="block mb-2 text-accent-yellow">Password</label>
+                    <input
+                        type="password"
+                        name="password"
+                        required
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                    />
+                </div>
+                <div>
+                    <label class="block mb-2 text-accent-yellow">Ruolo</label>
+                    <select
+                        name="role"
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                    >
+                        <option value="user">Utente</option>
+                        <option value="admin">Amministratore</option>
+                    </select>
+                </div>
+                <button
+                    type="submit"
+                    class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors"
+                >
+                    Crea utente
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="bg-dark-gray py-6 px-4 mt-12 border-t border-gray-800">
+        <div class="container mx-auto text-center text-gray-500">
+            <p>© 2024 FAQ Portal - Tutti i diritti riservati</p>
+        </div>
+    </footer>
+
+    <script src="/js/error-alert.js"></script>
+    <script>
+        // Verifica che l'utente sia autenticato e sia admin
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/auth/check');
+                const data = await response.json();
+                
+                if (!data.authenticated) {
+                    window.location.href = '/auth';
+                    return;
+                }
+                
+                if (data.user.role !== 'admin') {
+                    window.location.href = '/dashboard';
+                    return;
+                }
+            } catch (error) {
+                console.error('Errore verifica autenticazione:', error);
+                showErrorAlert('Errore verifica autenticazione');
+            }
+        });
+        
+        // Gestione form creazione utente
+        document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const formData = new FormData(e.target);
+                const userData = {
+                    email: formData.get('email'),
+                    password: formData.get('password'),
+                    role: formData.get('role')
+                };
+                
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showErrorAlert(data.error || 'Errore creazione utente');
+                    return;
+                }
+
+                showErrorAlert('Utente creato con successo!');
+                e.target.reset();
+            } catch (error) {
+                console.error('Errore durante la creazione utente:', error);
+                showErrorAlert('Errore: ' + error.message);
+            }
+        });
+        
+        // Gestione logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Errore durante il logout:', error);
+                showErrorAlert('Errore durante il logout');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ Portal - Gestione Utenti</title>
+    <link href="/css/main.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-black': '#0a0a0a',
+                        'accent-yellow': '#FFD700',
+                        'dark-gray': '#1a1a1a',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-primary-black text-gray-100">
+    <header class="bg-dark-gray py-4 px-6 border-b border-gray-800">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
+            <nav class="flex space-x-4 items-center">
+                <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
+                <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
+                <a href="/admin" class="text-gray-300 hover:text-accent-yellow">Admin</a>
+                <button id="logoutBtn" class="text-gray-300 hover:text-accent-yellow">Logout</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <h1 class="text-3xl font-bold mb-8 text-center text-accent-yellow">Gestione Utenti</h1>
+        
+        <div class="bg-dark-gray p-6 rounded-lg shadow-md mb-8">
+            <div class="overflow-x-auto">
+                <table class="w-full table-auto">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-2 text-left text-accent-yellow">ID</th>
+                            <th class="px-4 py-2 text-left text-accent-yellow">Email</th>
+                            <th class="px-4 py-2 text-left text-accent-yellow">Ruolo</th>
+                            <th class="px-4 py-2 text-left text-accent-yellow">Data registrazione</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTable">
+                        <!-- Tabella utenti sarà caricata dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark-gray py-6 px-4 mt-12 border-t border-gray-800">
+        <div class="container mx-auto text-center text-gray-500">
+            <p>© 2024 FAQ Portal - Tutti i diritti riservati</p>
+        </div>
+    </footer>
+
+    <script src="/js/error-alert.js"></script>
+    <script>
+        // Verifica che l'utente sia autenticato e sia admin
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/auth/check');
+                const data = await response.json();
+                
+                if (!data.authenticated) {
+                    window.location.href = '/auth';
+                    return;
+                }
+                
+                if (data.user.role !== 'admin') {
+                    window.location.href = '/dashboard';
+                    return;
+                }
+                
+                // Carica la lista utenti
+                loadUsers();
+            } catch (error) {
+                console.error('Errore verifica autenticazione:', error);
+                showErrorAlert('Errore verifica autenticazione');
+            }
+        });
+        
+        // Carica gli utenti
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/users');
+                
+                if (!response.ok) {
+                    showErrorAlert('Errore nel caricamento degli utenti');
+                    return;
+                }
+                
+                const users = await response.json();
+                renderUsers(users);
+            } catch (error) {
+                console.error('Errore caricamento utenti:', error);
+                showErrorAlert('Errore caricamento utenti: ' + error.message);
+            }
+        }
+        
+        // Render della tabella utenti
+        function renderUsers(users) {
+            const table = document.getElementById('usersTable');
+            table.innerHTML = '';
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = 'border-t border-gray-700';
+                
+                row.innerHTML = `
+                    <td class="px-4 py-2">${user.id}</td>
+                    <td class="px-4 py-2">${user.email}</td>
+                    <td class="px-4 py-2">
+                        <span class="${user.role === 'admin' ? 'text-accent-yellow' : 'text-gray-300'} font-medium">
+                            ${user.role === 'admin' ? 'Amministratore' : 'Utente'}
+                        </span>
+                    </td>
+                    <td class="px-4 py-2">${new Date(user.created_at).toLocaleString()}</td>
+                `;
+                
+                table.appendChild(row);
+            });
+        }
+        
+        // Gestione logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Errore durante il logout:', error);
+                showErrorAlert('Errore durante il logout');
+            }
+        });
+    </script>
+</body>
+</html>
