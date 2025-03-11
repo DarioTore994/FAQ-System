@@ -39,7 +39,7 @@ async function initDatabase() {
       );
     `);
     console.log('Tabella users verificata/creata con successo');
-    
+
     // Crea la tabella delle categorie se non esiste
     await client.query(`
       CREATE TABLE IF NOT EXISTS categories (
@@ -52,7 +52,7 @@ async function initDatabase() {
 
     // Prova a eliminare la tabella faqs se esiste per ricrearla con la struttura corretta
     await client.query(`DROP TABLE IF EXISTS faqs;`);
-    
+
     // Ricrea la tabella con la struttura corretta
     await client.query(`
       CREATE TABLE IF NOT EXISTS faqs (
@@ -69,7 +69,7 @@ async function initDatabase() {
 
     // Verifica se ci sono già utenti
     const existingUsers = await client.query('SELECT COUNT(*) FROM users');
-    
+
     // Se non ci sono utenti, inserisci un admin di default
     if (parseInt(existingUsers.rows[0].count) === 0) {
       // Nella produzione dovresti usare bcrypt per hashare le password
@@ -78,17 +78,17 @@ async function initDatabase() {
         ['admin@example.com', 'admin123', 'admin']
       );
       console.log('Utente admin creato con successo!');
-      
+
       const userResult = await client.query('SELECT id FROM users WHERE email = $1', ['admin@example.com']);
       const adminId = userResult.rows[0].id;
-      
+
       // Verifica se ci sono già categorie
       const existingCategories = await client.query('SELECT COUNT(*) FROM categories');
-      
+
       // Se non ci sono categorie, inserisci le categorie predefinite
       if (parseInt(existingCategories.rows[0].count) === 0) {
         const defaultCategories = ['Hardware', 'Software', 'Network', 'Security'];
-        
+
         for (const category of defaultCategories) {
           await client.query(
             'INSERT INTO categories (name) VALUES ($1) ON CONFLICT (name) DO NOTHING',
@@ -97,7 +97,7 @@ async function initDatabase() {
         }
         console.log('Categorie predefinite create con successo!');
       }
-      
+
       // Verifica se ci sono già dati nella tabella
       const existingData = await client.query('SELECT COUNT(*) FROM faqs');
 
@@ -157,13 +157,13 @@ const requireAdmin = async (req, res, next) => {
   if (!req.cookies.authToken) {
     return res.redirect('/auth');
   }
-  
+
   try {
     const userId = parseInt(req.cookies.authToken, 10);
     if (isNaN(userId)) {
       return res.redirect('/auth');
     }
-    
+
     const client = await pool.connect();
     try {
       const result = await client.query('SELECT role FROM users WHERE id = $1', [userId]);
@@ -209,21 +209,21 @@ app.get("/api/auth/check", async (req, res) => {
   if (!authToken) {
     return res.json({ authenticated: false });
   }
-  
+
   try {
     // Decodifica il token per ottenere l'id utente
     const userId = parseInt(authToken, 10);
     if (isNaN(userId)) {
       return res.json({ authenticated: false });
     }
-    
+
     const client = await pool.connect();
     try {
       const result = await client.query('SELECT id, email, role FROM users WHERE id = $1', [userId]);
       if (result.rows.length === 0) {
         return res.json({ authenticated: false });
       }
-      
+
       const user = result.rows[0];
       return res.json({ 
         authenticated: true, 
@@ -254,16 +254,16 @@ app.post("/api/auth/login", async (req, res) => {
     try {
       // In produzione dovrai usare bcrypt per verificare le password
       const result = await client.query('SELECT id, email, role FROM users WHERE email = $1 AND password = $2', [email, password]);
-      
+
       if (result.rows.length === 0) {
         return res.status(401).json({ error: 'Credenziali non valide' });
       }
-      
+
       const user = result.rows[0];
-      
+
       // Usa l'ID utente come token (semplificato, in produzione usa JWT)
       const token = user.id.toString();
-      
+
       // Impostazione del cookie di autenticazione
       res.cookie('authToken', token, {
         httpOnly: true,
@@ -296,19 +296,19 @@ app.post("/api/auth/register", async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ error: 'Email e password sono obbligatori' });
     }
-    
+
     // Solo gli admin possono creare altri admin
     const authToken = req.cookies.authToken;
     if (role === 'admin') {
       if (!authToken) {
         return res.status(403).json({ error: 'Non autorizzato a creare admin' });
       }
-      
+
       const adminCheck = await pool.query(
         'SELECT role FROM users WHERE id = $1', 
         [parseInt(authToken, 10)]
       );
-      
+
       if (adminCheck.rows.length === 0 || adminCheck.rows[0].role !== 'admin') {
         return res.status(403).json({ error: 'Solo gli admin possono creare altri admin' });
       }
@@ -321,15 +321,15 @@ app.post("/api/auth/register", async (req, res) => {
       if (existingUser.rows.length > 0) {
         return res.status(400).json({ error: 'Email già registrata' });
       }
-      
+
       // In produzione, usa bcrypt per hashare le password
       const result = await client.query(
         'INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING id, email, role',
         [email, password, role]
       );
-      
+
       const user = result.rows[0];
-      
+
       // Se non c'è già una sessione attiva, accedi automaticamente
       if (!authToken) {
         const token = user.id.toString();
@@ -369,21 +369,21 @@ app.get("/api/users", async (req, res) => {
   if (!authToken) {
     return res.status(401).json({ error: 'Non autenticato' });
   }
-  
+
   try {
     const client = await pool.connect();
-    
+
     try {
       // Verifica se l'utente è admin
       const adminCheck = await client.query(
         'SELECT role FROM users WHERE id = $1', 
         [parseInt(authToken, 10)]
       );
-      
+
       if (adminCheck.rows.length === 0 || adminCheck.rows[0].role !== 'admin') {
         return res.status(403).json({ error: 'Solo gli admin possono vedere la lista utenti' });
       }
-      
+
       // Ottieni tutti gli utenti
       const result = await client.query('SELECT id, email, role, created_at FROM users ORDER BY created_at DESC');
       return res.json(result.rows);
@@ -401,15 +401,15 @@ app.put("/api/users/:id/role", requireAdmin, async (req, res) => {
   try {
     const userId = parseInt(req.params.id, 10);
     const { role } = req.body;
-    
+
     if (isNaN(userId)) {
       return res.status(400).json({ error: 'ID utente non valido' });
     }
-    
+
     if (!role || !['admin', 'user'].includes(role)) {
       return res.status(400).json({ error: 'Ruolo non valido. Deve essere "admin" o "user"' });
     }
-    
+
     const client = await pool.connect();
     try {
       // Controllo se l'utente esiste
@@ -417,10 +417,10 @@ app.put("/api/users/:id/role", requireAdmin, async (req, res) => {
       if (userCheck.rows.length === 0) {
         return res.status(404).json({ error: 'Utente non trovato' });
       }
-      
+
       // Aggiorna il ruolo dell'utente
       await client.query('UPDATE users SET role = $1 WHERE id = $2', [role, userId]);
-      
+
       return res.json({ success: true, message: 'Ruolo aggiornato con successo' });
     } finally {
       client.release();
@@ -450,22 +450,22 @@ app.post("/api/categories", requireAdmin, async (req, res) => {
   const client = await pool.connect();
   try {
     const { name } = req.body;
-    
+
     if (!name) {
       return res.status(400).json({ error: 'Il nome della categoria è obbligatorio' });
     }
-    
+
     // Verifica se la categoria esiste già
     const existingCategory = await client.query('SELECT id FROM categories WHERE name = $1', [name]);
     if (existingCategory.rows.length > 0) {
       return res.status(400).json({ error: 'Questa categoria esiste già' });
     }
-    
+
     const result = await client.query(
       'INSERT INTO categories (name) VALUES ($1) RETURNING *',
       [name]
     );
-    
+
     return res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error("Errore durante l'aggiunta della categoria:", error);
@@ -480,25 +480,25 @@ app.delete("/api/categories/:id", requireAdmin, async (req, res) => {
   const client = await pool.connect();
   try {
     const categoryId = parseInt(req.params.id, 10);
-    
+
     if (isNaN(categoryId)) {
       return res.status(400).json({ error: 'ID categoria non valido' });
     }
-    
+
     // Verifica se ci sono FAQ associate a questa categoria
     const faqCheck = await client.query('SELECT COUNT(*) FROM faqs WHERE category = (SELECT name FROM categories WHERE id = $1)', [categoryId]);
-    
+
     if (parseInt(faqCheck.rows[0].count) > 0) {
       return res.status(400).json({ error: 'Non è possibile eliminare questa categoria perché esistono FAQ associate ad essa' });
     }
-    
+
     // Elimina la categoria
     const result = await client.query('DELETE FROM categories WHERE id = $1 RETURNING id', [categoryId]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Categoria non trovata' });
     }
-    
+
     return res.json({ success: true, message: 'Categoria eliminata con successo' });
   } catch (error) {
     console.error("Errore durante l'eliminazione della categoria:", error);
@@ -514,36 +514,36 @@ app.put("/api/categories/:id", requireAdmin, async (req, res) => {
   try {
     const categoryId = parseInt(req.params.id, 10);
     const { name } = req.body;
-    
+
     if (isNaN(categoryId)) {
       return res.status(400).json({ error: 'ID categoria non valido' });
     }
-    
+
     if (!name) {
       return res.status(400).json({ error: 'Il nome della categoria è obbligatorio' });
     }
-    
+
     // Verifica se la categoria esiste
     const categoryCheck = await client.query('SELECT id FROM categories WHERE id = $1', [categoryId]);
     if (categoryCheck.rows.length === 0) {
       return res.status(404).json({ error: 'Categoria non trovata' });
     }
-    
+
     // Verifica se il nuovo nome esiste già
     const existingCategory = await client.query('SELECT id FROM categories WHERE name = $1 AND id != $2', [name, categoryId]);
     if (existingCategory.rows.length > 0) {
       return res.status(400).json({ error: 'Esiste già una categoria con questo nome' });
     }
-    
+
     // Aggiorna la categoria
     await client.query('UPDATE categories SET name = $1 WHERE id = $2', [name, categoryId]);
-    
+
     // Aggiorna anche le FAQ associate alla categoria
     const oldCategoryName = await client.query('SELECT name FROM categories WHERE id = $1', [categoryId]);
     if (oldCategoryName.rows.length > 0) {
       await client.query('UPDATE faqs SET category = $1 WHERE category = $2', [name, oldCategoryName.rows[0].name]);
     }
-    
+
     return res.json({ success: true, message: 'Categoria aggiornata con successo' });
   } catch (error) {
     console.error("Errore durante l'aggiornamento della categoria:", error);
@@ -563,7 +563,22 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
   try {
     // Validate that all required fields are present
     const { category, title, description, resolution } = req.body;
-    const userId = parseInt(req.cookies.authToken, 10);
+    const authToken = req.cookies.authToken;
+    let userId;
+
+    if (!authToken) {
+      return res.status(401).json({ error: 'Non autenticato' });
+    }
+
+    try {
+      userId = parseInt(authToken, 10);
+      if (isNaN(userId)) {
+          return res.status(401).json({ error: 'Token non valido' });
+      }
+    } catch (error) {
+      return res.status(401).json({ error: 'Token non valido' });
+    }
+    
 
     console.log('Ricevuta richiesta di salvataggio FAQ:', {
       userId,
@@ -587,9 +602,9 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
         error: { message: 'Utente non trovato' }
       });
     }
-    
+
     const userRole = userResult.rows[0].role;
-    
+
     // Solo gli admin possono creare FAQ
     if (userRole !== 'admin') {
       return res.status(403).json({
@@ -607,7 +622,7 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
         WHERE table_name = 'faqs' 
         AND column_name = 'user_id'
       `);
-      
+
       // Se la colonna user_id non esiste, ricreiamo la tabella
       if (tableInfo.rows.length === 0) {
         console.log('Colonna user_id mancante, ricreo la tabella...');
@@ -700,7 +715,7 @@ app.post("/api/init-db", async (req, res) => {
           AND column_name = 'user_id'
         );
       `);
-      
+
       if (!userIdExists.rows[0].exists) {
         needsRecreation = true;
       }
@@ -712,7 +727,7 @@ app.post("/api/init-db", async (req, res) => {
       if (tableExists.rows[0].exists) {
         await client.query(`DROP TABLE IF EXISTS faqs;`);
       }
-      
+
       // Crea la tabella con la struttura corretta
       await client.query(`
         CREATE TABLE faqs (
@@ -729,10 +744,10 @@ app.post("/api/init-db", async (req, res) => {
 
       // Ottieni l'utente admin per l'inserimento dei dati demo
       const adminResult = await client.query('SELECT id FROM users WHERE role = $1 LIMIT 1', ['admin']);
-      
+
       if (adminResult.rows.length > 0) {
         const adminId = adminResult.rows[0].id;
-        
+
         // Inserimento dati demo
         const demoFaqs = [
           {

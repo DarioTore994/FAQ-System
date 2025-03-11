@@ -447,13 +447,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     const authResponse = await fetch('/api/auth/check');
-    
+
     // Verifica se la risposta è valida
     if (!authResponse.ok) {
       console.error('Errore API auth/check:', authResponse.status, authResponse.statusText);
       return;
     }
-    
+
     // Gestione sicura del parsing JSON
     let authData;
     try {
@@ -481,7 +481,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (createFaqBtn) {
           createFaqBtn.classList.remove('hidden');
         }
-        
+
         // Mostra link admin solo se l'utente è admin
         const adminLink = document.getElementById('adminLink');
         if (adminLink) {
