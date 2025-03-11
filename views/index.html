@@ -115,25 +115,19 @@
                     <a href="/" class="text-gray-300 hover:text-accent-yellow border-b-2 border-accent-yellow pb-1">Home</a>
                 </div>
 
-                <!-- Contenitore per utenti autenticati (inclusi i bottoni dashboard e crea FAQ) -->
+                <!-- Contenitore per utenti autenticati (solo dashboard) -->
                 <div id="authUserContainer" class="hidden">
-                    <!-- Menu per utenti autenticati -->
                     <div class="flex items-center gap-4">
                         <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
-                        <a href="/create" id="createFaqBtn" class="text-gray-300 hover:text-accent-yellow">
-                            <span>Crea FAQ</span>
-                        </a>
                     </div>
                 </div>
 
                 <!-- Menu solo per admin - visibile solo se l'utente è admin -->
                 <div id="adminMenu" class="hidden flex items-center gap-4">
                     <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow">Admin</a>
-                    <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow">Utenti</a>
-                    <a href="/categories" id="categoriesLink" class="text-gray-300 hover:text-accent-yellow">Categorie</a>
                 </div>
 
-                <!-- Contenitore per i bottoni di login/logout -->
+                <!-- Contenitore per i bottoni di login/logout (solo nella home) -->
                 <div class="flex items-center gap-4">
                     <!-- Bottone di accesso - visibile solo se l'utente non è loggato -->
                     <a href="/auth" id="loginBtn" class="btn btn-primary">

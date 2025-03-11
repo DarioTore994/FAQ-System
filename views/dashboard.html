@@ -69,18 +69,9 @@
                     <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow border-b-2 border-accent-yellow pb-1">Dashboard</a>
                 </div>
 
-                <!-- Menu per utenti autenticati -->
-                <div id="authUserMenu" class="hidden flex items-center gap-4">
-                    <a href="/create" id="createFaqBtn" class="text-gray-300 hover:text-accent-yellow">
-                        <span>Crea FAQ</span>
-                    </a>
-                </div>
-
                 <!-- Menu solo per admin -->
                 <div id="adminMenu" class="hidden flex items-center gap-4">
                     <a href="/admin" id="adminLink" class="text-gray-300 hover:text-accent-yellow">Admin</a>
-                    <a href="/users" id="usersLink" class="text-gray-300 hover:text-accent-yellow">Utenti</a>
-                    <a href="/categories" id="categoriesLink" class="text-gray-300 hover:text-accent-yellow">Categorie</a>
                 </div>
 
                 <!-- Solo bottone logout per utenti autenticati -->
@@ -99,6 +90,14 @@
             <div>
                 <h2 class="text-2xl font-bold text-accent-yellow">Domande Frequenti</h2>
                 <p class="text-gray-400 mt-1">Ultime FAQ disponibili</p>
+            </div>
+            <div class="flex items-center">
+                <a href="/create" id="createFaqBtn" class="btn btn-primary flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Crea FAQ</span>
+                </a>
             </div>
             <div class="relative flex items-center w-full md:w-auto">
                 <div class="relative w-full">

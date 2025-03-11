@@ -172,10 +172,10 @@
                     </a>
                 </div>
                 <nav class="flex items-center gap-4">
-                    <!-- Menu principale -->
-                    <div class="flex items-center gap-4">
-                        <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
-                    </div>
+                    <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
+                    <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
+                    <span id="admin-link" class="text-gray-300 hover:text-accent-yellow hidden">Admin</span>  <!--Initially hidden -->
+                    <span id="auth-button" class="text-gray-300 hover:text-accent-yellow"></span> <!--Dynamically updated -->
                 </nav>
             </div>
         </header>
@@ -311,7 +311,7 @@
         </footer>
 
         <script src="/js/error-alert.js"></script>
-    <script src="/js/header.js"></script>
+        <script src="/js/header.js"></script>
 
         <script>
             // Verifica autenticazione e reindirizza se già autenticato
@@ -323,6 +323,18 @@
                     if (data.authenticated) {
                         // Se già autenticato, reindirizza alla dashboard
                         window.location.href = "/dashboard";
+                    }
+                    const adminLink = document.getElementById("admin-link");
+                    const authButton = document.getElementById("auth-button");
+
+                    if (data.role === "admin") {
+                        adminLink.classList.remove("hidden");
+                    }
+
+                    if (data.authenticated) {
+                        authButton.innerHTML = `<a href="/api/auth/logout" class="text-gray-300 hover:text-accent-yellow">Logout</a>`;
+                    } else {
+                        authButton.innerHTML = `<a href="/" class="text-gray-300 hover:text-accent-yellow">Login</a>`;
                     }
                 } catch (error) {
                     console.error("Errore controllo autenticazione:", error);
