@@ -695,82 +695,49 @@ app.get("/api/faqs", async (req, res) => {
 app.post("/api/init-db", async (req, res) => {
   const client = await pool.connect();
   try {
-    // Verifica se la tabella esiste
-    const tableExists = await client.query(`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'faqs'
+    // Forza il drop della tabella faqs per ricrearla correttamente
+    await client.query(`DROP TABLE IF EXISTS faqs;`);
+    console.log('Tabella faqs eliminata con successo');
+    
+    // Crea la tabella con la struttura corretta
+    await client.query(`
+      CREATE TABLE faqs (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id),
+        category TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        resolution TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
+    console.log('Tabella faqs ricreata con successo!');
 
-    // Verifica se la tabella ha la struttura corretta con user_id
-    let needsRecreation = false;
-    if (tableExists.rows[0].exists) {
-      const userIdExists = await client.query(`
-        SELECT EXISTS (
-          SELECT FROM information_schema.columns 
-          WHERE table_schema = 'public' 
-          AND table_name = 'faqs'
-          AND column_name = 'user_id'
-        );
-      `);
+    // Ottieni l'utente admin per l'inserimento dei dati demo
+    const adminResult = await client.query('SELECT id FROM users WHERE role = $1 LIMIT 1', ['admin']);
 
-      if (!userIdExists.rows[0].exists) {
-        needsRecreation = true;
-      }
-    }
+    if (adminResult.rows.length > 0) {
+      const adminId = adminResult.rows[0].id;
 
-    // Ricrea la tabella se non esiste o se manca la colonna user_id
-    if (!tableExists.rows[0].exists || needsRecreation) {
-      // Se esiste ma è errata, la eliminiamo
-      if (tableExists.rows[0].exists) {
-        await client.query(`DROP TABLE IF EXISTS faqs;`);
-      }
-
-      // Crea la tabella con la struttura corretta
-      await client.query(`
-        CREATE TABLE faqs (
-          id SERIAL PRIMARY KEY,
-          user_id INTEGER NOT NULL REFERENCES users(id),
-          category TEXT NOT NULL,
-          title TEXT NOT NULL,
-          description TEXT NOT NULL,
-          resolution TEXT NOT NULL,
-          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-        );
-      `);
-      console.log('Tabella faqs creata con successo!');
-
-      // Ottieni l'utente admin per l'inserimento dei dati demo
-      const adminResult = await client.query('SELECT id FROM users WHERE role = $1 LIMIT 1', ['admin']);
-
-      if (adminResult.rows.length > 0) {
-        const adminId = adminResult.rows[0].id;
-
-        // Inserimento dati demo
-        const demoFaqs = [
-          {
-            category: 'Network',
-            title: 'Problema di connessione alla rete',
-            description: 'Il computer non riesce a connettersi alla rete Wi-Fi',
-            resolution: 'Verifica che il Wi-Fi sia attivo. Riavvia il router. Controlla le impostazioni di rete.'
-          }
-        ];
-
-        for (const faq of demoFaqs) {
-          await client.query(
-            'INSERT INTO faqs (user_id, category, title, description, resolution) VALUES ($1, $2, $3, $4, $5)',
-            [adminId, faq.category, faq.title, faq.description, faq.resolution]
-          );
+      // Inserimento dati demo
+      const demoFaqs = [
+        {
+          category: 'Network',
+          title: 'Problema di connessione alla rete',
+          description: 'Il computer non riesce a connettersi alla rete Wi-Fi',
+          resolution: 'Verifica che il Wi-Fi sia attivo. Riavvia il router. Controlla le impostazioni di rete.'
         }
-      }
+      ];
 
-      return res.json({ success: true, message: 'Tabella creata con successo' });
-    } else {
-      console.log('Tabella faqs verificata con successo');
-      return res.json({ success: true, message: 'Tabella verificata con successo' });
+      for (const faq of demoFaqs) {
+        await client.query(
+          'INSERT INTO faqs (user_id, category, title, description, resolution) VALUES ($1, $2, $3, $4, $5)',
+          [adminId, faq.category, faq.title, faq.description, faq.resolution]
+        );
+      }
     }
+
+    return res.json({ success: true, message: 'Tabella creata con successo' });
   } catch (error) {
     console.error('Errore durante la verifica/creazione del database:', error);
     return res.status(500).json({ 
