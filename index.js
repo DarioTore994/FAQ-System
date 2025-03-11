@@ -378,8 +378,11 @@ app.post("/api/auth/logout", (req, res) => {
     path: '/'
   });
   
+  // Scrivo sul console per debug
+  console.log('Utente disconnesso');
+  
   // Risposta standard
-  res.json({ success: true });
+  res.json({ success: true, message: 'Utente disconnesso con successo' });
 });
 
 // API per ottenere tutti gli utenti (solo per admin)

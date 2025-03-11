@@ -14,13 +14,15 @@ window.performLogout = async function() {
             localStorage.removeItem('userRole');
             document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 
-            // Reindirizza alla homepage
-            window.location.href = '/';
+            // Reindirizza alla pagina di login
+            window.location.href = '/auth';
         } else {
             console.error('Errore durante il logout');
+            showErrorAlert('Errore durante il logout');
         }
     } catch (error) {
         console.error('Errore durante il logout:', error);
+        showErrorAlert('Errore durante il logout: ' + error.message);
     }
 };
 
@@ -647,23 +649,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Gestione logout
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      try {
-        const response = await fetch('/api/auth/logout', {
-          method: 'POST',
-          credentials: 'same-origin' // aggiunto per inviare i cookie
-        });
-
-        if (response.ok) {
-          window.location.href = '/';
-        } else {
-          console.error('Errore durante il logout:', response.status);
-          showErrorAlert('Errore durante il logout');
-        }
-      } catch (error) {
-        console.error('Errore durante il logout:', error);
-        showErrorAlert('Errore durante il logout');
-      }
+    logoutBtn.addEventListener('click', performLogout);
     });
   }
 
