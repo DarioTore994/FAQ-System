@@ -177,6 +177,10 @@ app.post("/api/auth/logout", (req, res) => {
   res.json({ success: true });
 });
 
+// Importa e usa le API per l'app mobile
+const apiEndpoints = require('./api-endpoints');
+app.use('/api/mobile', apiEndpoints);
+
 // Aggiungi questa route
 app.post("/api/faqs", requireAuth, async (req, res) => {
   try {
