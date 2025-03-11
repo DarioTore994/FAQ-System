@@ -37,8 +37,7 @@
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
             <nav class="space-x-4" id="headerNav">
-                <!-- I pulsanti Admin e Crea FAQ saranno mostrati in base al ruolo -->
-                <a href="/admin" id="adminBtn" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors hidden">Admin</a>
+                <!-- Solo il pulsante Crea FAQ sarà mostrato in base al ruolo -->
                 <a href="/create" id="createFaqBtn" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Crea FAQ</a>
                 <button id="logoutBtn" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Logout</button>
             </nav>
@@ -82,11 +81,6 @@
                 const data = await response.json();
                 
                 if (data.authenticated) {
-                    // Mostra pulsante Admin solo se l'utente è admin
-                    if (data.user.role === 'admin') {
-                        document.getElementById('adminBtn').classList.remove('hidden');
-                    }
-                    
                     // Mostra pulsante Crea FAQ solo se l'utente è admin
                     if (data.user.role !== 'admin') {
                         document.getElementById('createFaqBtn').classList.add('hidden');
