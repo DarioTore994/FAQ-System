@@ -236,11 +236,11 @@
                         <label class="form-label">Immagine</label>
                         <div class="flex flex-col space-y-2">
                             <input
-                                type="text"
-                                name="image_url"
-                                id="image_url"
+                                type="file"
+                                name="image"
+                                id="image"
                                 class="form-input"
-                                placeholder="URL dell'immagine (opzionale)"
+                                accept="image/*"
                             />
                             <div id="imagePreview" class="hidden mt-2 p-2 border border-gray-700 rounded-lg">
                                 <img id="previewImg" src="" alt="Anteprima immagine" class="max-w-full h-auto rounded">
@@ -399,7 +399,6 @@
                 document.getElementById('description').value = faq.description || '';
                 document.getElementById('resolution').value = faq.resolution || '';
                 document.getElementById('notes').value = faq.notes || '';
-                document.getElementById('image_url').value = faq.image_url || '';
                 
                 // Mostra anteprima immagine se presente
                 if (faq.image_url) {
@@ -508,8 +507,22 @@
                     resolution: formData.get('resolution'),
                     status: formData.get('status'),
                     notes: formData.get('notes'),
-                    image_url: formData.get('image_url')
+                    image_url: document.getElementById('previewImg').src // Usa l'immagine convertita in base64
                 };
+                
+                // Se non è stata selezionata una nuova immagine ma c'era già un'immagine caricata,
+                // mantenere l'URL dell'immagine esistente
+                if (!document.getElementById('image').files.length && faqData.image_url === '') {
+                    // Cerchiamo di recuperare l'URL esistente
+                    const faqId = getFaqIdFromUrl();
+                    const response = await fetch(`/api/faqs/${faqId}`);
+                    if (response.ok) {
+                        const existingFaq = await response.json();
+                        if (existingFaq.image_url) {
+                            faqData.image_url = existingFaq.image_url;
+                        }
+                    }
+                }
 
                 console.log('Sending updated FAQ data:', faqData);
 
@@ -618,21 +631,29 @@
 
         // Funzione per aggiornare l'anteprima dell'immagine
         function updateImagePreview() {
-            const imageUrl = document.getElementById('image_url').value;
+            const imageInput = document.getElementById('image');
             const imagePreview = document.getElementById('imagePreview');
             const previewImg = document.getElementById('previewImg');
             
-            if (imageUrl) {
-                previewImg.src = imageUrl;
-                previewImg.onload = function() {
+            if (imageInput.files && imageInput.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
                     imagePreview.classList.remove('hidden');
                 };
-                previewImg.onerror = function() {
+                
+                reader.onerror = function() {
                     imagePreview.classList.add('hidden');
-                    showErrorAlert('URL immagine non valido', 'error');
+                    showErrorAlert('Impossibile leggere il file immagine', 'error');
                 };
+                
+                reader.readAsDataURL(imageInput.files[0]);
             } else {
-                imagePreview.classList.add('hidden');
+                // Se c'è un'immagine già caricata, mantieni la preview
+                if (!previewImg.src || previewImg.src === window.location.href) {
+                    imagePreview.classList.add('hidden');
+                }
             }
         }
         
@@ -640,7 +661,7 @@
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 // Configura l'anteprima dell'immagine
-                document.getElementById('image_url').addEventListener('input', updateImagePreview);
+                document.getElementById('image').addEventListener('change', updateImagePreview);
                 
                 // Verifica autenticazione
                 const authResponse = await fetch('/api/auth/check');
