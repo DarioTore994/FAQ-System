@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -36,16 +35,28 @@
         .faq-detail {
             @apply hidden p-4 pt-0 border-t border-gray-700/30;
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
     </style>
 </head>
-<body class="bg-primary-black text-gray-100">
+<body class="bg-primary-black text-gray-100" id="body">
     <header class="bg-dark-gray py-4 px-6 border-b border-gray-800">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
             <nav class="space-x-4" id="headerNav">
-                <!-- Solo il pulsante Crea FAQ sarà mostrato in base al ruolo -->
                 <a href="/create" id="createFaqBtn" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Crea FAQ</a>
                 <button id="logoutBtn" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Logout</button>
+                <button id="themeToggle" class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">Tema</button>
             </nav>
         </div>
     </header>
@@ -64,8 +75,27 @@
             </div>
         </div>
 
-        <div id="faqContainer" class="space-y-6">
-            <!-- FAQ content will be loaded here -->
+        <div id="faqContainer">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Domanda</th>
+                        <th>Risposta</th>
+                        <th>Categoria</th>
+                    </tr>
+                </thead>
+                <tbody id="faqTableBody">
+                    <!-- FAQ data will be inserted here -->
+                </tbody>
+            </table>
+
+
+            <!-- Admin Section (hidden by default) -->
+            <div id="adminCategorySection" class="hidden mt-4">
+                <h3>Aggiungi Categoria</h3>
+                <input type="text" id="newCategoryName" placeholder="Nome categoria">
+                <button id="addCategoryBtn">Aggiungi</button>
+            </div>
         </div>
     </main>
 
@@ -83,31 +113,50 @@
             try {
                 const response = await fetch('/api/auth/check');
                 const data = await response.json();
-                
+
                 if (data.authenticated) {
                     // Mostra pulsante Crea FAQ solo se l'utente è admin
                     if (data.user.role !== 'admin') {
                         document.getElementById('createFaqBtn').classList.add('hidden');
+                    }
+                    if (data.user.role === 'admin') {
+                        document.getElementById('adminCategorySection').classList.remove('hidden');
                     }
                 }
             } catch (error) {
                 console.error('Errore controllo autenticazione:', error);
             }
         });
-        
+
         // Gestione logout
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             try {
                 const response = await fetch('/api/auth/logout', {
                     method: 'POST'
                 });
-                
+
                 if (response.ok) {
                     window.location.href = '/';
                 }
             } catch (error) {
                 console.error('Errore durante il logout:', error);
                 showErrorAlert('Errore durante il logout');
+            }
+        });
+
+        // Theme Toggle
+        const body = document.getElementById('body');
+        const themeToggle = document.getElementById('themeToggle');
+        let isDarkMode = false;
+
+        themeToggle.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            body.classList.toggle('dark', isDarkMode);
+            // Adjust colors/styles based on dark/light mode
+            if (isDarkMode) {
+                themeToggle.textContent = 'Tema Chiaro';
+            } else {
+                themeToggle.textContent = 'Tema Scuro';
             }
         });
     </script>

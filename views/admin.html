@@ -20,11 +20,80 @@
             }
         }
     </script>
+    <style>
+        /* Tema scuro (default) */
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-color: #FFD700;
+            --border-color: #374151;
+        }
+        
+        /* Tema chiaro */
+        [data-theme="light"] {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --accent-color: #FFD700;
+            --border-color: #e5e7eb;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        header, footer {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+        
+        .bg-dark-gray {
+            background-color: var(--bg-secondary);
+        }
+        
+        .text-gray-300 {
+            color: var(--text-secondary);
+        }
+        
+        .theme-toggle {
+            @apply flex items-center justify-center w-10 h-10 rounded-full;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .category-pill {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            margin: 0.25rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .category-pill button {
+            margin-left: 0.5rem;
+        }
+    </style>
 </head>
 <body class="bg-primary-black text-gray-100">
-    <header class="bg-dark-gray py-4 px-6 border-b border-gray-800">
+    <header class="py-4 px-6 border-b">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold text-accent-yellow">FAQ Portal</h1>
+            <div class="flex items-center">
+                <h1 class="text-xl font-bold text-accent-yellow mr-4">FAQ Portal</h1>
+                <button id="themeToggle" class="theme-toggle" title="Cambia tema">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" id="themeIcon" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                    </svg>
+                </button>
+            </div>
             <nav class="flex space-x-4 items-center">
                 <a href="/" class="text-gray-300 hover:text-accent-yellow">Home</a>
                 <a href="/dashboard" class="text-gray-300 hover:text-accent-yellow">Dashboard</a>
@@ -38,7 +107,7 @@
     <main class="container mx-auto px-6 py-8">
         <h1 class="text-3xl font-bold mb-8 text-center text-accent-yellow">Pannello di Amministrazione</h1>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <div class="bg-dark-gray p-6 rounded-lg shadow-md">
                 <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Gestione FAQ</h2>
                 <p class="text-gray-300 mb-4">Aggiungi, modifica o elimina le FAQ del portale.</p>
@@ -54,9 +123,17 @@
                     Gestisci utenti
                 </a>
             </div>
+            
+            <div class="bg-dark-gray p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Gestione Categorie</h2>
+                <p class="text-gray-300 mb-4">Aggiungi e gestisci le categorie delle FAQ.</p>
+                <button id="showCategoriesBtn" class="inline-block bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors">
+                    Gestisci categorie
+                </button>
+            </div>
         </div>
         
-        <div class="bg-dark-gray p-6 rounded-lg shadow-md">
+        <div class="bg-dark-gray p-6 rounded-lg shadow-md mb-6">
             <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Crea nuovo utente</h2>
             <form id="createUserForm" class="space-y-4">
                 <div>
@@ -65,7 +142,8 @@
                         type="email"
                         name="email"
                         required
-                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                        style="background-color: var(--bg-primary); border-color: var(--border-color);"
                     />
                 </div>
                 <div>
@@ -74,14 +152,16 @@
                         type="password"
                         name="password"
                         required
-                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                        style="background-color: var(--bg-primary); border-color: var(--border-color);"
                     />
                 </div>
                 <div>
                     <label class="block mb-2 text-accent-yellow">Ruolo</label>
                     <select
                         name="role"
-                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                        style="background-color: var(--bg-primary); border-color: var(--border-color);"
                     >
                         <option value="user">Utente</option>
                         <option value="admin">Amministratore</option>
@@ -95,6 +175,37 @@
                 </button>
             </form>
         </div>
+        
+        <!-- Gestione categorie (inizialmente nascosto) -->
+        <div id="categoryManagement" class="bg-dark-gray p-6 rounded-lg shadow-md" style="display: none;">
+            <h2 class="text-xl font-semibold mb-4 text-accent-yellow">Gestione Categorie</h2>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-medium mb-2">Categorie esistenti</h3>
+                <div id="categoriesList" class="mb-4">
+                    <!-- Le categorie verranno caricate qui -->
+                </div>
+            </div>
+            
+            <form id="addCategoryForm" class="space-y-4">
+                <div>
+                    <label class="block mb-2 text-accent-yellow">Nome categoria</label>
+                    <input
+                        type="text"
+                        name="categoryName"
+                        required
+                        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-accent-yellow"
+                        style="background-color: var(--bg-primary); border-color: var(--border-color);"
+                    />
+                </div>
+                <button
+                    type="submit"
+                    class="bg-accent-yellow text-primary-black px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-colors"
+                >
+                    Aggiungi categoria
+                </button>
+            </form>
+        </div>
     </main>
 
     <footer class="bg-dark-gray py-6 px-4 mt-12 border-t border-gray-800">
@@ -105,6 +216,97 @@
 
     <script src="/js/error-alert.js"></script>
     <script>
+        // Gestione del tema
+        function setTheme(themeName) {
+            localStorage.setItem('theme', themeName);
+            document.documentElement.setAttribute('data-theme', themeName);
+            
+            // Aggiorna l'icona
+            const themeIcon = document.getElementById('themeIcon');
+            if (themeName === 'light') {
+                themeIcon.innerHTML = '<path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />';
+            } else {
+                themeIcon.innerHTML = '<path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />';
+            }
+        }
+        
+        // Alternanza tema
+        function toggleTheme() {
+            if (localStorage.getItem('theme') === 'light') {
+                setTheme('dark');
+            } else {
+                setTheme('light');
+            }
+        }
+        
+        // Inizializza tema
+        (function() {
+            if (localStorage.getItem('theme') === 'light') {
+                setTheme('light');
+            } else {
+                setTheme('dark');
+            }
+        })();
+        
+        // Funzione per caricare le categorie
+        async function loadCategories() {
+            try {
+                const response = await fetch('/api/categories');
+                if (!response.ok) {
+                    throw new Error('Errore nel caricamento delle categorie');
+                }
+                
+                const categories = await response.json();
+                const categoriesList = document.getElementById('categoriesList');
+                
+                categoriesList.innerHTML = '';
+                
+                if (categories.length === 0) {
+                    categoriesList.innerHTML = '<p class="text-gray-400">Nessuna categoria presente.</p>';
+                    return;
+                }
+                
+                categories.forEach(category => {
+                    const categoryPill = document.createElement('div');
+                    categoryPill.className = 'category-pill';
+                    categoryPill.innerHTML = `
+                        ${category.name}
+                        <button class="delete-category" data-id="${category.id}">×</button>
+                    `;
+                    categoriesList.appendChild(categoryPill);
+                });
+                
+                // Aggiungi listener per eliminazione
+                document.querySelectorAll('.delete-category').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const categoryId = button.getAttribute('data-id');
+                        
+                        if (confirm('Sei sicuro di voler eliminare questa categoria?')) {
+                            try {
+                                const response = await fetch(`/api/categories/${categoryId}`, {
+                                    method: 'DELETE'
+                                });
+                                
+                                if (!response.ok) {
+                                    throw new Error('Errore nell\'eliminazione della categoria');
+                                }
+                                
+                                showErrorAlert('Categoria eliminata con successo!');
+                                loadCategories();
+                            } catch (error) {
+                                console.error('Errore eliminazione categoria:', error);
+                                showErrorAlert('Errore: ' + error.message);
+                            }
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('Errore caricamento categorie:', error);
+                showErrorAlert('Errore: ' + error.message);
+            }
+        }
+        
         // Verifica che l'utente sia autenticato e sia admin
         window.addEventListener('DOMContentLoaded', async () => {
             try {
@@ -120,6 +322,20 @@
                     window.location.href = '/dashboard';
                     return;
                 }
+                
+                // Aggiungi listener per cambio tema
+                document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+                
+                // Gestione visualizzazione form categorie
+                document.getElementById('showCategoriesBtn').addEventListener('click', () => {
+                    const categoryManagement = document.getElementById('categoryManagement');
+                    if (categoryManagement.style.display === 'none') {
+                        categoryManagement.style.display = 'block';
+                        loadCategories();
+                    } else {
+                        categoryManagement.style.display = 'none';
+                    }
+                });
             } catch (error) {
                 console.error('Errore verifica autenticazione:', error);
                 showErrorAlert('Errore verifica autenticazione');
@@ -158,6 +374,39 @@
                 e.target.reset();
             } catch (error) {
                 console.error('Errore durante la creazione utente:', error);
+                showErrorAlert('Errore: ' + error.message);
+            }
+        });
+        
+        // Gestione form aggiunta categorie
+        document.getElementById('addCategoryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const formData = new FormData(e.target);
+                const categoryData = {
+                    name: formData.get('categoryName')
+                };
+                
+                const response = await fetch('/api/categories', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(categoryData),
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Errore creazione categoria');
+                }
+                
+                showErrorAlert('Categoria aggiunta con successo!');
+                e.target.reset();
+                loadCategories();
+            } catch (error) {
+                console.error('Errore durante la creazione categoria:', error);
                 showErrorAlert('Errore: ' + error.message);
             }
         });

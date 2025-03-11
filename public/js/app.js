@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
-  // Create category section
+  // Create category section with table
   const createCategorySection = (category, faqs) => {
     const section = document.createElement("div");
     section.className = "category-accordion";
@@ -93,34 +93,43 @@ document.addEventListener("DOMContentLoaded", async () => {
           <h3 class="text-lg font-semibold">${category}</h3>
           <div class="w-5 h-5 transform transition-transform"></div>
         </div>
-        <div class="faq-content hidden p-4 bg-gray-800/20 space-y-4">
-          ${faqs
-            .map(
-              (faq) => `
-            <div class="faq-item" data-faq-id="${faq.id}">
-              <div class="faq-preview">
-                <div class="flex-1">
-                  <h4 class="font-medium">${faq.title}</h4>
-                  <p class="text-gray-400 text-sm line-clamp-1">${faq.description}</p>
-                </div>
-                <div class="flex flex-col items-end">
-                  <span class="text-xs text-yellow-500/80">${new Date(faq.created_at).toLocaleDateString()}</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 transform transition-transform mt-2 faq-expand-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
-              <div class="faq-detail">
-                <p class="text-gray-300 text-sm mb-3">${faq.description}</p>
-                <div class="resolution-box bg-gray-900/50 p-3 rounded-md mt-3">
-                  <h5 class="text-yellow-500/80 text-sm font-medium mb-2">Procedura risolutiva:</h5>
-                  <p class="text-gray-300 text-sm">${faq.resolution}</p>
-                </div>
-              </div>
-            </div>
-          `,
-            )
-            .join("")}
+        <div class="faq-content hidden p-4 space-y-4">
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th class="w-1/4">Titolo</th>
+                <th class="w-1/2">Descrizione</th>
+                <th class="w-1/4">Data</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${faqs
+                .map(
+                  (faq) => `
+                <tr class="faq-row" data-faq-id="${faq.id}">
+                  <td class="font-medium">${faq.title}</td>
+                  <td class="text-sm text-secondary line-clamp-1">${faq.description}</td>
+                  <td class="text-xs">${new Date(faq.created_at).toLocaleDateString()}</td>
+                </tr>
+                <tr class="faq-detail-row" data-faq-id="${faq.id}">
+                  <td colspan="3" class="p-0">
+                    <div class="faq-detail">
+                      <div class="mb-3">
+                        <h5 class="font-medium mb-1">Descrizione completa:</h5>
+                        <p class="text-sm">${faq.description}</p>
+                      </div>
+                      <div class="resolution-box p-3 rounded-md mt-3" style="background-color: rgba(0,0,0,0.1);">
+                        <h5 class="text-accent-yellow text-sm font-medium mb-2">Procedura risolutiva:</h5>
+                        <p class="text-sm">${faq.resolution}</p>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              `,
+                )
+                .join("")}
+            </tbody>
+          </table>
         </div>
       `;
     return section;
@@ -138,15 +147,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     });
     
-    // FAQ item accordions
-    document.querySelectorAll(".faq-preview").forEach((preview) => {
-      preview.addEventListener("click", () => {
-        const faqItem = preview.closest('.faq-item');
-        const detail = faqItem.querySelector('.faq-detail');
-        const icon = preview.querySelector('.faq-expand-icon');
+    // FAQ row accordions
+    document.querySelectorAll(".faq-row").forEach((row) => {
+      row.addEventListener("click", () => {
+        const faqId = row.getAttribute('data-faq-id');
+        const detailRows = document.querySelectorAll(`.faq-detail-row[data-faq-id="${faqId}"]`);
         
-        detail.classList.toggle("hidden");
-        icon.classList.toggle("rotate-180");
+        detailRows.forEach(detailRow => {
+          const detail = detailRow.querySelector('.faq-detail');
+          detail.classList.toggle("hidden");
+          
+          // Highlight active row
+          row.classList.toggle("bg-accent-yellow/10");
+        });
       });
     });
   };

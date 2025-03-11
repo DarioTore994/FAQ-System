@@ -29,6 +29,16 @@ async function initDatabase() {
       );
     `);
     console.log('Tabella users verificata/creata con successo');
+    
+    // Crea la tabella delle categorie se non esiste
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS categories (
+        id SERIAL PRIMARY KEY,
+        name TEXT UNIQUE NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+    console.log('Tabella categories verificata/creata con successo');
 
     // Verifica se la tabella esiste e se necessario la crea
     await client.query(`
@@ -58,6 +68,22 @@ async function initDatabase() {
       
       const userResult = await client.query('SELECT id FROM users WHERE email = $1', ['admin@example.com']);
       const adminId = userResult.rows[0].id;
+      
+      // Verifica se ci sono già categorie
+      const existingCategories = await client.query('SELECT COUNT(*) FROM categories');
+      
+      // Se non ci sono categorie, inserisci le categorie predefinite
+      if (parseInt(existingCategories.rows[0].count) === 0) {
+        const defaultCategories = ['Hardware', 'Software', 'Network', 'Security'];
+        
+        for (const category of defaultCategories) {
+          await client.query(
+            'INSERT INTO categories (name) VALUES ($1) ON CONFLICT (name) DO NOTHING',
+            [category]
+          );
+        }
+        console.log('Categorie predefinite create con successo!');
+      }
       
       // Verifica se ci sono già dati nella tabella
       const existingData = await client.query('SELECT COUNT(*) FROM faqs');
@@ -386,6 +412,83 @@ app.put("/api/users/:id/role", requireAdmin, async (req, res) => {
   } catch (error) {
     console.error('Errore aggiornamento ruolo:', error);
     return res.status(500).json({ error: 'Errore interno del server' });
+  }
+});
+
+// API per ottenere tutte le categorie
+app.get("/api/categories", async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT * FROM categories ORDER BY name');
+    return res.json(result.rows);
+  } catch (error) {
+    console.error("Errore nel recupero delle categorie:", error);
+    return res.status(500).json({ error: 'Errore interno del server' });
+  } finally {
+    client.release();
+  }
+});
+
+// API per aggiungere una nuova categoria (solo admin)
+app.post("/api/categories", requireAdmin, async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { name } = req.body;
+    
+    if (!name) {
+      return res.status(400).json({ error: 'Il nome della categoria è obbligatorio' });
+    }
+    
+    // Verifica se la categoria esiste già
+    const existingCategory = await client.query('SELECT id FROM categories WHERE name = $1', [name]);
+    if (existingCategory.rows.length > 0) {
+      return res.status(400).json({ error: 'Questa categoria esiste già' });
+    }
+    
+    const result = await client.query(
+      'INSERT INTO categories (name) VALUES ($1) RETURNING *',
+      [name]
+    );
+    
+    return res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error("Errore durante l'aggiunta della categoria:", error);
+    return res.status(500).json({ error: 'Errore interno del server' });
+  } finally {
+    client.release();
+  }
+});
+
+// API per eliminare una categoria (solo admin)
+app.delete("/api/categories/:id", requireAdmin, async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const categoryId = parseInt(req.params.id, 10);
+    
+    if (isNaN(categoryId)) {
+      return res.status(400).json({ error: 'ID categoria non valido' });
+    }
+    
+    // Verifica se ci sono FAQ associate a questa categoria
+    const faqCheck = await client.query('SELECT COUNT(*) FROM faqs WHERE category = (SELECT name FROM categories WHERE id = $1)', [categoryId]);
+    
+    if (parseInt(faqCheck.rows[0].count) > 0) {
+      return res.status(400).json({ error: 'Non è possibile eliminare questa categoria perché esistono FAQ associate ad essa' });
+    }
+    
+    // Elimina la categoria
+    const result = await client.query('DELETE FROM categories WHERE id = $1 RETURNING id', [categoryId]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Categoria non trovata' });
+    }
+    
+    return res.json({ success: true, message: 'Categoria eliminata con successo' });
+  } catch (error) {
+    console.error("Errore durante l'eliminazione della categoria:", error);
+    return res.status(500).json({ error: 'Errore interno del server' });
+  } finally {
+    client.release();
   }
 });
 
