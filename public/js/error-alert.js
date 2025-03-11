@@ -1,42 +1,51 @@
-function showErrorAlert(message, duration = 5000) {
-  const alertContainer = document.getElementById('alertContainer');
-  if (!alertContainer) {
-    // Crea il container degli alert se non esiste
-    const container = document.createElement('div');
-    container.id = 'alertContainer';
-    container.className = 'fixed top-4 right-4 z-50 flex flex-col items-end space-y-2';
-    document.body.appendChild(container);
+// Variabile globale per tenere traccia dell'alert attivo
+let activeAlert = null;
+let alertTimeout = null;
+
+function showErrorAlert(message, type = 'error') {
+  // Se c'è già un alert attivo, rimuovilo prima di mostrarne uno nuovo
+  if (activeAlert) {
+    document.body.removeChild(activeAlert);
+    clearTimeout(alertTimeout);
+    activeAlert = null;
   }
 
-  // Crea l'elemento dell'alert
-  const alert = document.createElement('div');
-  alert.className = 'bg-red-500 text-white px-4 py-3 rounded shadow-lg flex items-center transform transition-transform duration-300 ease-in-out';
-  alert.style.opacity = '0';
-  alert.style.transform = 'translateX(100%)';
+  const alertBox = document.createElement('div');
+  const alertClass = type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-blue-500';
 
-  // Aggiungi l'icona di errore
-  alert.innerHTML = `
-    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-    </svg>
-    <span>${message}</span>
-  `;
+  alertBox.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${alertClass} text-white transition-opacity duration-500`;
+  alertBox.innerHTML = message;
 
-  // Aggiungi l'alert al container
-  document.getElementById('alertContainer').appendChild(alert);
+  document.body.appendChild(alertBox);
 
-  // Anima l'entrata dell'alert
-  setTimeout(() => {
-    alert.style.opacity = '1';
-    alert.style.transform = 'translateX(0)';
-  }, 10);
+  // Imposta l'alert come attivo
+  activeAlert = alertBox;
 
-  // Rimuovi l'alert dopo il tempo specificato
-  setTimeout(() => {
-    alert.style.opacity = '0';
-    alert.style.transform = 'translateX(100%)';
+  // Fade out after 5 seconds and remove (aumentato da 3 a 5 secondi)
+  alertTimeout = setTimeout(() => {
+    alertBox.style.opacity = '0';
     setTimeout(() => {
-      alert.remove();
-    }, 300);
-  }, duration);
+      if (document.body.contains(alertBox)) {
+        document.body.removeChild(alertBox);
+      }
+      if (activeAlert === alertBox) {
+        activeAlert = null;
+      }
+    }, 500); // Wait for transition to complete before removing
+  }, 5000);
+
+  // Aggiungi la possibilità di chiudere l'alert cliccandoci sopra
+  alertBox.style.cursor = 'pointer';
+  alertBox.addEventListener('click', () => {
+    alertBox.style.opacity = '0';
+    setTimeout(() => {
+      if (document.body.contains(alertBox)) {
+        document.body.removeChild(alertBox);
+      }
+      if (activeAlert === alertBox) {
+        activeAlert = null;
+      }
+    }, 500);
+    clearTimeout(alertTimeout);
+  });
 }
