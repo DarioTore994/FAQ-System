@@ -210,6 +210,18 @@
                     </div>
 
                     <div class="form-control">
+                        <label class="form-label">Note Aggiuntive</label>
+                        <textarea name="notes" class="form-textarea" placeholder="Inserisci note aggiuntive (opzionale)"></textarea>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="form-label">Immagine</label>
+                        <input type="file" name="image" accept="image/*">
+                        <div id="imagePreview"></div>  <!-- Placeholder for image preview -->
+                    </div>
+
+
+                    <div class="form-control">
                         <label class="form-label">Stato</label>
                         <select name="status" class="form-select">
                             <option value="Nuovo">Nuovo</option>
@@ -286,13 +298,13 @@
                 // Aggiungi event listener al form di creazione FAQ
                 document.getElementById('faqForm').addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    
+
                     // Prevenire invii multipli con controllo esplicito
                     if (window.isSavingFaq) {
                         console.log('Prevenzione invio duplicato: richiesta già in corso');
                         return;
                     }
-                    
+
                     window.isSavingFaq = true; // Imposta flag per prevenire doppi invii
 
                     // Gestione stato pulsante di invio
@@ -323,7 +335,9 @@
                             title: formData.get('title'),
                             description: formData.get('description'),
                             resolution: formData.get('resolution'),
-                            status: formData.get('status')
+                            status: formData.get('status'),
+                            notes: formData.get('notes'),
+                            image: formData.get('image') // Add image to the data
                         };
 
                         console.log('Sending FAQ data:', faqData);

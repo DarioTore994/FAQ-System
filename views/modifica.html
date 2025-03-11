@@ -221,6 +221,33 @@
                         </select>
                     </div>
 
+                    <div class="form-control">
+                        <label class="form-label">Note interne</label>
+                        <textarea
+                            name="notes"
+                            id="notes"
+                            rows="3"
+                            class="form-textarea"
+                            placeholder="Aggiungi note interne (opzionale)"
+                        ></textarea>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="form-label">Immagine</label>
+                        <div class="flex flex-col space-y-2">
+                            <input
+                                type="text"
+                                name="image_url"
+                                id="image_url"
+                                class="form-input"
+                                placeholder="URL dell'immagine (opzionale)"
+                            />
+                            <div id="imagePreview" class="hidden mt-2 p-2 border border-gray-700 rounded-lg">
+                                <img id="previewImg" src="" alt="Anteprima immagine" class="max-w-full h-auto rounded">
+                            </div>
+                        </div>
+                    </div>
+
                     <button type="submit" class="submit-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
@@ -371,6 +398,14 @@
                 document.getElementById('title').value = faq.title || '';
                 document.getElementById('description').value = faq.description || '';
                 document.getElementById('resolution').value = faq.resolution || '';
+                document.getElementById('notes').value = faq.notes || '';
+                document.getElementById('image_url').value = faq.image_url || '';
+                
+                // Mostra anteprima immagine se presente
+                if (faq.image_url) {
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                    document.getElementById('previewImg').src = faq.image_url;
+                }
 
                 // Seleziona la categoria corretta
                 const categorySelect = document.getElementById('category');
@@ -471,7 +506,9 @@
                     title: formData.get('title'),
                     description: formData.get('description'),
                     resolution: formData.get('resolution'),
-                    status: formData.get('status')
+                    status: formData.get('status'),
+                    notes: formData.get('notes'),
+                    image_url: formData.get('image_url')
                 };
 
                 console.log('Sending updated FAQ data:', faqData);
@@ -579,9 +616,32 @@
             }
         });
 
+        // Funzione per aggiornare l'anteprima dell'immagine
+        function updateImagePreview() {
+            const imageUrl = document.getElementById('image_url').value;
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+            
+            if (imageUrl) {
+                previewImg.src = imageUrl;
+                previewImg.onload = function() {
+                    imagePreview.classList.remove('hidden');
+                };
+                previewImg.onerror = function() {
+                    imagePreview.classList.add('hidden');
+                    showErrorAlert('URL immagine non valido', 'error');
+                };
+            } else {
+                imagePreview.classList.add('hidden');
+            }
+        }
+        
         // Carica i dati della FAQ all'avvio
         window.addEventListener('DOMContentLoaded', async () => {
             try {
+                // Configura l'anteprima dell'immagine
+                document.getElementById('image_url').addEventListener('input', updateImagePreview);
+                
                 // Verifica autenticazione
                 const authResponse = await fetch('/api/auth/check');
                 const authData = await authResponse.json();

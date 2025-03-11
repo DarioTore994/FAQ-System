@@ -75,7 +75,7 @@ router.post('/auth/login', async (req, res) => {
       // Verifica la password con bcrypt
       const user = result.rows[0];
       const bcrypt = require('bcrypt');
-      
+
       // Stampa info di debug (rimuovi queste righe in produzione)
       console.log('Password fornita:', password);
       console.log('Password nel DB (hashed):', user.password);
@@ -154,17 +154,17 @@ router.get('/faqs', async (req, res) => {
 router.get('/faqs/:id', async (req, res) => {
   const { id } = req.params;
   const client = await pool.connect();
-  
+
   try {
     console.log(`Recupero FAQ con ID: ${id}`);
     const query = 'SELECT * FROM faqs WHERE id = $1';
     const result = await client.query(query, [id]);
-    
+
     if (result.rows.length === 0) {
       console.log(`FAQ con ID ${id} non trovata`);
       return res.status(404).json({ error: { message: 'FAQ non trovata' } });
     }
-    
+
     console.log(`FAQ con ID ${id} recuperata con successo`);
     return res.status(200).json(result.rows[0]);
   } catch (err) {
@@ -187,7 +187,7 @@ router.get('/categories', async (req, res) => {
     client = await pool.connect();
     const query = 'SELECT * FROM categories ORDER BY name';
     const result = await client.query(query);
-    
+
     return res.status(200).json(result.rows);
   } catch (err) {
     console.error('Errore API categorie:', err);
@@ -227,7 +227,7 @@ router.post('/categories', verificaAutenticazione, async (req, res) => {
     try {
       const query = 'INSERT INTO categories (name, description) VALUES ($1, $2) RETURNING *';
       const result = await client.query(query, [name, description || null]);
-      
+
       return res.status(201).json(result.rows[0]);
     } finally {
       client.release();
@@ -256,11 +256,11 @@ router.put('/categories/:id', verificaAutenticazione, async (req, res) => {
     try {
       const query = 'UPDATE categories SET name = $1, description = $2 WHERE id = $3 RETURNING *';
       const result = await client.query(query, [name, description || null, id]);
-      
+
       if (result.rows.length === 0) {
         return res.status(404).json({ error: 'Categoria non trovata' });
       }
-      
+
       return res.status(200).json(result.rows[0]);
     } finally {
       client.release();
@@ -284,11 +284,11 @@ router.delete('/categories/:id', verificaAutenticazione, async (req, res) => {
     try {
       const query = 'DELETE FROM categories WHERE id = $1 RETURNING *';
       const result = await client.query(query, [id]);
-      
+
       if (result.rows.length === 0) {
         return res.status(404).json({ error: 'Categoria non trovata' });
       }
-      
+
       return res.status(200).json({ success: true, message: 'Categoria eliminata con successo' });
     } finally {
       client.release();
@@ -302,7 +302,7 @@ router.delete('/categories/:id', verificaAutenticazione, async (req, res) => {
 // Endpoint per salvare una nuova FAQ
 router.post('/faqs', verificaAutenticazione, async (req, res) => {
   try {
-    const { category, title, description, resolution, status } = req.body;
+    const { category, title, description, resolution, status, notes, image_url } = req.body; // Added notes and image_url
     const userId = req.user ? req.user.id : null;
 
     if (!category || !title || !description || !resolution) {
@@ -331,8 +331,8 @@ router.post('/faqs', verificaAutenticazione, async (req, res) => {
     }
 
     // Inserisci la nuova FAQ nel database con user_id se disponibile
-    const query = 'INSERT INTO faqs (user_id, category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
-    const params = [userId || null, category, title, description, resolution, status];
+    const query = 'INSERT INTO faqs (user_id, category, title, description, resolution, status, notes, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *'; // Added notes and image_url
+    const params = [userId || null, category, title, description, resolution, status, notes || null, image_url || null]; // Added notes and image_url
 
     const result = await pool.query(query, params);
 
@@ -369,7 +369,7 @@ router.post('/faqs', verificaAutenticazione, async (req, res) => {
 router.put('/faqs/:id', verificaAutenticazione, async (req, res) => {
   try {
     const { id } = req.params;
-    const { category, title, description, resolution, status } = req.body;
+    const { category, title, description, resolution, status, notes, image_url } = req.body; // Added notes and image_url
     const userId = req.user ? req.user.id : null;
 
     if (!category || !title || !description || !resolution) {
@@ -409,14 +409,16 @@ router.put('/faqs/:id', verificaAutenticazione, async (req, res) => {
           description = $3, 
           resolution = $4, 
           status = $5,
+          notes = $6, // Added notes
+          image_url = $7, // Added image_url
           updated_at = NOW()
-      WHERE id = $6 
+      WHERE id = $8 
       RETURNING *
     `;
-    const params = [category, title, description, resolution, status || 'Nuovo', id];
+    const params = [category, title, description, resolution, status || 'Nuovo', notes || null, image_url || null, id]; // Added notes and image_url
 
     const result = await pool.query(query, params);
-    
+
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('Errore aggiornamento FAQ:', error);
@@ -459,7 +461,9 @@ router.post('/init-db', async (req, res) => {
         resolution TEXT NOT NULL,
         status VARCHAR(50) DEFAULT 'Nuovo',
         created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMP
+        updated_at TIMESTAMP,
+        notes TEXT,  // Added notes column
+        image_url VARCHAR(255)  // Added image_url column
       );
     `);
 
@@ -497,12 +501,12 @@ router.get('/users', verificaAutenticazione, async (req, res) => {
         }
       });
     }
-    
+
     const client = await pool.connect();
     try {
       const query = 'SELECT id, email, role, created_at FROM users ORDER BY created_at DESC';
       const result = await client.query(query);
-      
+
       return res.status(200).json(result.rows);
     } finally {
       client.release();
@@ -523,7 +527,7 @@ router.put('/users/:id/role', verificaAutenticazione, async (req, res) => {
   try {
     const { id } = req.params;
     const { role } = req.body;
-    
+
     // Verifica se l'utente è un amministratore
     if (req.user.role !== 'admin') {
       return res.status(403).json({ 
@@ -532,7 +536,7 @@ router.put('/users/:id/role', verificaAutenticazione, async (req, res) => {
         }
       });
     }
-    
+
     if (!role || !['admin', 'user'].includes(role)) {
       return res.status(400).json({ 
         error: {
@@ -540,12 +544,12 @@ router.put('/users/:id/role', verificaAutenticazione, async (req, res) => {
         }
       });
     }
-    
+
     const client = await pool.connect();
     try {
       const query = 'UPDATE users SET role = $1 WHERE id = $2 RETURNING id, email, role';
       const result = await client.query(query, [role, id]);
-      
+
       if (result.rows.length === 0) {
         return res.status(404).json({ 
           error: {
@@ -553,7 +557,7 @@ router.put('/users/:id/role', verificaAutenticazione, async (req, res) => {
           }
         });
       }
-      
+
       return res.status(200).json({ 
         success: true, 
         user: result.rows[0],
@@ -577,7 +581,7 @@ router.put('/users/:id/role', verificaAutenticazione, async (req, res) => {
 router.delete('/users/:id', verificaAutenticazione, async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Verifica se l'utente è un amministratore
     if (req.user.role !== 'admin') {
       return res.status(403).json({ 
@@ -586,7 +590,7 @@ router.delete('/users/:id', verificaAutenticazione, async (req, res) => {
         }
       });
     }
-    
+
     // Non permettere di eliminare il proprio account
     if (req.user.id.toString() === id) {
       return res.status(400).json({ 
@@ -595,12 +599,12 @@ router.delete('/users/:id', verificaAutenticazione, async (req, res) => {
         }
       });
     }
-    
+
     const client = await pool.connect();
     try {
       const query = 'DELETE FROM users WHERE id = $1 RETURNING id';
       const result = await client.query(query, [id]);
-      
+
       if (result.rows.length === 0) {
         return res.status(404).json({ 
           error: {
@@ -608,7 +612,7 @@ router.delete('/users/:id', verificaAutenticazione, async (req, res) => {
           }
         });
       }
-      
+
       return res.status(200).json({ 
         success: true, 
         message: 'Utente eliminato con successo'
@@ -631,14 +635,14 @@ router.delete('/users/:id', verificaAutenticazione, async (req, res) => {
 router.post('/users/recover', verificaAutenticazione, async (req, res) => {
   try {
     const { email } = req.body;
-    
+
     // Verifica se l'utente è un amministratore
     if (req.user.role !== 'admin') {
       return res.status(403).json({ 
         error: 'Accesso non autorizzato: è richiesto il ruolo di amministratore'
       });
     }
-    
+
     // Verifica se l'email esiste nel database
     const userQuery = 'SELECT * FROM users WHERE email = $1';
     const userResult = await pool.query(userQuery, [email]);
@@ -661,7 +665,7 @@ router.post('/users/recover', verificaAutenticazione, async (req, res) => {
 
     // Invio email configurato in server
     const nodemailer = require('nodemailer');
-    
+
     try {
       // Configura il trasporto email con le credenziali dal file .env
       const transporter = nodemailer.createTransport({
@@ -699,7 +703,7 @@ router.post('/users/recover', verificaAutenticazione, async (req, res) => {
 
       // Invio dell'email
       await transporter.sendMail(mailOptions);
-      
+
       return res.status(200).json({ 
         success: true, 
         message: 'Email di recupero inviata con successo' 

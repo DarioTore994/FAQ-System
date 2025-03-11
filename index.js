@@ -58,37 +58,25 @@ app.get('/api/auth/check', async (req, res) => {
   try {
     // Verifica se il token è presente nei cookie o nell'header
     const token = req.headers.authorization?.split(' ')[1] || req.cookies?.token;
-    
+
     if (!token) {
       console.log('Nessun token fornito');
       return res.status(200).json({ authenticated: false, message: 'Nessun token fornito' });
     }
-    
+
     // Verifica il token
     try {
       const userQuery = 'SELECT * FROM users WHERE id = $1';
       const userResult = await pool.query(userQuery, [token]);
-      
+
       if (userResult.rows.length === 0) {
         console.log('Utente non trovato con token:', token);
         return res.status(200).json({ authenticated: false, message: 'Utente non trovato' });
       }
-      
-      const user = userResult.rows[0];
-      
-      // Ritorna le informazioni dell'utente (esclusa la password)
 
-// Endpoint per il logout
-app.post('/api/auth/logout', (req, res) => {
-  try {
-    // Cancella il cookie del token
-    res.clearCookie('token');
-    return res.status(200).json({ success: true, message: 'Logout completato con successo' });
-  } catch (error) {
-    console.error('Errore durante il logout:', error);
-    return res.status(500).json({ error: 'Errore durante il logout', details: error.message });
-  }
-});
+      const user = userResult.rows[0];
+
+      // Ritorna le informazioni dell'utente (esclusa la password)
 
       const { password, ...userInfo } = user;
       return res.status(200).json({ 
@@ -102,6 +90,18 @@ app.post('/api/auth/logout', (req, res) => {
   } catch (error) {
     console.error('Errore nel controllo autenticazione:', error);
     return res.status(200).json({ authenticated: false, message: 'Errore nel controllo autenticazione' });
+  }
+});
+
+// Endpoint per il logout
+app.post('/api/auth/logout', (req, res) => {
+  try {
+    // Cancella il cookie del token
+    res.clearCookie('token');
+    return res.status(200).json({ success: true, message: 'Logout completato con successo' });
+  } catch (error) {
+    console.error('Errore durante il logout:', error);
+    return res.status(500).json({ error: 'Errore durante il logout', details: error.message });
   }
 });
 
@@ -280,7 +280,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
 
 app.post('/api/faq/create', async (req, res) => {
     try {
-        const { category, title, description, resolution, status } = req.body;
+        const { category, title, description, resolution, status, notes, image_url } = req.body;
 
         if (!category || !title || !description || !resolution) {
             return res.status(400).json({ error: { message: 'Tutti i campi sono obbligatori' } });
@@ -288,8 +288,8 @@ app.post('/api/faq/create', async (req, res) => {
 
         // Inserisci la nuova FAQ nel database senza richiedere user_id
         const result = await pool.query(
-            'INSERT INTO faqs (category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [category, title, description, resolution, status || 'Nuovo']
+            'INSERT INTO faqs (category, title, description, resolution, status, notes, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+            [category, title, description, resolution, status || 'Nuovo', notes || null, image_url || null]
         );
 
         res.json({ success: true, data: result.rows[0] });
@@ -305,8 +305,6 @@ app.post('/api/faq/create', async (req, res) => {
     }
 });
 
-
-// ... (rest of the app.js file) ...
 
 const port = process.env.PORT || 3001;
 app.listen(port, '0.0.0.0', () => console.log(`Server started on port ${port} at 0.0.0.0`));

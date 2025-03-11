@@ -10,10 +10,15 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS faqs (
   id SERIAL PRIMARY KEY,
+  user_id INTEGER,
   category VARCHAR(100) NOT NULL,
   title VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
   resolution TEXT NOT NULL,
+  notes TEXT,
+  image_url VARCHAR(255),
   status VARCHAR(50) DEFAULT 'Nuovo',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
