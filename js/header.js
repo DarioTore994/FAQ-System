@@ -1,15 +1,10 @@
 document.addEventListener('DOMContentLoaded', async function() {
     try {
-        // Controlla se siamo nella pagina di autenticazione
-        const isAuthPage = window.location.pathname === '/auth';
-        
-        // Se siamo nella pagina di autenticazione, non è necessario fare ulteriori controlli
-        if (isAuthPage) {
-            return;
-        }
-        
         const logoutBtn = document.getElementById('logoutBtn');
         const loginBtn = document.getElementById('loginBtn');
+
+        // Gestione errori duplicazione FAQ
+        const urlPath = window.location.pathname;
 
         // Aggiungi event listener per il logout
         if (logoutBtn) {
@@ -21,10 +16,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (!response.ok) {
             // Non autenticato - mostra solo login e Home
             if (loginBtn) loginBtn.classList.remove('hidden');
-            
+
             const authUserContainer = document.getElementById('authUserContainer');
             if (authUserContainer) authUserContainer.classList.add('hidden');
-            
+
             const adminMenu = document.getElementById('adminMenu');
             if (adminMenu) adminMenu.classList.add('hidden');
             return;
@@ -35,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (data.authenticated) {
             // Utente autenticato
             if (loginBtn) loginBtn.classList.add('hidden');
-            
+
             const authUserContainer = document.getElementById('authUserContainer');
             if (authUserContainer) authUserContainer.classList.remove('hidden');
 
@@ -47,10 +42,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         } else {
             // Non autenticato - mostra solo login
             if (loginBtn) loginBtn.classList.remove('hidden');
-            
+
             const authUserContainer = document.getElementById('authUserContainer');
             if (authUserContainer) authUserContainer.classList.add('hidden');
-            
+
             const adminMenu = document.getElementById('adminMenu');
             if (adminMenu) adminMenu.classList.add('hidden');
         }
@@ -59,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // In caso di errore, mostra solo login
         const loginBtn = document.getElementById('loginBtn');
         if (loginBtn) loginBtn.classList.remove('hidden');
-        
+
         const authUserContainer = document.getElementById('authUserContainer');
         if (authUserContainer) authUserContainer.classList.add('hidden');
     }

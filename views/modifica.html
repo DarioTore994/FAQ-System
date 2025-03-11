@@ -256,11 +256,16 @@
             return params;
         }
 
+        // Funzione per ottenere l'ID della FAQ dall'URL
+        function getFaqIdFromUrl() {
+            const params = getUrlParams();
+            return params.id;
+        }
+
         // Carica i dati della FAQ in base all'ID
         async function loadFaqData() {
             try {
-                const params = getUrlParams();
-                const faqId = params.id;
+                const faqId = getFaqIdFromUrl();
 
                 if (!faqId) {
                     showErrorAlert('ID FAQ mancante nell\'URL', 'error');
@@ -401,35 +406,61 @@
                     method: 'POST'
                 });
 
-                // Aggiorna la FAQ
-                const response = await fetch(`/api/faqs/${faqData.id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(faqData),
-                    credentials: 'include'
-                });
+                // Invia i dati al server
+                async function saveFaq() {
+                    const category = document.getElementById('category').value;
+                    const title = document.getElementById('title').value;
+                    const description = document.getElementById('description').value;
+                    const resolution = document.getElementById('resolution').value;
+                    const status = document.getElementById('status').value;
+                    const faqId = getFaqIdFromUrl();
 
-                // Gestione errori
-                if (!response.ok) {
-                    const contentType = response.headers.get('content-type');
+                    // Verifica input
+                    if (!category || !title || !description || !resolution) {
+                        showNotification('Compila tutti i campi obbligatori', 'error');
+                        return;
+                    }
 
-                    if (contentType && contentType.includes('application/json')) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error?.message || 'Errore sconosciuto');
-                    } else {
-                        if (response.status === 401 || response.status === 403) {
-                            throw new Error('Sessione scaduta. Effettua nuovamente il login.');
-                        } else {
-                            throw new Error(`Errore del server (${response.status}): Riprova più tardi`);
+                    try {
+                        // Se abbiamo l'ID della FAQ, usiamo PUT per aggiornare
+                        const url = faqId ? `/api/faqs/${faqId}` : '/api/faqs';
+                        const method = faqId ? 'PUT' : 'POST';
+
+                        console.log(`Salvataggio FAQ con metodo ${method} a ${url}`);
+
+                        const response = await fetch(url, {
+                            method: method,
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                category,
+                                title,
+                                description,
+                                resolution,
+                                status
+                            }),
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error?.message || 'Errore durante il salvataggio');
                         }
+
+                        const data = await response.json();
+                        showNotification(`FAQ ${faqId ? 'aggiornata' : 'creata'} con successo!`, 'success');
+
+                        // Ritorna alla dashboard dopo il salvataggio
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 2000);
+                    } catch (error) {
+                        console.error('Errore:', error);
+                        showNotification(`Errore: ${error.message}`, 'error');
                     }
                 }
+                await saveFaq();
 
-                // Successo!
-                const data = await response.json();
-                console.log('Risposta grezza del server:', JSON.stringify(data));
 
                 // Aggiorna UI per successo
                 updateButtonState(true, `
@@ -562,6 +593,13 @@
                     }
                 }, 200); // Transizione più veloce (ridotta da 300ms a 200ms)
             }, 4000); // Tempo di visualizzazione dimezzato (da 8000ms a 4000ms)
+        }
+
+
+        // Funzione per mostrare notifiche
+        function showNotification(message, type = 'info') {
+            // Implementazione della notifica (da definire)
+            console.log(`Notifica ${type}: ${message}`);
         }
     </script>
 </body>

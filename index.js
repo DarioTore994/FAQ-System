@@ -40,6 +40,18 @@ async function initDatabase() {
       );
     `);
     console.log('Tabella users verificata/creata con successo');
+    
+    // Creare tabella per token di recupero password
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        token TEXT UNIQUE NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        expires_at TIMESTAMPTZ NOT NULL
+      );
+    `);
+    console.log('Tabella password_reset_tokens verificata/creata con successo');
 
     // Crea la tabella delle categorie se non esiste
     await client.query(`
@@ -152,6 +164,12 @@ async function initDatabase() {
 // Esegui l'inizializzazione
 initDatabase();
 
+// Importa moduli per email e gestione token
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+const { promisify } = require('util');
+const randomBytes = promisify(crypto.randomBytes);
+
 // Middleware
 app.use(express.static("public"));
 app.use(express.json());
@@ -256,6 +274,9 @@ app.get("/users", requireAdmin, (req, res) =>
 );
 app.get("/categories", requireAdmin, (req, res) =>
   res.sendFile(path.join(__dirname, "views/categories.html")),
+);
+app.get("/reset-password", (req, res) =>
+  res.sendFile(path.join(__dirname, "views/reset-password.html")),
 );
 
 // API autenticazione
@@ -438,6 +459,157 @@ app.post("/api/auth/logout", (req, res) => {
 
   // Risposta standard
   res.json({ success: true, message: 'Utente disconnesso con successo' });
+});
+
+// API per richiesta recupero password
+app.post("/api/auth/recover-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email obbligatoria' });
+    }
+
+    const client = await pool.connect();
+    try {
+      // Verifica se l'utente esiste
+      const userResult = await client.query('SELECT id, email FROM users WHERE email = $1', [email]);
+      
+      if (userResult.rows.length === 0) {
+        // Non rivelare se l'email esiste o meno (sicurezza)
+        return res.json({ success: true, message: 'Se l\'indirizzo email è registrato, riceverai un link per reimpostare la password.' });
+      }
+
+      const user = userResult.rows[0];
+      
+      // Genera token casuale
+      const tokenBuffer = await randomBytes(32);
+      const token = tokenBuffer.toString('hex');
+      
+      // Calcola data di scadenza (1 ora)
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 1);
+      
+      // Elimina eventuali token precedenti per l'utente
+      await client.query('DELETE FROM password_reset_tokens WHERE user_id = $1', [user.id]);
+      
+      // Salva nuovo token
+      await client.query(
+        'INSERT INTO password_reset_tokens (user_id, token, expires_at) VALUES ($1, $2, $3)',
+        [user.id, token, expiresAt]
+      );
+      
+      // Configura nodemailer (usa variabili d'ambiente per credenziali in produzione)
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.example.com',
+        port: process.env.SMTP_PORT || 587,
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER || 'user@example.com',
+          pass: process.env.SMTP_PASS || 'password'
+        }
+      });
+      
+      // URL del reset (usa la URL del tuo sito)
+      const resetUrl = `${process.env.APP_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
+      
+      // Prepara l'email
+      const mailOptions = {
+        from: process.env.MAIL_FROM || '"FAQ Portal" <noreply@example.com>',
+        to: user.email,
+        subject: 'Recupero Password - FAQ Portal',
+        text: `Hai richiesto il reset della password. Clicca sul seguente link per reimpostare la tua password: ${resetUrl}\n\nQuesto link scadrà tra un'ora.\n\nSe non hai richiesto il reset della password, ignora questa email.`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+            <h2 style="color: #ffd700; text-align: center;">Recupero Password - FAQ Portal</h2>
+            <p>Hai richiesto il reset della password per il tuo account FAQ Portal.</p>
+            <p>Clicca sul pulsante qui sotto per reimpostare la tua password:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}" style="background-color: #ffd700; color: #333; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Reimposta Password</a>
+            </div>
+            <p>Oppure copia e incolla questo link nel tuo browser:</p>
+            <p style="background-color: #f5f5f5; padding: 10px; border-radius: 5px; word-break: break-all;">${resetUrl}</p>
+            <p><strong>Nota:</strong> Questo link scadrà tra un'ora.</p>
+            <p>Se non hai richiesto il reset della password, ignora questa email.</p>
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+            <p style="color: #777; font-size: 12px; text-align: center;">© 2024 FAQ Portal - Tutti i diritti riservati</p>
+          </div>
+        `
+      };
+
+      // In modalità sviluppo, stampa l'URL di reset invece di inviare l'email
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Link di reset password (SOLO SVILUPPO):', resetUrl);
+        return res.json({ 
+          success: true, 
+          message: 'Link di reset generato con successo. Controlla la console del server.'
+        });
+      }
+      
+      // Invia l'email
+      try {
+        await transporter.sendMail(mailOptions);
+        return res.json({ 
+          success: true, 
+          message: 'Se l\'indirizzo email è registrato, riceverai un link per reimpostare la password.'
+        });
+      } catch (emailErr) {
+        console.error('Errore invio email:', emailErr);
+        return res.status(500).json({ error: 'Errore durante l\'invio dell\'email di recupero' });
+      }
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Errore recupero password:', error);
+    return res.status(500).json({ error: 'Errore interno del server' });
+  }
+});
+
+// API per reset password
+app.post("/api/auth/reset-password", async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ error: 'Token e password sono obbligatori' });
+    }
+
+    // Verifica che la password sia sufficientemente lunga
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'La password deve contenere almeno 6 caratteri' });
+    }
+
+    const client = await pool.connect();
+    try {
+      // Verifica validità del token
+      const now = new Date();
+      const tokenResult = await client.query(
+        'SELECT user_id FROM password_reset_tokens WHERE token = $1 AND expires_at > $2',
+        [token, now]
+      );
+
+      if (tokenResult.rows.length === 0) {
+        return res.status(400).json({ error: 'Token non valido o scaduto' });
+      }
+
+      const userId = tokenResult.rows[0].user_id;
+
+      // Aggiorna la password dell'utente
+      // Nota: in produzione, dovresti hashare la password con bcrypt o simili
+      await client.query('UPDATE users SET password = $1 WHERE id = $2', [password, userId]);
+
+      // Elimina il token usato
+      await client.query('DELETE FROM password_reset_tokens WHERE token = $1', [token]);
+
+      return res.json({ success: true, message: 'Password reimpostata con successo' });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Errore reset password:', error);
+    return res.status(500).json({ error: 'Errore interno del server' });
+  }
 });
 
 // API per ottenere tutti gli utenti (solo per admin)
