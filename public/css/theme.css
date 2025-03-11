@@ -1,11 +1,11 @@
 :root {
-    --bg-primary: #ffffff;
-    --bg-secondary: #f5f7fa;
-    --text-primary: #0d2b45;
-    --text-secondary: #1e4976;
+    --bg-primary: #000000; /* Changed to black */
+    --bg-secondary: #111111; /* Darker gray/black */
+    --text-primary: #ffffff; /* Changed to white for contrast */
+    --text-secondary: #cccccc; /* Lighter gray/white */
     --accent-color: #2b6cb0;
     --accent-hover: #1d4ed8;
-    --border-color: #e2e8f0;
+    --border-color: #333333; /* Darker gray/black */
 }
 
 /* Stili globali ottimizzati */
