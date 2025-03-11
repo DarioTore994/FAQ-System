@@ -145,9 +145,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       try {
         console.log('Sending FAQ data:', faqData);
+        
+        // Validazione lato client
+        const missingFields = [];
+        Object.entries(faqData).forEach(([key, value]) => {
+          if (!value) missingFields.push(key);
+        });
+        
+        if (missingFields.length > 0) {
+          throw new Error(`Campi mancanti: ${missingFields.join(', ')}`);
+        }
 
         // Verifica autenticazione prima di inviare
         const authCheck = await fetch('/api/auth/check');
+        if (!authCheck.ok) {
+          console.error('Errore verifica autenticazione:', await authCheck.text());
+          throw new Error('Errore verifica autenticazione');
+        }
+        
         const authData = await authCheck.json();
 
         if (!authData.authenticated) {
@@ -158,6 +173,25 @@ document.addEventListener("DOMContentLoaded", async () => {
           return;
         }
 
+        // Prima verifica se la tabella esiste
+        showErrorAlert('Verifica tabella in corso...');
+        
+        const tableCheck = await fetch('/api/init-db', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+        
+        if (!tableCheck.ok) {
+          console.warn('Errore verifica tabella:', await tableCheck.text());
+        } else {
+          console.log('Tabella verificata');
+        }
+
+        showErrorAlert('Salvataggio FAQ in corso...');
+        
         const response = await fetch('/api/faqs', {
           method: 'POST',
           headers: {
@@ -167,34 +201,33 @@ document.addEventListener("DOMContentLoaded", async () => {
           credentials: 'include'
         });
 
-        // Prima verifica se la tabella esiste
-        const tableCheck = await fetch('/api/init-db', {
-          method: 'POST',
-          credentials: 'include'
-        });
+        let responseText;
+        try {
+          responseText = await response.text();
+          console.log('Risposta grezza del server:', responseText);
+        } catch (textErr) {
+          console.error('Errore lettura risposta:', textErr);
+          responseText = 'Errore lettura risposta';
+        }
+        
+        let responseData;
+        try {
+          responseData = JSON.parse(responseText);
+        } catch (parseErr) {
+          console.error('Errore parsing JSON:', parseErr, 'Testo:', responseText);
+          throw new Error('Risposta del server non valida');
+        }
 
-        // Riprova a salvare dopo aver verificato la tabella
-        const retryResponse = !response.ok ? await fetch('/api/faqs', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(faqData),
-          credentials: 'include'
-        }) : response;
-
-        const responseData = await retryResponse.json().catch((err) => {
-          console.error("Errore parsing JSON:", err);
-          return { error: { message: "Errore nella risposta del server" } };
-        });
-
-        if (!retryResponse.ok) {
-          throw new Error(responseData.error?.message || 'Errore durante il salvataggio: ' + JSON.stringify(responseData));
+        if (!response.ok) {
+          console.error('Dettagli errore server:', responseData);
+          throw new Error(responseData.error?.message || 
+            (responseData.error?.details ? `Errore: ${responseData.error.details}` : 
+            'Errore durante il salvataggio nel database'));
         }
 
         showErrorAlert('FAQ salvata con successo!');
 
-        // Redirect to home after successful creation (with a small delay to show success message)
+        // Redirect to home after successful creation
         setTimeout(() => {
           window.location.href = '/dashboard';
         }, 1500);

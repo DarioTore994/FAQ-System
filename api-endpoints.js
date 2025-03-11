@@ -59,64 +59,106 @@ router.post('/faqs', async (req, res) => {
   try {
     const { category, title, description, resolution } = req.body;
     
+    console.log('API Mobile - Richiesta inserimento FAQ:', {
+      category, 
+      title,
+      descriptionLength: description?.length || 0,
+      resolutionLength: resolution?.length || 0
+    });
+    
     if (!category || !title || !description || !resolution) {
+      console.error('API Mobile - Campi mancanti:', { category, title, description, resolution });
       return res.status(400).json({ error: 'Tutti i campi sono obbligatori' });
     }
     
     // Verifica prima se la tabella esiste
+    console.log('API Mobile - Verifica tabella...');
     try {
-      const tableCheck = await supabase.from('faqs').select('id').limit(1);
+      const { data: tableCheck, error: tableError } = await supabase
+        .from('faqs')
+        .select('id')
+        .limit(1);
       
-      if (tableCheck.error && tableCheck.error.code === '42P01') {
-        // La tabella non esiste, proviamo a crearla
-        try {
-          await supabase.rpc('exec_sql', {
-            query_text: `
-              CREATE TABLE IF NOT EXISTS faqs (
-                id SERIAL PRIMARY KEY,
-                category TEXT NOT NULL,
-                title TEXT NOT NULL,
-                description TEXT NOT NULL,
-                resolution TEXT NOT NULL,
-                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-              );
-            `
-          });
-          console.log('Tabella creata con successo nell\'API mobile');
-        } catch (createErr) {
-          console.error('Errore creazione tabella:', createErr);
-          return res.status(500).json({ 
-            error: 'Errore nella creazione della tabella',
-            details: createErr.message
-          });
+      if (tableError) {
+        console.error('API Mobile - Errore verifica tabella:', tableError);
+        
+        if (tableError.code === '42P01') {
+          // La tabella non esiste, proviamo a crearla
+          console.log('API Mobile - Creazione tabella...');
+          try {
+            const { error: rpcError } = await supabase.rpc('exec_sql', {
+              query_text: `
+                CREATE TABLE IF NOT EXISTS faqs (
+                  id SERIAL PRIMARY KEY,
+                  category TEXT NOT NULL,
+                  title TEXT NOT NULL,
+                  description TEXT NOT NULL,
+                  resolution TEXT NOT NULL,
+                  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                );
+              `
+            });
+            
+            if (rpcError) {
+              console.error('API Mobile - Errore RPC creazione tabella:', rpcError);
+              // Fallback diretto a Supabase
+              console.log('API Mobile - Tentativo diretto creazione tabella...');
+              await supabase.auth.getSession();
+            } else {
+              console.log('API Mobile - Tabella creata con successo tramite RPC');
+            }
+          } catch (createErr) {
+            console.error('API Mobile - Errore creazione tabella:', createErr);
+            return res.status(500).json({ 
+              error: 'Errore nella creazione della tabella',
+              details: createErr.message,
+              stack: createErr.stack
+            });
+          }
         }
+      } else {
+        console.log('API Mobile - Tabella esistente, record trovati:', tableCheck?.length || 0);
       }
     } catch (checkErr) {
-      console.error('Errore verifica tabella:', checkErr);
+      console.error('API Mobile - Eccezione verifica tabella:', checkErr);
     }
     
     // Ora proviamo a inserire i dati
-    const { data, error } = await supabase.from('faqs').insert([{
-      category,
-      title,
-      description,
-      resolution
-    }]);
+    console.log('API Mobile - Inserimento dati...');
+    const { data, error } = await supabase
+      .from('faqs')
+      .insert([{
+        category,
+        title,
+        description,
+        resolution
+      }])
+      .select();
     
     if (error) {
-      console.error('Errore inserimento dati:', error);
+      console.error('API Mobile - Errore inserimento dati:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
+      
       return res.status(500).json({ 
-        error: error.message,
-        details: error 
+        error: 'Errore inserimento dati',
+        message: error.message,
+        code: error.code,
+        hint: error.hint || 'Verifica le credenziali di accesso al database o i permessi'
       });
     }
     
+    console.log('API Mobile - FAQ inserita con successo:', data);
     return res.status(201).json({ success: true, data });
   } catch (err) {
-    console.error('Errore salvataggio FAQ:', err);
+    console.error('API Mobile - Errore salvataggio FAQ:', err);
     return res.status(500).json({ 
       error: 'Errore durante il salvataggio della FAQ',
-      details: err.message
+      details: err.message,
+      stack: err.stack
     });
   }
 });

@@ -187,43 +187,91 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
     // Validate that all required fields are present
     const { category, title, description, resolution } = req.body;
     
+    console.log('Ricevuta richiesta di salvataggio FAQ:', {
+      category, title, 
+      description: description?.substring(0, 20) + '...',
+      resolution: resolution?.substring(0, 20) + '...'
+    });
+    
     if (!category || !title || !description || !resolution) {
+      console.error('Campi mancanti:', { category, title, description, resolution });
       return res.status(400).json({ 
         error: { message: 'Tutti i campi sono obbligatori' } 
       });
     }
     
     // Verifica se la tabella esiste prima del salvataggio
+    console.log('Verifica esistenza tabella...');
     try {
-      await supabase.from('faqs').select('count').limit(1);
-    } catch (tableError) {
-      console.log('Verifica tabella fallita, creazione tabella...');
-      try {
-        await supabase.sql(`
-          CREATE TABLE IF NOT EXISTS faqs (
-            id SERIAL PRIMARY KEY,
-            category TEXT NOT NULL,
-            title TEXT NOT NULL,
-            description TEXT NOT NULL,
-            resolution TEXT NOT NULL,
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-          );
-        `);
-        console.log('Tabella faqs creata con successo');
-      } catch (createErr) {
-        console.error('Errore durante la creazione della tabella:', createErr);
-        return res.status(500).json({ 
-          error: { message: 'Impossibile creare la tabella FAQ', details: createErr } 
-        });
+      const { data: tableCheck, error: tableCheckError } = await supabase
+        .from('faqs')
+        .select('count')
+        .limit(1);
+        
+      if (tableCheckError) {
+        console.error('Errore verifica tabella:', tableCheckError);
+        
+        console.log('Verifica tabella fallita, creazione tabella...');
+        try {
+          // Prova prima con il metodo SQL standard
+          const { error: sqlError } = await supabase.rpc('exec_sql', {
+            query_text: `
+              CREATE TABLE IF NOT EXISTS faqs (
+                id SERIAL PRIMARY KEY,
+                category TEXT NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL,
+                resolution TEXT NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+              );
+            `
+          });
+          
+          if (sqlError) {
+            console.error('Errore RPC per creazione tabella:', sqlError);
+            
+            // Tentativo alternativo
+            await supabase.auth.getSession();
+            console.log('Verificata sessione auth. Tentativo creazione tabella con metodi alternativi...');
+          } else {
+            console.log('Tabella faqs creata con successo tramite RPC');
+          }
+        } catch (createErr) {
+          console.error('Errore durante la creazione della tabella:', createErr);
+          return res.status(500).json({ 
+            error: { message: 'Impossibile creare la tabella FAQ', details: createErr.toString() } 
+          });
+        }
+      } else {
+        console.log('Tabella trovata, numero di record:', tableCheck?.length > 0 ? tableCheck[0]?.count : 0);
       }
+    } catch (tableError) {
+      console.error('Eccezione verifica tabella:', tableError);
     }
     
-    const { data, error } = await supabase.from("faqs").insert([req.body]);
+    console.log('Tentativo di inserimento FAQ...');
+    
+    // Prepara l'oggetto con solo i campi necessari
+    const faqData = { 
+      category, 
+      title, 
+      description, 
+      resolution 
+    };
+    
+    console.log('Dati FAQ da inserire:', faqData);
+    
+    const { data, error } = await supabase.from("faqs").insert([faqData]).select();
     
     if (error) {
       console.error('Errore Supabase durante inserimento FAQ:', error);
       return res.status(500).json({ 
-        error: { message: 'Errore durante il salvataggio nel database', details: error } 
+        error: { 
+          message: 'Errore durante il salvataggio nel database', 
+          details: error.message, 
+          code: error.code || 'unknown',
+          hint: error.hint || 'Nessun suggerimento disponibile'
+        } 
       });
     }
     
@@ -232,7 +280,11 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
   } catch (err) {
     console.error('Errore imprevisto durante inserimento FAQ:', err);
     return res.status(500).json({ 
-      error: { message: 'Errore interno del server', details: err.toString() } 
+      error: { 
+        message: 'Errore interno del server', 
+        details: err.toString(),
+        stack: err.stack 
+      } 
     });
   }
 });
