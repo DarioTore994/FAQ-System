@@ -558,13 +558,12 @@
             }
         });
 
-        // Variabile globale per tenere traccia della notifica attiva
-        let activeNotification = null;
-        let notificationTimeout = null;
-
         // Funzione per mostrare notifiche all'utente senza sovrapposizioni
         function showErrorAlert(message, type = 'info') {
             // Se c'è già una notifica attiva, rimuovila prima di mostrarne una nuova
+            let activeNotification = null; //Dichiarazione qui
+            let notificationTimeout = null; //Dichiarazione qui
+
             if (activeNotification) {
                 document.body.removeChild(activeNotification);
                 clearTimeout(notificationTimeout);
@@ -611,7 +610,6 @@
             // Implementazione della notifica (da definire)
             console.log(`Notifica ${type}: ${message}`);
         }
-
         // Funzione per ottenere parametri dall'URL
         function getURLParameter(name) {
             const urlParams = new URLSearchParams(window.location.search);
@@ -820,13 +818,12 @@
             }
         });
 
-        // Variabile globale per tenere traccia della notifica attiva
-        let activeNotification = null;
-        let notificationTimeout = null;
-
         // Funzione per mostrare notifiche all'utente senza sovrapposizioni
         function showErrorAlert(message, type = 'info') {
             // Se c'è già una notifica attiva, rimuovila prima di mostrarne una nuova
+            let activeNotification = null;
+            let notificationTimeout = null;
+
             if (activeNotification) {
                 document.body.removeChild(activeNotification);
                 clearTimeout(notificationTimeout);
