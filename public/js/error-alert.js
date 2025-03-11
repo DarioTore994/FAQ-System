@@ -148,3 +148,59 @@ window.addEventListener('unhandledrejection', function(event) {
   console.error('Promise non gestita:', event.reason);
   showErrorAlert('Errore asincrono: ' + (event.reason?.message || 'Errore sconosciuto'));
 });
+// Funzione per mostrare errori in formato alert
+function showErrorAlert(message, isError = true) {
+  const alertContainer = document.getElementById('alertContainer');
+  
+  // Se non esiste, creiamo il container
+  if (!alertContainer) {
+    const newAlertContainer = document.createElement('div');
+    newAlertContainer.id = 'alertContainer';
+    newAlertContainer.className = 'fixed top-4 right-4 z-50 max-w-md';
+    document.body.appendChild(newAlertContainer);
+  }
+
+  const alertElement = document.createElement('div');
+  alertElement.className = `mb-4 p-4 rounded-lg shadow-lg flex items-center ${
+    isError ? 'bg-red-100 text-red-800 border-l-4 border-red-500' : 'bg-green-100 text-green-800 border-l-4 border-green-500'
+  }`;
+
+  alertElement.innerHTML = `
+    <div class="flex-grow">
+      <p class="text-sm font-medium">${message}</p>
+    </div>
+    <button class="ml-4 text-gray-500 hover:text-gray-700" onclick="this.parentElement.remove()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+      </svg>
+    </button>
+  `;
+
+  const container = document.getElementById('alertContainer') || newAlertContainer;
+  container.appendChild(alertElement);
+
+  // Rimuovi automaticamente l'alert dopo 5 secondi
+  setTimeout(() => {
+    if (alertElement.parentElement) {
+      alertElement.remove();
+    }
+  }, 5000);
+}
+
+// Funzione per gestire gli errori delle richieste fetch
+async function handleFetchError(response) {
+  if (!response.ok) {
+    let errorMessage = 'Si è verificato un errore';
+    
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.error?.message || errorData.error || errorMessage;
+    } catch (e) {
+      console.error('Errore nella lettura della risposta di errore:', e);
+    }
+    
+    showErrorAlert(errorMessage, true);
+    throw new Error(errorMessage);
+  }
+  return response;
+}

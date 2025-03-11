@@ -25,6 +25,14 @@ app.get('/admin', (req, res) => {
   res.sendFile(__dirname + '/views/admin.html');
 });
 
+app.get('/create-faq', (req, res) => {
+  res.sendFile(__dirname + '/views/faq-create.html');
+});
+
+app.get('/users', (req, res) => {
+  res.sendFile(__dirname + '/views/users.html');
+});
+
 // Use API endpoints from api-endpoints.js
 const apiEndpoints = require('./api-endpoints');
 app.use('/api', apiEndpoints);

@@ -279,6 +279,26 @@ router.post('/faqs', verificaAutenticazione, async (req, res) => {
       return res.status(400).json({ error: { message: 'Tutti i campi sono obbligatori' } });
     }
 
+    // Verifica che la categoria esista
+    let categoryExists = false;
+    try {
+      const categoryCheck = await pool.query('SELECT id FROM categories WHERE name = $1', [category]);
+      categoryExists = categoryCheck.rows.length > 0;
+    } catch (categoryError) {
+      console.warn('Errore verifica categoria:', categoryError);
+      // Continua comunque, potrebbe essere un problema temporaneo
+    }
+
+    // Se la categoria non esiste, la crea automaticamente
+    if (!categoryExists) {
+      try {
+        await pool.query('INSERT INTO categories (name) VALUES ($1) ON CONFLICT DO NOTHING', [category]);
+        console.log('Categoria creata automaticamente:', category);
+      } catch (createCategoryError) {
+        console.warn('Errore creazione categoria:', createCategoryError);
+        // Continua comunque, potrebbe essere un problema temporaneo
+      }
+    }
 
     // Inserisci la nuova FAQ nel database con user_id se disponibile
     const query = 'INSERT INTO faqs (user_id, category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
@@ -289,12 +309,29 @@ router.post('/faqs', verificaAutenticazione, async (req, res) => {
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('Errore salvataggio FAQ:', error);
-    res.status(500).json({ 
-      error: { 
-        message: 'Errore interno del server',
-        details: error.message
-      } 
-    });
+    // Gestione dettagliata degli errori
+    if (error.code === '23503') {
+      return res.status(400).json({ 
+        error: { 
+          message: 'La categoria specificata non esiste',
+          details: error.message
+        } 
+      });
+    } else if (error.code === '42P01') {
+      return res.status(500).json({ 
+        error: { 
+          message: 'La tabella delle FAQ non è stata inizializzata. Eseguire /api/init-db',
+          details: error.message
+        } 
+      });
+    } else {
+      return res.status(500).json({ 
+        error: { 
+          message: 'Errore interno del server',
+          details: error.message
+        } 
+      });
+    }
   }
 });
 
@@ -351,6 +388,147 @@ router.post('/init-db', async (req, res) => {
         message: 'Errore inizializzazione database',
         details: error.message
       } 
+    });
+  }
+});
+
+// Endpoint per recuperare tutti gli utenti (solo per admin)
+router.get('/users', verificaAutenticazione, async (req, res) => {
+  try {
+    // Verifica se l'utente è un amministratore
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        error: {
+          message: 'Accesso non autorizzato: è richiesto il ruolo di amministratore'
+        }
+      });
+    }
+    
+    const client = await pool.connect();
+    try {
+      const query = 'SELECT id, email, role, created_at FROM users ORDER BY created_at DESC';
+      const result = await client.query(query);
+      
+      return res.status(200).json(result.rows);
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error('Errore recupero utenti:', err);
+    return res.status(500).json({ 
+      error: {
+        message: 'Errore durante il recupero degli utenti',
+        details: err.message
+      }
+    });
+  }
+});
+
+// Endpoint per modificare il ruolo di un utente (solo per admin)
+router.put('/users/:id/role', verificaAutenticazione, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+    
+    // Verifica se l'utente è un amministratore
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        error: {
+          message: 'Accesso non autorizzato: è richiesto il ruolo di amministratore'
+        }
+      });
+    }
+    
+    if (!role || !['admin', 'user'].includes(role)) {
+      return res.status(400).json({ 
+        error: {
+          message: 'Ruolo non valido. I ruoli consentiti sono: admin, user'
+        }
+      });
+    }
+    
+    const client = await pool.connect();
+    try {
+      const query = 'UPDATE users SET role = $1 WHERE id = $2 RETURNING id, email, role';
+      const result = await client.query(query, [role, id]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ 
+          error: {
+            message: 'Utente non trovato'
+          }
+        });
+      }
+      
+      return res.status(200).json({ 
+        success: true, 
+        user: result.rows[0],
+        message: `Ruolo utente aggiornato a ${role}`
+      });
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error('Errore aggiornamento ruolo:', err);
+    return res.status(500).json({ 
+      error: {
+        message: 'Errore durante l\'aggiornamento del ruolo',
+        details: err.message
+      }
+    });
+  }
+});
+
+// Endpoint per eliminare un utente (solo per admin)
+router.delete('/users/:id', verificaAutenticazione, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Verifica se l'utente è un amministratore
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ 
+        error: {
+          message: 'Accesso non autorizzato: è richiesto il ruolo di amministratore'
+        }
+      });
+    }
+    
+    // Non permettere di eliminare il proprio account
+    if (req.user.id.toString() === id) {
+      return res.status(400).json({ 
+        error: {
+          message: 'Non è possibile eliminare il proprio account'
+        }
+      });
+    }
+    
+    const client = await pool.connect();
+    try {
+      const query = 'DELETE FROM users WHERE id = $1 RETURNING id';
+      const result = await client.query(query, [id]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ 
+          error: {
+            message: 'Utente non trovato'
+          }
+        });
+      }
+      
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Utente eliminato con successo'
+      });
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error('Errore eliminazione utente:', err);
+    return res.status(500).json({ 
+      error: {
+        message: 'Errore durante l\'eliminazione dell\'utente',
+        details: err.message
+      }
     });
   }
 });
