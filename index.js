@@ -639,17 +639,35 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
       console.log('Tabella faqs creata perché mancante');
     } else {
       // Verifica se la tabella ha la struttura corretta con user_id
-      const userIdExists = await client.query(`
-        SELECT EXISTS (
-          SELECT FROM information_schema.columns 
-          WHERE table_schema = 'public' 
-          AND table_name = 'faqs'
-          AND column_name = 'user_id'
-        );
-      `);
+      try {
+        const userIdExists = await client.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.columns 
+            WHERE table_schema = 'public' 
+            AND table_name = 'faqs'
+            AND column_name = 'user_id'
+          );
+        `);
 
-      if (!userIdExists.rows[0].exists) {
-        // Colonna user_id mancante, ricreiamo la tabella
+        if (!userIdExists.rows[0].exists) {
+          // Colonna user_id mancante, ricreiamo la tabella
+          await client.query(`DROP TABLE IF EXISTS faqs;`);
+          await client.query(`
+            CREATE TABLE faqs (
+              id SERIAL PRIMARY KEY,
+              user_id INTEGER NOT NULL REFERENCES users(id),
+              category TEXT NOT NULL,
+              title TEXT NOT NULL,
+              description TEXT NOT NULL,
+              resolution TEXT NOT NULL,
+              created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+          `);
+          console.log('Tabella faqs ricreata perché mancante colonna user_id');
+        }
+      } catch (err) {
+        // Se c'è un errore nel controllo, forziamo la ricreazione della tabella
+        console.error('Errore verifica tabella, ricreo completamente:', err);
         await client.query(`DROP TABLE IF EXISTS faqs;`);
         await client.query(`
           CREATE TABLE faqs (
@@ -662,7 +680,7 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
           );
         `);
-        console.log('Tabella faqs ricreata perché mancante colonna user_id');
+        console.log('Tabella faqs ricreata dopo errore');
       }
     }
 

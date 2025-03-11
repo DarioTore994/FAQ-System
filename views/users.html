@@ -328,7 +328,7 @@
                             throw new Error(`Errore server (${response.status}): Impossibile elaborare la risposta`);
                         }
                     } else {
-                        // Se non è JSON (probabilmente HTML di un errore), gestisci diversamente
+                        // Se non è JSON (probabilmente HTML di un errore), gestisci diversamentente
                         if (response.status === 401 || response.status === 403) {
                             throw new Error('Sessione scaduta o non autorizzato. Rieffettua il login.');
                         } else {
@@ -343,7 +343,6 @@
                 document.getElementById('editRoleModal').classList.add('hidden');
                 
                 // Conferma l'azione all'utente
-                showErrorAlert('Ruolo aggiornato con successo');
                 showErrorAlert('Ruolo aggiornato con successo!');
                 loadUsers();
             } catch (error) {
