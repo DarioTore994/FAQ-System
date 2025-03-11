@@ -306,8 +306,8 @@
 
                         console.log('Reinizializzazione del database in corso...');
 
-                        // Prima di inviare la FAQ, forziamo la ricreazione della tabella
-                        const initDbResponse = await fetch('/api/init-db', {
+                        // Prima di inviare la FAQ, verifichiamo lo stato della tabella
+                        const initDbResponse = awaitit fetch('/api/init-db', {
                             method: 'POST'
                         });
 

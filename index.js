@@ -50,10 +50,7 @@ async function initDatabase() {
     `);
     console.log('Tabella categories verificata/creata con successo');
 
-    // Prova a eliminare la tabella faqs se esiste per ricrearla con la struttura corretta
-    await client.query(`DROP TABLE IF EXISTS faqs;`);
-
-    // Ricrea la tabella con la struttura corretta
+    // Crea la tabella faqs se non esiste
     await client.query(`
       CREATE TABLE IF NOT EXISTS faqs (
         id SERIAL PRIMARY KEY,
@@ -638,23 +635,32 @@ app.post("/api/faqs", requireAuth, async (req, res) => {
       });
     }
 
-    // Forza il drop della tabella faqs per ricrearla correttamente
-    await client.query(`DROP TABLE IF EXISTS faqs;`);
-    console.log('Tabella faqs eliminata per ricostruzione');
-    
-    // Crea la tabella con la struttura corretta
-    await client.query(`
-      CREATE TABLE faqs (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id),
-        category TEXT NOT NULL,
-        title TEXT NOT NULL,
-        description TEXT NOT NULL,
-        resolution TEXT NOT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    // Verifica che la tabella faqs esista già
+    const tableCheck = await client.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'faqs'
       );
     `);
-    console.log('Tabella faqs ricreata con successo!');
+    
+    if (!tableCheck.rows[0].exists) {
+      // Crea la tabella con la struttura corretta
+      await client.query(`
+        CREATE TABLE faqs (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id),
+          category TEXT NOT NULL,
+          title TEXT NOT NULL,
+          description TEXT NOT NULL,
+          resolution TEXT NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+      `);
+      console.log('Tabella faqs creata con successo!');
+    } else {
+      console.log('Tabella faqs esistente verificata');
+    }
 
     // Inserimento della FAQ
     const result = await client.query(
