@@ -142,6 +142,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       };
       
       try {
+        console.log('Sending FAQ data:', faqData);
+        
         const response = await fetch('/api/faqs', {
           method: 'POST',
           headers: {
@@ -150,13 +152,20 @@ document.addEventListener("DOMContentLoaded", async () => {
           body: JSON.stringify(faqData),
         });
         
-        if (!response.ok) throw new Error('Errore durante il salvataggio');
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error?.message || 'Errore durante il salvataggio');
+        }
         
-        // Redirect to home after successful creation
-        window.location.href = '/';
+        showErrorAlert('FAQ salvata con successo!');
+        
+        // Redirect to home after successful creation (with a small delay to show success message)
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1500);
       } catch (error) {
         console.error('Error saving FAQ:', error);
-        showErrorAlert('Errore nel salvataggio della FAQ');
+        showErrorAlert('Errore nel salvataggio della FAQ. Verifica di essere autenticato e che la tabella faqs esista.');
       }
     });
   }

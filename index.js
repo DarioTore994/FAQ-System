@@ -131,8 +131,29 @@ app.post("/api/auth/logout", (req, res) => {
 
 // Aggiungi questa route
 app.post("/api/faqs", requireAuth, async (req, res) => {
-  const { data, error } = await supabase.from("faqs").insert([req.body]);
-  error ? res.status(500).json({ error }) : res.json(data);
+  try {
+    // Validate that all required fields are present
+    const { category, title, description, resolution } = req.body;
+    
+    if (!category || !title || !description || !resolution) {
+      return res.status(400).json({ 
+        error: { message: 'Tutti i campi sono obbligatori' } 
+      });
+    }
+    
+    const { data, error } = await supabase.from("faqs").insert([req.body]);
+    
+    if (error) {
+      console.error('Errore Supabase durante inserimento FAQ:', error);
+      return res.status(500).json({ error });
+    }
+    
+    console.log('FAQ inserita con successo:', data);
+    return res.status(201).json(data);
+  } catch (err) {
+    console.error('Errore imprevisto durante inserimento FAQ:', err);
+    return res.status(500).json({ error: { message: 'Errore interno del server' } });
+  }
 });
 
 // API per FAQ
