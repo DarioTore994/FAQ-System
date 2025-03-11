@@ -133,19 +133,44 @@
 
         <div id="faqContainer" class="card p-0 overflow-hidden animate-fade-in border border-gray-700 rounded-xl shadow-lg">
             <div class="overflow-x-auto">
-                <table class="w-full border-collapse">
-                    <thead class="bg-gray-800 border-b border-gray-700">
-                        <tr>
-                            <th class="py-5 px-6 text-left text-accent-yellow font-semibold text-sm uppercase tracking-wider" width="25%">Domanda</th>
-                            <th class="py-5 px-6 text-left text-accent-yellow font-semibold text-sm uppercase tracking-wider" width="40%">Risposta</th>
-                            <th class="py-5 px-6 text-left text-accent-yellow font-semibold text-sm uppercase tracking-wider" width="15%">Categoria</th>
-                            <th class="py-5 px-6 text-left text-accent-yellow font-semibold text-sm uppercase tracking-wider" width="20%">Data</th>
-                        </tr>
-                    </thead>
-                    <tbody id="faqTableBody" class="divide-y divide-gray-700 bg-gray-900/30">
-                        <!-- FAQ data will be inserted here -->
-                    </tbody>
-                </table>
+                <div id="faqCardContainer" class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- FAQ cards verranno inserite qui -->
+                </div>
+                <div id="faqTableView" class="hidden">
+                    <table class="w-full border-collapse">
+                        <thead class="bg-gray-800 border-b border-gray-700">
+                            <tr>
+                                <th class="py-5 px-6 text-left text-accent-yellow font-semibold text-sm uppercase tracking-wider" width="25%">Domanda</th>
+                                <th class="py-5 px-6 text-left text-accent-yellow font-semibold text-sm uppercase tracking-wider" width="40%">Risposta</th>
+                                <th class="py-5 px-6 text-left text-accent-yellow font-semibold text-sm uppercase tracking-wider" width="15%">Categoria</th>
+                                <th class="py-5 px-6 text-left text-accent-yellow font-semibold text-sm uppercase tracking-wider" width="20%">Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="faqTableBody" class="divide-y divide-gray-700 bg-gray-900/30">
+                            <!-- FAQ data will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="flex justify-center p-4 border-t border-gray-700 bg-gray-800/30">
+                <div class="flex items-center space-x-4">
+                    <button id="viewModeCard" class="px-4 py-2 bg-accent-yellow/90 text-primary-black rounded-lg font-medium text-sm active">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                        </svg>
+                        Card
+                    </button>
+                    <button id="viewModeTable" class="px-4 py-2 bg-gray-700/50 text-gray-300 hover:bg-gray-700 rounded-lg font-medium text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        Tabella
+                    </button>
+                </div>
             </div>
 
             <!-- Admin Section (hidden by default) -->
@@ -225,6 +250,9 @@
                     
                     // Carica le FAQ
                     loadFAQs();
+                    
+                    // Inizializza i pulsanti di visualizzazione
+                    initViewModeButtons();
                 } else {
                     // Non autenticato: reindirizza a login
                     window.location.href = '/auth';
@@ -234,6 +262,40 @@
                 window.location.href = '/auth';
             }
         });
+        
+        // Inizializza i pulsanti per cambiare modalità di visualizzazione
+        function initViewModeButtons() {
+            const cardButton = document.getElementById('viewModeCard');
+            const tableButton = document.getElementById('viewModeTable');
+            const faqCardContainer = document.getElementById('faqCardContainer');
+            const faqTableView = document.getElementById('faqTableView');
+            
+            if (cardButton && tableButton && faqCardContainer && faqTableView) {
+                // Imposta la visualizzazione card come predefinita
+                faqCardContainer.classList.remove('hidden');
+                faqTableView.classList.add('hidden');
+                
+                // Gestione clic sul pulsante card
+                cardButton.addEventListener('click', () => {
+                    faqCardContainer.classList.remove('hidden');
+                    faqTableView.classList.add('hidden');
+                    cardButton.classList.add('bg-accent-yellow/90', 'text-primary-black');
+                    cardButton.classList.remove('bg-gray-700/50', 'text-gray-300', 'hover:bg-gray-700');
+                    tableButton.classList.add('bg-gray-700/50', 'text-gray-300', 'hover:bg-gray-700');
+                    tableButton.classList.remove('bg-accent-yellow/90', 'text-primary-black');
+                });
+                
+                // Gestione clic sul pulsante tabella
+                tableButton.addEventListener('click', () => {
+                    faqCardContainer.classList.add('hidden');
+                    faqTableView.classList.remove('hidden');
+                    tableButton.classList.add('bg-accent-yellow/90', 'text-primary-black');
+                    tableButton.classList.remove('bg-gray-700/50', 'text-gray-300', 'hover:bg-gray-700');
+                    cardButton.classList.add('bg-gray-700/50', 'text-gray-300', 'hover:bg-gray-700');
+                    cardButton.classList.remove('bg-accent-yellow/90', 'text-primary-black');
+                });
+            }
+        }
 
         // Funzione per caricare le FAQ
         async function loadFAQs() {
@@ -257,7 +319,10 @@
                 
                 // Memorizza le FAQ per l'uso con la ricerca e i resize
                 window.currentFaqs = faqs;
+                
+                // Renderizza entrambe le visualizzazioni
                 renderFAQsTable(faqs);
+                renderFAQsCards(faqs);
                 
                 // Aggiunta listener per ricerca
                 const searchInput = document.getElementById('searchInput');
@@ -271,10 +336,12 @@
                             (faq.category && faq.category.toLowerCase().includes(searchTerm))
                         );
                         renderFAQsTable(filteredFaqs);
+                        renderFAQsCards(filteredFaqs);
                     });
                 }
             } catch (error) {
                 console.error('Errore nel caricamento delle FAQ:', error);
+                // Gestione errori per la tabella
                 document.getElementById('faqTableBody').innerHTML = `
                     <tr>
                         <td colspan="4" class="py-4 text-center text-gray-400">
@@ -286,21 +353,110 @@
                     </tr>
                 `;
                 
-                // Aggiungi listener per il pulsante di inizializzazione
-                document.getElementById('initDbBtn')?.addEventListener('click', async () => {
-                    try {
-                        const response = await fetch('/api/init-db', { method: 'POST' });
-                        if (!response.ok) {
-                            throw new Error('Errore nell\'inizializzazione del database');
+                // Gestione errori per le card
+                document.getElementById('faqCardContainer').innerHTML = `
+                    <div class="col-span-full py-8 text-center text-gray-400">
+                        Errore nel caricamento delle FAQ. <br>
+                        <button id="initDbBtnCard" class="mt-2 px-4 py-2 bg-accent-yellow text-primary-black rounded-md">
+                            Inizializza il database
+                        </button>
+                    </div>
+                `;
+                
+                // Aggiungi listener per i pulsanti di inizializzazione
+                document.querySelectorAll('#initDbBtn, #initDbBtnCard').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        try {
+                            const response = await fetch('/api/init-db', { method: 'POST' });
+                            if (!response.ok) {
+                                throw new Error('Errore nell\'inizializzazione del database');
+                            }
+                            alert('Database inizializzato. Ricarico la pagina...');
+                            window.location.reload();
+                        } catch (error) {
+                            console.error('Errore:', error);
+                            alert('Errore durante l\'inizializzazione del database');
                         }
-                        alert('Database inizializzato. Ricarico la pagina...');
-                        window.location.reload();
-                    } catch (error) {
-                        console.error('Errore:', error);
-                        alert('Errore durante l\'inizializzazione del database');
-                    }
+                    });
                 });
             }
+        }
+
+        // Funzione per formattare la data
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Data non disponibile';
+            
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('it-IT', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (e) {
+                console.error('Errore nel parsing della data:', e);
+                return 'Data non valida';
+            }
+        }
+
+        // Funzione per renderizzare la visualizzazione a card delle FAQ
+        function renderFAQsCards(faqs) {
+            const cardContainer = document.getElementById('faqCardContainer');
+            if (!cardContainer) return;
+            
+            // Cancella il contenuto attuale
+            cardContainer.innerHTML = '';
+            
+            // Controlla se ci sono FAQ da mostrare
+            if (!faqs || faqs.length === 0) {
+                cardContainer.innerHTML = `
+                    <div class="col-span-full py-8 text-center text-gray-400">
+                        Nessuna FAQ disponibile
+                    </div>
+                `;
+                return;
+            }
+            
+            // Crea le card per ogni FAQ
+            faqs.forEach((faq, index) => {
+                // Assicurati che tutti i campi esistano per evitare errori
+                const title = faq.title || 'Titolo non disponibile';
+                const category = faq.category || 'Categoria non specificata';
+                const description = faq.description || 'Descrizione non disponibile';
+                const resolution = faq.resolution || 'Risoluzione non disponibile';
+                const formattedDate = formatDate(faq.created_at);
+                
+                // Genera un ID unico per questa FAQ
+                const faqId = `faq-${index}`;
+                
+                const card = document.createElement('div');
+                card.className = 'bg-gray-800/50 rounded-xl border border-gray-700 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-accent-yellow/10 hover:border-gray-600';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start p-5 border-b border-gray-700/50 bg-gray-800/30">
+                        <h3 class="font-semibold text-accent-yellow text-lg">${title}</h3>
+                        <span class="px-3 py-1 bg-accent-yellow/20 text-accent-yellow rounded-full text-xs font-medium ml-2 whitespace-nowrap">
+                            ${category}
+                        </span>
+                    </div>
+                    <div class="p-5 space-y-4">
+                        <div>
+                            <h4 class="text-xs text-gray-400 uppercase tracking-wider mb-2">Problema:</h4>
+                            <p class="text-gray-300">${description}</p>
+                        </div>
+                        <div class="p-4 bg-gray-800/70 rounded-lg border border-gray-700/50 shadow-inner">
+                            <h4 class="text-xs text-accent-yellow uppercase tracking-wider mb-2">Soluzione:</h4>
+                            <p class="text-gray-200">${resolution}</p>
+                        </div>
+                        <div class="pt-2 text-right">
+                            <span class="text-xs text-gray-500">${formattedDate}</span>
+                        </div>
+                    </div>
+                `;
+                
+                cardContainer.appendChild(card);
+            });
         }
 
         // Funzione per renderizzare la tabella delle FAQ
@@ -310,9 +466,6 @@
             
             // Cancella il contenuto attuale
             tableBody.innerHTML = '';
-            
-            // Debug dei dati
-            console.log('Rendering FAQs:', faqs);
             
             // Controlla se ci sono FAQ da mostrare
             if (!faqs || faqs.length === 0) {
@@ -333,28 +486,12 @@
                     const row = document.createElement('tr');
                     row.className = 'block mb-5 bg-gray-800/50 rounded-lg border border-gray-700 shadow-md overflow-hidden';
 
-                    // Gestione sicura della data
-                    let formattedDate = 'Data non disponibile';
-                    if (faq.created_at) {
-                        try {
-                            const date = new Date(faq.created_at);
-                            formattedDate = date.toLocaleDateString('it-IT', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            });
-                        } catch (e) {
-                            console.error('Errore nel parsing della data:', e);
-                        }
-                    }
-
                     // Assicurati che tutti i campi esistano per evitare errori
                     const title = faq.title || 'Titolo non disponibile';
                     const category = faq.category || 'Categoria non specificata';
                     const description = faq.description || 'Descrizione non disponibile';
                     const resolution = faq.resolution || 'Risoluzione non disponibile';
+                    const formattedDate = formatDate(faq.created_at);
 
                     row.innerHTML = `
                         <td class="block p-4 border-b border-gray-700/50">
@@ -383,28 +520,12 @@
                     const row = document.createElement('tr');
                     row.className = 'hover:bg-gray-800/50 transition-colors duration-150';
 
-                    // Gestione sicura della data
-                    let formattedDate = 'Data non disponibile';
-                    if (faq.created_at) {
-                        try {
-                            const date = new Date(faq.created_at);
-                            formattedDate = date.toLocaleDateString('it-IT', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            });
-                        } catch (e) {
-                            console.error('Errore nel parsing della data:', e);
-                        }
-                    }
-
                     // Assicurati che tutti i campi esistano per evitare errori
                     const title = faq.title || 'Titolo non disponibile';
                     const category = faq.category || 'Categoria non specificata';
                     const description = faq.description || 'Descrizione non disponibile';
                     const resolution = faq.resolution || 'Risoluzione non disponibile';
+                    const formattedDate = formatDate(faq.created_at);
 
                     row.innerHTML = `
                         <td class="py-4 px-6 border-b border-gray-700">${title}</td>
