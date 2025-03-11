@@ -355,14 +355,16 @@
                     const adminLink = document.getElementById("admin-link");
                     const authButton = document.getElementById("auth-button");
 
-                    if (data.role === "admin") {
+                    if (adminLink && data.role === "admin") {
                         adminLink.classList.remove("hidden");
                     }
 
-                    if (data.authenticated) {
-                        authButton.innerHTML = `<a href="/api/auth/logout" class="text-gray-300 hover:text-accent-yellow">Logout</a>`;
-                    } else {
-                        authButton.innerHTML = `<a href="/" class="text-gray-300 hover:text-accent-yellow">Login</a>`;
+                    if (authButton) {
+                        if (data.authenticated) {
+                            authButton.innerHTML = `<a href="/api/auth/logout" class="text-gray-300 hover:text-accent-yellow">Logout</a>`;
+                        } else {
+                            authButton.innerHTML = `<a href="/" class="text-gray-300 hover:text-accent-yellow">Login</a>`;
+                        }
                     }
                 } catch (error) {
                     console.error("Errore controllo autenticazione:", error);
