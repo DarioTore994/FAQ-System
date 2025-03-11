@@ -997,10 +997,6 @@ video {
   border-color: rgb(31 41 55 / var(--tw-border-opacity, 1));
 }
 
-.border-yellow-500\/20 {
-  border-color: rgb(234 179 8 / 0.2);
-}
-
 .bg-accent-yellow {
   --tw-bg-opacity: 1;
   background-color: rgb(255 215 0 / var(--tw-bg-opacity, 1));
@@ -1327,8 +1323,8 @@ video {
 
 /* Custom CSS can go here */
 
-.hover\:border-yellow-500\/50:hover {
-  border-color: rgb(234 179 8 / 0.5);
+.hover\:border-accent-yellow\/50:hover {
+  border-color: rgb(255 215 0 / 0.5);
 }
 
 .hover\:bg-gray-700:hover {
