@@ -467,6 +467,79 @@ app.get("/api/users", async (req, res) => {
   }
 });
 
+// API per modificare completamente un utente (solo per admin)
+app.put("/api/users/:id", requireAdmin, async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    const { email, password, role } = req.body;
+
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: 'ID utente non valido' });
+    }
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email obbligatoria' });
+    }
+
+    if (role && !['admin', 'user'].includes(role)) {
+      return res.status(400).json({ error: 'Ruolo non valido. Deve essere "admin" o "user"' });
+    }
+
+    const client = await pool.connect();
+    try {
+      // Controllo se l'utente esiste
+      const userCheck = await client.query('SELECT id FROM users WHERE id = $1', [userId]);
+      if (userCheck.rows.length === 0) {
+        return res.status(404).json({ error: 'Utente non trovato' });
+      }
+
+      // Verifico se l'email è già usata da un altro utente
+      const emailCheck = await client.query('SELECT id FROM users WHERE email = $1 AND id != $2', [email, userId]);
+      if (emailCheck.rows.length > 0) {
+        return res.status(400).json({ error: 'Questa email è già utilizzata da un altro utente' });
+      }
+
+      // Preparo la query di aggiornamento in base ai campi forniti
+      let query = 'UPDATE users SET email = $1';
+      const queryParams = [email];
+      let paramIndex = 2;
+
+      if (password) {
+        query += `, password = $${paramIndex}`;
+        queryParams.push(password);
+        paramIndex++;
+      }
+
+      if (role) {
+        query += `, role = $${paramIndex}`;
+        queryParams.push(role);
+        paramIndex++;
+      }
+
+      query += ` WHERE id = $${paramIndex}`;
+      queryParams.push(userId);
+
+      // Esegui l'aggiornamento
+      await client.query(query, queryParams);
+
+      return res.json({ 
+        success: true, 
+        message: 'Utente aggiornato con successo',
+        user: {
+          id: userId,
+          email: email,
+          role: role
+        }
+      });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Errore aggiornamento utente:', error);
+    return res.status(500).json({ error: 'Errore interno del server' });
+  }
+});
+
 // API per modificare il ruolo di un utente (solo per admin)
 app.put("/api/users/:id/role", requireAdmin, async (req, res) => {
   try {
@@ -498,6 +571,55 @@ app.put("/api/users/:id/role", requireAdmin, async (req, res) => {
     }
   } catch (error) {
     console.error('Errore aggiornamento ruolo:', error);
+    return res.status(500).json({ error: 'Errore interno del server' });
+  }
+});
+
+// API per eliminare un utente (solo per admin)
+app.delete("/api/users/:id", requireAdmin, async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: 'ID utente non valido' });
+    }
+
+    // Controllo se l'utente sta cercando di eliminare se stesso
+    const authToken = req.cookies.authToken;
+    const currentUserId = parseInt(authToken, 10);
+    
+    if (userId === currentUserId) {
+      return res.status(400).json({ error: 'Non puoi eliminare il tuo account mentre sei loggato' });
+    }
+
+    const client = await pool.connect();
+    try {
+      // Controllo se l'utente esiste
+      const userCheck = await client.query('SELECT id FROM users WHERE id = $1', [userId]);
+      if (userCheck.rows.length === 0) {
+        return res.status(404).json({ error: 'Utente non trovato' });
+      }
+
+      // Prima di eliminare l'utente, verifichiamo se ha delle FAQ associate
+      const faqsCheck = await client.query('SELECT COUNT(*) FROM faqs WHERE user_id = $1', [userId]);
+      
+      if (parseInt(faqsCheck.rows[0].count) > 0) {
+        // Opzione 1: impedire l'eliminazione
+        // return res.status(400).json({ error: 'Non è possibile eliminare questo utente perché ha delle FAQ associate' });
+        
+        // Opzione 2: eliminare anche le FAQ associate (più pulito)
+        await client.query('DELETE FROM faqs WHERE user_id = $1', [userId]);
+      }
+
+      // Elimina l'utente
+      await client.query('DELETE FROM users WHERE id = $1', [userId]);
+
+      return res.json({ success: true, message: 'Utente eliminato con successo' });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Errore eliminazione utente:', error);
     return res.status(500).json({ error: 'Errore interno del server' });
   }
 });
