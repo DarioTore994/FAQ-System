@@ -213,20 +213,7 @@ app.post('/api/faq/create', async (req, res) => {
             return res.status(400).json({ error: { message: 'Tutti i campi sono obbligatori' } });
         }
 
-        // Verifica che la tabella esista prima di inserire
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS faqs (
-                id SERIAL PRIMARY KEY,
-                category VARCHAR(100) NOT NULL,
-                title VARCHAR(255) NOT NULL,
-                description TEXT NOT NULL,
-                resolution TEXT NOT NULL,
-                status VARCHAR(50) DEFAULT 'Nuovo',
-                created_at TIMESTAMP NOT NULL DEFAULT NOW()
-            );
-        `);
-
-        // Inserisci la nuova FAQ nel database
+        // Inserisci la nuova FAQ nel database senza richiedere user_id
         const result = await pool.query(
             'INSERT INTO faqs (category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5) RETURNING *',
             [category, title, description, resolution, status || 'Nuovo']

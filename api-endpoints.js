@@ -9,6 +9,47 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
+// Middleware per verificare autenticazione
+const verificaAutenticazione = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1] || req.cookies?.token;
+
+    if (!token) {
+      console.log('Autenticazione fallita: Token mancante');
+      return res.status(401).json({ 
+        error: {
+          message: 'Accesso non autorizzato: token mancante'
+        }
+      });
+    }
+
+    const userQuery = 'SELECT * FROM users WHERE id = $1';
+    const userResult = await pool.query(userQuery, [token]);
+
+    if (userResult.rows.length === 0) {
+      console.log('Autenticazione fallita: Utente non trovato per token', token);
+      return res.status(401).json({ 
+        error: {
+          message: 'Accesso non autorizzato: utente non trovato'
+        }
+      });
+    }
+
+    // L'utente è valido, imposta nella richiesta e procedi
+    req.user = userResult.rows[0];
+    console.log('Utente autenticato:', req.user.email);
+    next();
+  } catch (error) {
+    console.error('Errore middleware autenticazione:', error);
+    res.status(500).json({ 
+      error: {
+        message: 'Errore interno del server',
+        details: error.message
+      }
+    });
+  }
+};
+
 // Endpoint per autenticazione
 router.post('/auth/login', async (req, res) => {
   try {
@@ -99,7 +140,7 @@ router.post('/faqs', async (req, res) => {
     console.log('Salvataggio FAQ in corso...');
     // Inserisci la nuova FAQ nel database con user_id se disponibile
     let query, params;
-    
+
     if (user_id) {
       query = 'INSERT INTO faqs (user_id, category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
       params = [user_id, category, title, description, resolution, status || 'Nuovo'];
@@ -107,9 +148,9 @@ router.post('/faqs', async (req, res) => {
       query = 'INSERT INTO faqs (category, title, description, resolution, status) VALUES ($1, $2, $3, $4, $5) RETURNING *';
       params = [category, title, description, resolution, status || 'Nuovo'];
     }
-    
+
     const result = await pool.query(query, params);
-    
+
     res.json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('Errore salvataggio FAQ:', error);
