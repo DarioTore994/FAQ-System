@@ -779,4 +779,15 @@ app.post("/api/init-db", async (req, res) => {
   }
 });
 
-app.listen(port, () => console.log(`Server running on port ${port}`));
+app.listen(port, () => console.log(`Server running on port ${port}`))
+  .on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`La porta ${port} è già in uso. Prova a terminare l'altro processo o utilizza un'altra porta.`);
+      // Tenta di utilizzare una porta alternativa
+      const alternativePort = 3001;
+      console.log(`Tentativo di utilizzare la porta alternativa ${alternativePort}...`);
+      app.listen(alternativePort, () => console.log(`Server running on alternative port ${alternativePort}`));
+    } else {
+      console.error('Errore avvio server:', error);
+    }
+  });
