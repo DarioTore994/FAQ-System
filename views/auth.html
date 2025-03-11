@@ -455,18 +455,18 @@
                             showErrorAlert("Inserisci email e password");
                             return;
                         }
-                        
+
                         // Validazione email
                         const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
                         if (!emailPattern.test(email)) {
                             showErrorAlert("Formato email non valido");
                             return;
                         }
-                        
+
                         // Verifica preliminare se l'email esiste già
                         const checkResponse = await fetch(`/api/auth/check-email?email=${encodeURIComponent(email)}`);
                         const checkData = await checkResponse.json();
-                        
+
                         if (checkData.exists) {
                             showErrorAlert("Un utente con questa email è già registrato");
                             return;
@@ -524,7 +524,7 @@
                                 showErrorAlert("Inserisci l'email per recuperare la password");
                                 return;
                             }
-                            
+
                             // Validazione email lato client
                             const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
                             if (!emailPattern.test(email)) {
@@ -547,7 +547,7 @@
                             });
 
                             const data = await response.json();
-                            
+
                             // Ripristina il bottone
                             submitBtn.innerHTML = originalBtnText;
                             submitBtn.disabled = false;
